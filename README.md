@@ -1,2 +1,1 @@
-# charts
-Levo.ai Helm Charts Repository
+# Levo.ai Helm Charts Repository
