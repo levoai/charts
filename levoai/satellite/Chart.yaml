@@ -8,16 +8,16 @@ type: application
 version: 0.2.43
 dependencies:
 - name: satellite
-  repository: "file://charts/satellite"
+  repository: "file://subcharts/satellite"
 - name: tagger
-  repository: "file://charts/tagger"
+  repository: "file://subcharts/tagger"
 - name: rabbitmq
-  repository: "file://charts/rabbitmq"
+  repository: "file://subcharts/rabbitmq"
 - name: kubewatch
-  repository: "file://charts/kubewatch"
+  repository: "file://subcharts/kubewatch"
   condition: enableKubeWatch
 - name: kube-state-metrics
-  repository: "file://charts/kube-state-metrics"
+  repository: "file://subcharts/kube-state-metrics"
   condition: enableKubeStateMetrics
 - name: levoai-collector
-  repository: "file://charts/levoai-collector"
+  repository: "file://subcharts/levoai-collector"
