@@ -5,7 +5,7 @@ type: application
 # When the docker image used by satellite et al. changes, you must bump this
 # version (see T128) but you must also change
 # ./charts/tagger/templates/deployment.yaml which has an 'imageversion':
-version: 0.2.43
+version: 0.2.44
 dependencies:
 - name: satellite
   repository: "file://subcharts/satellite"
