@@ -10,7 +10,7 @@ components for Levoai.
 kubectl create ns levoai
 
 # Install
-helm repo add levoai https://charts.levoa.ai
+helm repo add levoai https://charts.levo.ai
 helm install levoai-satellite levoai/satellite
 
 # Upgrade
