@@ -11,14 +11,14 @@ kubectl create ns levoai
 
 # Install
 helm repo add levoai https://charts.levo.ai
-helm install levoai-sensor levoai/levoai-ebpf-sensor
+helm install -n levoai levoai-sensor levoai/levoai-ebpf-sensor
 
 # Upgrade
 helm repo update
-helm upgrade levoai-sensor levoai/levoai-ebpf-sensor
+helm upgrade --install -n levoai levoai-sensor levoai/levoai-ebpf-sensor
 
 # Uninstall
-helm uninstall levoai-sensor
+helm uninstall -n levoai levoai-sensor
 
 # Remove levoai namespace
 kubectl delete ns levoai

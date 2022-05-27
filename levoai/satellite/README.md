@@ -11,14 +11,14 @@ kubectl create ns levoai
 
 # Install
 helm repo add levoai https://charts.levo.ai
-helm install levoai-satellite levoai/satellite
+helm install -n levoai levoai-satellite levoai/satellite
 
 # Upgrade
 helm repo update
-helm upgrade levoai-satellite levoai/satellite
+helm upgrade --install -n levoai levoai-satellite levoai/satellite
 
 # Uninstall
-helm uninstall levoai-satellite
+helm uninstall -n levoai levoai-satellite
 
 # Remove levoai namespace
 kubectl delete ns levoai
