@@ -27,8 +27,6 @@ global:
     enabled: false
     fullyQualifiedDomainName: ''
     gateway: ''
-imagePullSecrets:
-- name: ghcr-auth
 ingress:
   annotations: {}
   enabled: false

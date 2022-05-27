@@ -11,7 +11,7 @@ kubectl create ns levoai
 
 # Install
 helm repo add levoai https://charts.levo.ai
-helm install -n levoai levoai-satellite levoai/satellite
+helm install -n levoai levoai-satellite levoai/satellite --set global.levoai.app_name=<YOUR_APP_NAME>
 
 # Upgrade
 helm repo update
