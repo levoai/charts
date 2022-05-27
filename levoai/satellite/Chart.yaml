@@ -1,0 +1,23 @@
+apiVersion: v2
+name: satellite
+description: The Levoai Service, which receives observations from the Layer 9 Envoy filters et al.
+type: application
+# When the docker image used by satellite et al. changes, you must bump this
+# version (see T128) but you must also change
+# ./charts/tagger/templates/deployment.yaml which has an 'imageversion':
+version: 0.2.43
+dependencies:
+- name: satellite
+  repository: "file://charts/satellite"
+- name: tagger
+  repository: "file://charts/tagger"
+- name: rabbitmq
+  repository: "file://charts/rabbitmq"
+- name: kubewatch
+  repository: "file://charts/kubewatch"
+  condition: enableKubeWatch
+- name: kube-state-metrics
+  repository: "file://charts/kube-state-metrics"
+  condition: enableKubeStateMetrics
+- name: levoai-collector
+  repository: "file://charts/levoai-collector"

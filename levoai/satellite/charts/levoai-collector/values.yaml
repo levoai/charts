@@ -1,0 +1,108 @@
+logLevel: INFO
+
+minReadySeconds: 5
+progressDeadlineSeconds: 120
+replicaCount: 1
+maxUnavailable: 0
+
+image: levoai/collector
+imagePullPolicy: IfNotPresent
+
+env:
+  - name: GOGC
+    value: "80"
+
+containerPorts:
+  - name: moesif
+    containerPort: 9070
+
+service:
+  type: ClusterIP
+  ports:
+  - name: grpc-otlp
+    port: 4317
+    targetPort: 4317
+    protocol: TCP
+  - name: http-otlp
+    port: 55681
+    targetPort: 55681
+    protocol: TCP
+
+livenessProbe:
+  initialDelaySeconds: 5
+  periodSeconds: 10
+
+readinessProbe:
+  initialDelaySeconds: 5
+  periodSeconds: 5
+
+resources:
+   limits:
+     cpu: 1
+     memory: 2Gi
+   requests:
+     cpu: 200m
+     memory: 400Mi
+
+podLabels:
+  app: levoai-collector
+
+deploymentSelectorMatchLabels:
+  app: levoai-collector
+
+serviceSelectorLabels:
+  app: levoai-collector
+
+volumeMounts:
+  - name: levoai-collector-config-vol
+    mountPath: /conf
+
+volumes:
+  - configMap:
+      name: levoai-collector-conf
+      items:
+        - key: levoai-collector-config
+          path: levoai-collector-config.yaml
+    name: levoai-collector-config-vol
+
+nodeSelector: {}
+
+config:
+  name: levoai-collector-conf
+  data:
+    extensions:
+      memory_ballast:
+        size_mib: 512
+      zpages:
+        endpoint: 0.0.0.0:55679
+
+    receivers:
+      otlp:
+        protocols:
+          grpc:
+            endpoint: 0.0.0.0:4317
+          http:
+            endpoint: 0.0.0.0:4318
+
+    processors:
+      levoai_merge:
+        timeout: 10s
+      batch:
+        timeout: 10s
+
+    exporters:
+      logging:
+        logLevel: debug
+      levoai_satellite:
+        endpoint: http://levoai-satellite:9999
+        # Python Flask server in Levo's Satellite doesn't support gzip so don't enable any compression here.
+        compression: none
+
+    service:
+      pipelines:
+        traces:
+          receivers: [otlp]
+          processors: [levoai_merge, batch]
+          exporters: [logging, levoai_satellite]
+
+      extensions: [memory_ballast, zpages]
