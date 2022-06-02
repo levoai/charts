@@ -2,6 +2,18 @@ apiVersion: v1
 entries:
   levoai-ebpf-sensor:
   - apiVersion: v2
+    appVersion: 0.8.0
+    created: "2022-06-02T06:36:11.725440884Z"
+    description: The Levo eBPF Sensor
+    digest: be5a80eaa9fb4115cd5a0e6680fd41167caa69258bdc1b46a94ca5f610b987d5
+    maintainers:
+    - email: mike@levo.ai
+      name: Michael Przybylski
+    name: levoai-ebpf-sensor
+    urls:
+    - https://github.com/levoai/charts/releases/download/levoai-ebpf-sensor-0.8.0/levoai-ebpf-sensor-0.8.0.tgz
+    version: 0.8.0
+  - apiVersion: v2
     appVersion: 0.6.7
     created: "2022-05-27T07:00:51.16041452Z"
     description: The Levo eBPF Sensor
@@ -38,6 +50,31 @@ entries:
     - https://github.com/levoai/charts/releases/download/levoai-ebpf-sensor-0.6.6-pr.40/levoai-ebpf-sensor-0.6.6-pr.40.tgz
     version: 0.6.6-pr.40
   satellite:
+  - apiVersion: v2
+    created: "2022-06-02T06:36:11.865169566Z"
+    dependencies:
+    - name: satellite
+      repository: file://subcharts/satellite
+    - name: tagger
+      repository: file://subcharts/tagger
+    - name: rabbitmq
+      repository: file://subcharts/rabbitmq
+    - condition: enableKubeWatch
+      name: kubewatch
+      repository: file://subcharts/kubewatch
+    - condition: enableKubeStateMetrics
+      name: kube-state-metrics
+      repository: file://subcharts/kube-state-metrics
+    - name: levoai-collector
+      repository: file://subcharts/levoai-collector
+    description: The Levoai Service, which receives observations from the Layer 9
+      Envoy filters et al.
+    digest: 18aaafae23d1a0e60966cdcbb76859d60bbd4da2ef274dcc9cec1cc6b47e3f94
+    name: satellite
+    type: application
+    urls:
+    - https://github.com/levoai/charts/releases/download/satellite-0.2.51/satellite-0.2.51.tgz
+    version: 0.2.51
   - apiVersion: v2
     created: "2022-05-27T15:16:19.773740545Z"
     dependencies:
@@ -113,4 +150,4 @@ entries:
     urls:
     - https://github.com/levoai/charts/releases/download/satellite-0.2.43/satellite-0.2.43.tgz
     version: 0.2.43
-generated: "2022-05-27T15:16:19.773766845Z"
+generated: "2022-06-02T06:36:11.865198767Z"
