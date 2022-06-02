@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: "{{ template "tagger.fullname" . }}-env"
+  labels:
+    app: {{ template "tagger.name" . }}
+    chart: {{ template "tagger.chart" . }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+data:
+  LEVOAI_APP_NAME: {{ .Values.global.levoai.app_name }}
+  LEVOAI_MODE: {{ .Values.global.levoai.mode }}
+  LEVOAI_LOG_LEVEL: {{ .Values.global.levoai.log_level }}
+  LEVOAI_CONF_OVERRIDES: '{{ mustToJson .Values.global.levoai_config_override }}'
+  PI_DETECTOR_DATA_DIR: {{ .Values.global.levoai.pi_detector_data_dir }}

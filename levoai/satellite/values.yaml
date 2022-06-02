@@ -1,0 +1,156 @@
+affinity: {}
+autoscaling:
+  enabled: false
+  maxReplicas: 100
+  minReplicas: 1
+  targetCPUUtilizationPercentage: 80
+enableKubeStateMetrics: false
+enableKubeWatch: false
+fullnameOverride: ''
+global:
+  levoai:
+    app_name: ''
+    log_level: DEBUG
+    mode: prod_k8s
+    pi_detector_data_dir: /opt/levoai/datasets/
+  levoai_config_override:
+    authentication_inspection: false
+    kube-state-metrics:
+      url: http://kube-state-metrics:8080/
+    rabbitmq:
+      host: levoai-rabbitmq
+    tagger_batch_interval_minutes: 1
+    tagger_ignore_seen_flows: true
+    traces_log_level: DEBUG
+  serviceAnnotations: {}
+  virtualService:
+    enabled: false
+    fullyQualifiedDomainName: ''
+    gateway: ''
+ingress:
+  annotations: {}
+  enabled: false
+  hosts:
+  - host: chart-example.local
+    paths: []
+  tls: []
+kubewatch:
+  fullnameOverride: levoai-kubewatch
+levoai-collector:
+  config:
+    data:
+      exporters:
+        levoai_satellite:
+          compression: none
+          endpoint: http://levoai-satellite:9999
+        logging:
+          logLevel: debug
+      extensions:
+        memory_ballast:
+          size_mib: 512
+        zpages:
+          endpoint: 0.0.0.0:55679
+      processors:
+        batch:
+          timeout: 10s
+        levoai_merge:
+          timeout: 10s
+      receivers:
+        otlp:
+          protocols:
+            grpc:
+              endpoint: 0.0.0.0:4317
+            http:
+              endpoint: 0.0.0.0:4318
+      service:
+        extensions:
+        - memory_ballast
+        - zpages
+        pipelines:
+          traces:
+            exporters:
+            - logging
+            - levoai_satellite
+            processors:
+            - levoai_merge
+            - batch
+            receivers:
+            - otlp
+    name: levoai-collector-conf
+  containerPorts:
+  - containerPort: 9070
+    name: moesif
+  deploymentSelectorMatchLabels:
+    app: levoai-collector
+  env:
+  - name: GOGC
+    value: '80'
+  fullnameOverride: levoai-levoai-collector
+  image: levoai/collector
+  imagePullPolicy: IfNotPresent
+  livenessProbe:
+    initialDelaySeconds: 5
+    periodSeconds: 10
+  logLevel: INFO
+  maxUnavailable: 0
+  minReadySeconds: 5
+  nodeSelector: {}
+  podLabels:
+    app: levoai-collector
+  progressDeadlineSeconds: 120
+  readinessProbe:
+    initialDelaySeconds: 5
+    periodSeconds: 5
+  replicaCount: 1
+  resources:
+    limits:
+      cpu: 1
+      memory: 2Gi
+    requests:
+      cpu: 200m
+      memory: 400Mi
+  service:
+    ports:
+    - name: grpc-otlp
+      port: 4317
+      protocol: TCP
+      targetPort: 4317
+    - name: http-otlp
+      port: 55681
+      protocol: TCP
+      targetPort: 55681
+    type: ClusterIP
+  serviceSelectorLabels:
+    app: levoai-collector
+  volumeMounts:
+  - mountPath: /conf
+    name: levoai-collector-config-vol
+  volumes:
+  - configMap:
+      items:
+      - key: levoai-collector-config
+        path: levoai-collector-config.yaml
+      name: levoai-collector-conf
+    name: levoai-collector-config-vol
+nameOverride: ''
+nodeSelector: {}
+podAnnotations: {}
+podSecurityContext: {}
+rabbitmq:
+  auth:
+    erlangCookie: levoaierlangcookie
+    password: levoailevoai
+    username: levoai
+  fullnameOverride: levoai-rabbitmq
+replicaCount: 1
+resources: {}
+satellite:
+  fullnameOverride: levoai-satellite
+securityContext: {}
+serviceAccount:
+  annotations: {}
+  create: true
+  name: ''
+tagger:
+  fullnameOverride: levoai-tagger
+tolerations: []
