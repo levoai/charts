@@ -5,3 +5,84 @@ sensor:
     grpcEndpoint: levoai-collector.levoai:4317
   binary:
     - /opt/levo/sbin/levo-ebpf-sensor
+  # Override with a multi-line scalar from separate yaml file to customize sensor config
+  # See https://helm.sh/docs/chart_template_guide/values_files/ and
+  # https://yaml-multiline.info/ for more information.
+  config: |
+    ip-filter-list:
+      default-policy: accept
+      entries:
+        ### Host Ports ###
+        - policy: drop
+          host-ports: 53 # DNS
+        - policy: drop
+          host-ports: 2379-2380 # etcd
+        - policy: drop
+          host-ports: 9092-9093 # kafka
+        - policy: drop
+          host-ports: 27017-27019 # mongodb
+        - policy: drop
+          host-ports: 28017 # mongodb
+        - policy: drop
+          host-ports: 135 # SQL Server
+        - policy: drop
+          host-ports: 1433-1434 # SQL Server
+        - policy: drop
+          host-ports: 4022 # SQL Server
+        - policy: drop
+          host-ports: 3306 # MySQL
+        - policy: drop
+          host-ports: 33060-33062 # MySQL
+        - policy: drop
+          host-ports: 5432-5433 # Postgres
+        - policy: drop
+          host-ports: 5671-5672 # RabbitMQ
+        - policy: drop
+          host-ports: 15672-15675 # RabbitMQ
+        - policy: drop
+          host-ports: 25672 # RabbitMQ
+        - policy: drop
+          host-ports: 35672-35682 # RabbitMQ
+        - policy: drop
+          host-ports: 61613-61614 # RabbitMQ
+        - policy: drop
+          host-ports: 6379 # Redis
+        - policy: drop
+          host-ports: [2181, 3888, 3888] # ZooKeeper
+        ### Peer Ports ###
+        - policy: drop
+          peer-ports: 53 # DNS
+        - policy: drop
+          peer-ports: 2379-2380 # etcd
+        - policy: drop
+          peer-ports: 9092-9093 # kafka
+        - policy: drop
+          peer-ports: 27017-27019 # mongodb
+        - policy: drop
+          peer-ports: 28017 # mongodb
+        - policy: drop
+          peer-ports: 135 # SQL Server
+        - policy: drop
+          peer-ports: 1433-1434 # SQL Server
+        - policy: drop
+          peer-ports: 4022 # SQL Server
+        - policy: drop
+          peer-ports: 3306 # MySQL
+        - policy: drop
+          peer-ports: 33060-33062 # MySQL
+        - policy: drop
+          peer-ports: 5432-5433 # Postgres
+        - policy: drop
+          peer-ports: 5671-5672 # RabbitMQ
+        - policy: drop
+          peer-ports: 15672-15675 # RabbitMQ
+        - policy: drop
+          peer-ports: 25672 # RabbitMQ
+        - policy: drop
+          peer-ports: 35672-35682 # RabbitMQ
+        - policy: drop
+          peer-ports: 61613-61614 # RabbitMQ
+        - policy: drop
+          peer-ports: 6379 # Redis
+        - policy: drop
+          peer-ports: [2181, 3888, 3888] # ZooKeeper
