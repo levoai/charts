@@ -21,10 +21,6 @@ spec:
       labels:
         {{- toYaml .Values.podLabels | nindent 8 }}
     spec:
-    {{- with .Values.imagePullSecrets }}
-      imagePullSecrets:
-        {{- toYaml . | nindent 8 }}
-    {{- end }}
     {{- with .Values.volumes }}
       volumes:
       {{- toYaml . | nindent 8 }}
@@ -35,7 +31,7 @@ spec:
     {{- end }}
       containers:
         - name: {{ .Chart.Name }}
-          image: "{{ .Values.image }}:{{ .Chart.AppVersion }}"
+          image: "{{ .Values.image }}:{{ default .Chart.AppVersion .Values.imageTag }}"
           imagePullPolicy: {{ .Values.imagePullPolicy }}
           command:
             - "/usr/local/bin/levoai/collector"
