@@ -15,4 +15,5 @@ rbac:
   ## that allows kube-state-metrics pods querying the K8s API
   create: true
 
+# TODO: node affinity with kubewatch would be nice:
 # affinity: {}
