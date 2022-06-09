@@ -1,6 +1,6 @@
 sensor:
   imageRepo: docker.io/levoai/ebpf_sensor
-  imageTag: 0.8.1
+  imageTag: 0.8.1-pr.61
   otel:
     grpcEndpoint: levoai-collector.levoai:4317
   binary:
