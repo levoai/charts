@@ -9,7 +9,6 @@ enableKubeWatch: false
 fullnameOverride: ''
 global:
   levoai:
-    app_name: ''
     log_level: DEBUG
     mode: prod_k8s
     pi_detector_data_dir: /opt/levoai/datasets/
@@ -19,14 +18,19 @@ global:
       url: http://kube-state-metrics:8080/
     rabbitmq:
       host: levoai-rabbitmq
-    tagger_batch_interval_minutes: 1
+    tagger_batch_interval_minutes: 5
     tagger_ignore_seen_flows: true
     traces_log_level: DEBUG
+    url_clusterer_id_len: 1
   serviceAnnotations: {}
   virtualService:
     enabled: false
     fullyQualifiedDomainName: ''
     gateway: ''
+image:
+  pullPolicy: IfNotPresent
+  repository: nginx
+  tag: ''
 ingress:
   annotations: {}
   enabled: false
@@ -133,6 +137,24 @@ levoai-collector:
       name: levoai-collector-conf
     name: levoai-collector-config-vol
 nameOverride: ''
+nginx:
+  fullnameOverride: levoai-nginx
+  pdb:
+    create: true
+    minAvailable: 1
+  replicaCount: 2
+  serverBlock: "server {\n    listen                8080 default_server deferred;\n\
+    \    server_name           main;\n    client_max_body_size  20M;\n    keepalive_timeout\
+    \ 5;\n    location / {\n        proxy_redirect off;\n        proxy_pass      \
+    \                    http://levoai-satellite:9999;\n        proxy_set_header \
+    \                   Host levoai-satellite;\n        proxy_http_version 1.1;\n\
+    \        proxy_set_header X-Forwarded-Host   $server_name;\n        proxy_set_header\
+    \ X-Forwarded-For $proxy_add_x_forwarded_for;\n        proxy_set_header X-Forwarded-Proto\
+    \ $scheme;\n        proxy_set_header X-Real-IP          $remote_addr;\n    }\n\
+    }"
+  service:
+    port: 9999
+    type: ClusterIP
 nodeSelector: {}
 podAnnotations: {}
 podSecurityContext: {}
@@ -154,3 +176,4 @@ serviceAccount:
 tagger:
   fullnameOverride: levoai-tagger
 tolerations: []
+useNginx: false

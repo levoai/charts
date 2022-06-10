@@ -1,0 +1,19 @@
+annotations:
+  category: Infrastructure
+apiVersion: v1
+appVersion: 3.8.7
+description: Open source message broker software that implements the Advanced Message
+  Queuing Protocol (AMQP)
+home: https://www.rabbitmq.com
+icon: https://bitnami.com/assets/stacks/rabbitmq/img/rabbitmq-stack-220x234.png
+keywords:
+- rabbitmq
+- message queue
+- AMQP
+maintainers:
+- email: containers@bitnami.com
+  name: Bitnami
+name: rabbitmq
+sources:
+- https://github.com/bitnami/bitnami-docker-rabbitmq
+version: 7.6.3

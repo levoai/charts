@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Values.config.name }}
+  labels:
+    app: levoai-collector
+    release: {{ .Release.Name }}
+data:
+  levoai-collector-config: |-
+    {{- toYaml .Values.config.data | nindent 4 }}
+

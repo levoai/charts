@@ -1,0 +1,72 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "tagger.fullname" . }}
+  labels:
+    {{- include "tagger.labels" . | nindent 4 }}
+spec:
+{{- if not .Values.autoscaling.enabled }}
+  replicas: {{ .Values.replicaCount }}
+{{- end }}
+  selector:
+    matchLabels:
+      {{- include "tagger.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+    {{- /*
+    See T128 regarding how the following is used to release new docker image versions.
+
+    NOTE: you must bump the satellite Helm chart's version when you change this:
+    */}}
+    {{- with deepCopy .Values.podAnnotations | mustMerge (dict "imageversion" "a25fdf41e6c891540a224f27b43e3ddcfcf222d9") }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+    {{- end }}
+      labels:
+        {{- include "tagger.selectorLabels" . | nindent 8 }}
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ include "tagger.serviceAccountName" . }}
+      securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      containers:
+        - name: {{ .Chart.Name }}
+          securityContext:
+            {{- toYaml .Values.securityContext | nindent 12 }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          command:
+              - python
+              - "-OO"
+              - /opt/levoai/e7s/src/python/levoai_e7s/tag_server.py
+          {{- if .Values.livenessProbeEnabled }}
+          livenessProbe:
+            exec:
+              command:
+                - /opt/levoai/common-public/src/python/levoai_common_public/monitoring/test_health_file.sh
+            initialDelaySeconds: 30
+            periodSeconds: 125
+            timeoutSeconds: 1
+            successThreshold: 1
+            failureThreshold: 50
+          {{- end }}
+          envFrom:
+          - configMapRef:
+              name: "{{ template "tagger.fullname" . }}-env"
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
