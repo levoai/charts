@@ -14,7 +14,7 @@ dependencies:
 - name: rabbitmq
   repository: "file://subcharts/rabbitmq"
 - name: nginx
-  repository: "file://charts/nginx"
+  repository: "file://subcharts/nginx"
   condition: useNginx
 - name: kubewatch
   repository: "file://subcharts/kubewatch"
