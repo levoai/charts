@@ -9,7 +9,7 @@ enableKubeWatch: false
 fullnameOverride: ''
 global:
   levoai:
-    log_level: DEBUG
+    log_level: INFO
     mode: prod_k8s
     pi_detector_data_dir: /opt/levoai/datasets/
   levoai_config_override:
@@ -48,12 +48,12 @@ levoai-collector:
           compression: none
           endpoint: http://levoai-satellite:9999
         logging:
-          logLevel: debug
+          logLevel: info
       extensions:
+        health_check:
+          endpoint: 0.0.0.0:13133
         memory_ballast:
           size_mib: 512
-        zpages:
-          endpoint: 0.0.0.0:55679
       processors:
         batch:
           timeout: 10s
@@ -64,12 +64,10 @@ levoai-collector:
           protocols:
             grpc:
               endpoint: 0.0.0.0:4317
-            http:
-              endpoint: 0.0.0.0:4318
       service:
         extensions:
+        - health_check
         - memory_ballast
-        - zpages
         pipelines:
           traces:
             exporters:
@@ -82,8 +80,10 @@ levoai-collector:
             - otlp
     name: levoai-collector-conf
   containerPorts:
-  - containerPort: 9070
-    name: moesif
+  - containerPort: 4317
+    name: grpc-otel
+  - containerPort: 13133
+    name: http-health
   deploymentSelectorMatchLabels:
     app: levoai-collector
   env:
@@ -119,10 +119,6 @@ levoai-collector:
       port: 4317
       protocol: TCP
       targetPort: 4317
-    - name: http-otlp
-      port: 55681
-      protocol: TCP
-      targetPort: 55681
     type: ClusterIP
   serviceSelectorLabels:
     app: levoai-collector

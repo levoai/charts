@@ -53,6 +53,12 @@ spec:
             initialDelaySeconds: {{ int .Values.livenessProbe.initialDelaySeconds }}
             periodSeconds: {{ int .Values.livenessProbe.periodSeconds }}
             tcpSocket:
-              port: 4318
+              port: 4317
+          readinessProbe:
+            initialDelaySeconds: {{ int .Values.readinessProbe.initialDelaySeconds }}
+            periodSeconds: {{ int .Values.readinessProbe.periodSeconds }}
+            httpGet:
+              path: /
+              port: http-health
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
