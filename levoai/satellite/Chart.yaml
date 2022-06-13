@@ -6,6 +6,10 @@ type: application
 # version (see T128) but you must also change
 # ./charts/tagger/templates/deployment.yaml which has an 'imageversion':
 version: 0.2.72
+# This is the version number of the application being deployed. This version number should be
+# incremented each time you make changes to the application. Versions are not expected to
+# follow Semantic Versioning. They should reflect the version the application is using.
+appVersion: 0.2.72
 dependencies:
 - name: satellite
   repository: "file://subcharts/satellite"
