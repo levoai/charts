@@ -13,8 +13,10 @@ env:
     value: "80"
 
 containerPorts:
-  - name: moesif
-    containerPort: 9070
+  - name: grpc-otel
+    containerPort: 4317
+  - name: http-health
+    containerPort: 13133
 
 service:
   type: ClusterIP
@@ -22,10 +24,6 @@ service:
   - name: grpc-otlp
     port: 4317
     targetPort: 4317
-    protocol: TCP
-  - name: http-otlp
-    port: 55681
-    targetPort: 55681
     protocol: TCP
 
 livenessProbe:
@@ -71,18 +69,16 @@ config:
   name: levoai-collector-conf
   data:
     extensions:
+      health_check:
+        endpoint: "0.0.0.0:13133"
       memory_ballast:
         size_mib: 512
-      zpages:
-        endpoint: 0.0.0.0:55679
 
     receivers:
       otlp:
         protocols:
           grpc:
             endpoint: 0.0.0.0:4317
-          http:
-            endpoint: 0.0.0.0:4318
 
     processors:
       levoai_merge:
@@ -92,7 +88,7 @@ config:
 
     exporters:
       logging:
-        logLevel: debug
+        logLevel: info
       levoai_satellite:
         endpoint: http://levoai-satellite:9999
         # Python Flask server in Levo's Satellite doesn't support gzip so don't enable any compression here.
@@ -105,4 +101,4 @@ config:
           processors: [levoai_merge, batch]
           exporters: [logging, levoai_satellite]
 
-      extensions: [memory_ballast, zpages]
+      extensions: [health_check, memory_ballast]
