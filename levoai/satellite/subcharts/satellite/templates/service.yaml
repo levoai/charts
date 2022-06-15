@@ -1,10 +1,12 @@
 apiVersion: v1
 kind: Service
 metadata:
+{{- if .Values.service.annotations }}
+  annotations: {{ toYaml .Values.service.annotations | nindent 4 }}
+{{- end }}
   name: {{ include "satellite.fullname" . }}
   labels:
     {{- include "satellite.labels" . | nindent 4 }}
-  annotations: {{ toYaml .Values.global.serviceAnnotations | nindent 4 }}
 spec:
   type: {{ .Values.service.type }}
   ports:
