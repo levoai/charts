@@ -17,3 +17,5 @@ rbac:
 
 # TODO: node affinity with kubewatch would be nice:
 # affinity: {}
+service:
+  annotations: {}
