@@ -1,6 +1,6 @@
 apiVersion: v2
-name: satellite
-description: The Levoai Service, which receives observations from the Layer 9 Envoy filters et al.
+name: levoai-satellite
+description: The Levoai Satellite Service, which receives observations from the Sensor/Envoy filters et al.
 type: application
 # When the docker image used by satellite et al. changes, you must bump this
 # version (see T128) but you must also change
