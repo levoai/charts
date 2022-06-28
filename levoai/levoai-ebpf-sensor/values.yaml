@@ -1,6 +1,6 @@
 sensor:
   imageRepo: docker.io/levoai/ebpf_sensor
-  imageTag: 0.8.1
+  imageTag: 0.8.7
   otel:
     grpcEndpoint: levoai-collector.levoai:4317
   binary:
@@ -9,6 +9,18 @@ sensor:
   # See https://helm.sh/docs/chart_template_guide/values_files/ and
   # https://yaml-multiline.info/ for more information.
   config: |
+    default-service-name: default
+    debug: false
+    #legacy-kernel-btf-path: ""
+    single-threaded-mode: true
+    #worker-threads: 4
+    #monitored-commands:
+    #  - nginx
+    #  - python3
+    ### NOTE: monitored-commands and monitored-pids settings are mutually exclusive ###
+    #monitored-pids:
+    #  - 123
+    #  - 45
     ip-filter-list:
       default-policy: accept
       entries:
@@ -49,6 +61,8 @@ sensor:
           host-ports: 6379 # Redis
         - policy: drop
           host-ports: [2181, 3888, 3888] # ZooKeeper
+        - policy: drop
+          host-ports: [4317, 9999] # Levo's Satellite services
         ### Peer Ports ###
         - policy: drop
           peer-ports: 53 # DNS
@@ -86,3 +100,5 @@ sensor:
           peer-ports: 6379 # Redis
         - policy: drop
           peer-ports: [2181, 3888, 3888] # ZooKeeper
+        - policy: drop
+          peer-ports: [4317, 9999] # Levo's Satellite services
