@@ -16,18 +16,30 @@ spec:
           effect: NoSchedule
       containers:
         - name: levoai-sensor
-          {{ if.Values.sensor.cpus }}
+          {{ if .Values.sensor.cpus }}
           resources:
             requests:
               cpu: {{ .Values.sensor.cpus }}
-          {{ end -}}
+          {{ end }}
           image: {{ .Values.sensor.imageRepo }}:{{ .Values.sensor.imageTag }}
           imagePullPolicy: Always
           env:
             - name: OTEL_EXPORTER_OTLP_TRACES_ENDPOINT
               value: {{ .Values.sensor.otel.grpcEndpoint }}
+            - name: OUTSIDE_HOSTNAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: spec.nodeName
           # Overrides docker image's entrypoint.
           command: {{ mustToJson .Values.sensor.binary }}
+          args:
+            - "--host-proc-path"
+            - "/host/proc"
+          {{ if .Values.sensor.args }}
+            {{- range .Values.sensor.args }}
+            - "{{.}}"
+            {{- end }}
+          {{- end }}
           securityContext:
             # NOTE: capabilities.add: ["SYS_ADMIN", "SYS_RESOURCE"] wasn't enough to read real addresses from
             #   /proc/kallsyms, or access /proc/PID/maps or /proc/PID/root in all cases.
@@ -36,14 +48,16 @@ spec:
             - name: config
               mountPath: etc/levo/sensor
               readOnly: true
-            - mountPath: /sys/kernel/debug
-              name: sys-kernel-debug
-              readOnly: true
             - mountPath: /host/proc
               name: host-proc
               readOnly: true
+            - mountPath: /sys/kernel/debug
+              name: sys-kernel-debug
+              readOnly: false
+      {{ if .Values.sensor.imagePullSecretName }}
       imagePullSecrets:
         - name: {{ .Values.sensor.imagePullSecretName }}
+      {{ end }}
       volumes:
         - name: config
           configMap:
