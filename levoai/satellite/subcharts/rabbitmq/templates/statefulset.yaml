@@ -150,9 +150,9 @@ spec:
                 secretKeyRef:
                   name: {{ template "rabbitmq.secretErlangName" . }}
                   key: rabbitmq-erlang-cookie
-            - name: RABBITMQ_USERNAME
+            - name: RABBITMQ_DEFAULT_USER
               value: {{ .Values.auth.username | quote }}
-            - name: RABBITMQ_PASSWORD
+            - name: RABBITMQ_DEFAULT_PASS
               valueFrom:
                 secretKeyRef:
                   name: {{ template "rabbitmq.secretPasswordName" . }}
