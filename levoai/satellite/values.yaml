@@ -18,7 +18,7 @@ global:
       url: http://kube-state-metrics:8080/
     rabbitmq:
       host: levoai-rabbitmq
-    tagger_batch_interval_minutes: 5
+    tagger_batch_interval_minutes: 1
     tagger_ignore_seen_flows: true
     traces_log_level: DEBUG
     url_clusterer_id_len: 1

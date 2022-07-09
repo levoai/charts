@@ -27,6 +27,10 @@ spec:
       serviceAccountName: {{ include "satellite.serviceAccountName" . }}
       securityContext:
         {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      initContainers:
+        - name: wait-for-rabbitmq
+          image: levoai/rmq_healthcheck:latest
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
       containers:
         - name: {{ .Chart.Name }}
           securityContext:
