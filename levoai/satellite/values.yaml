@@ -16,6 +16,7 @@ global:
     authentication_inspection: false
     kube-state-metrics:
       url: http://kube-state-metrics:8080/
+    min_urls_required_per_pattern: 10
     rabbitmq:
       host: levoai-rabbitmq
     tagger_batch_interval_minutes: 1
