@@ -14,12 +14,15 @@ global:
     pi_detector_data_dir: /opt/levoai/datasets/
   levoai_config_override:
     authentication_inspection: false
+    cookie_auth_keys: ''
     kube-state-metrics:
       url: http://kube-state-metrics:8080/
     min_urls_required_per_pattern: 10
     rabbitmq:
       host: levoai-rabbitmq
-    tagger_batch_interval_minutes: 1
+    service_naming:
+      strategies: KUBERNETES_METADATA,DEFAULT
+    tagger_batch_interval_minutes: 5
     tagger_ignore_seen_flows: true
     traces_log_level: DEBUG
     url_clusterer_id_len: 1
@@ -65,6 +68,7 @@ levoai-collector:
           protocols:
             grpc:
               endpoint: 0.0.0.0:4317
+              max_recv_msg_size_mib: 16
       service:
         extensions:
         - health_check
