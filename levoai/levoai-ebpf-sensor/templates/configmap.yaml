@@ -4,4 +4,4 @@ metadata:
   name: sensor-config
 data:
   config-file-content: |
-{{ .Values.sensor.config | indent 4 }}
+{{ .Values.sensor.config | toYaml | indent 4 }}
