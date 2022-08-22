@@ -42,6 +42,10 @@ spec:
             - "1"
             - "-b"
             - "0.0.0.0:{{ .Values.service.port }}"
+            - "--worker-class"
+            - "gevent"
+            - "--worker-connections"
+            - "1000"
             - "levoai_e7s.satellite.satellite:create_server()"
           ports:
             - name: http
