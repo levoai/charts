@@ -9,7 +9,7 @@ components for Levoai.
 # Install levoai helm repo
 helm repo add levoai https://charts.levo.ai
 
-# Create levoai namespace and Install levoai sensor
+# Create levoai namespace and Install levoai ebpf sensor
 helm install -n levoai levoai-sensor levoai/levoai-ebpf-sensor --create-namespace
 
 # Upgrade
