@@ -1,8 +1,6 @@
 sensor:
   imageRepo: docker.io/levoai/ebpf_sensor
-  imageTag: 0.12.0
-  otel:
-    grpcEndpoint: levoai-collector.levoai:4317
+  imageTag: 0.12.0-pr.128
   binary:
     - /opt/levo/sbin/levo-ebpf-sensor
   serviceAccount:
@@ -32,6 +30,15 @@ sensor:
     # endpoints from different environments.
     # --------------------------------------------------------------------------------------------
     default-service-name: default
+    # --------------------------------------------------------------------------------------------
+    
+    
+    # --------------------------------------------------------------------------------------------
+    # Satellite Settings:
+    # --------------------------------------------------------------------------------------------
+    # host:port for the collector service receiving the sensor's API traces.
+    # --------------------------------------------------------------------------------------------
+    collector-endpoint: levoai-collector.levoai:4317
     # --------------------------------------------------------------------------------------------
     
     
