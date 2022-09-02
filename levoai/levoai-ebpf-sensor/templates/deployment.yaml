@@ -27,8 +27,6 @@ spec:
           image: {{ .Values.sensor.imageRepo }}:{{ .Values.sensor.imageTag }}
           imagePullPolicy: Always
           env:
-            - name: OTEL_EXPORTER_OTLP_TRACES_ENDPOINT
-              value: {{ .Values.sensor.otel.grpcEndpoint }}
             - name: OUTSIDE_HOSTNAME
               valueFrom:
                 fieldRef:

@@ -11,8 +11,6 @@ running on each node in the cluster.
   sensor pods. See...
   https://kubernetes.io/docs/tasks/configure-pod-container/assign-cpu-resource/
   ...for more information.
-* `sensor.otel.grpcEndpoint`: `host:port` for the collector service receiving
-  the sensor's API traces.  Defaults to `levoai-collector.levoai:4317`.
 * `sensor.config`: Multi-line scalar / string in the same format as the sensor's
   configuration file. This value should be specified in a separate YAML file
   and passed to the helm command with the `-f` flag.  See

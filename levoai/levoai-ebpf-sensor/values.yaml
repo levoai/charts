@@ -1,8 +1,6 @@
 sensor:
   imageRepo: docker.io/levoai/ebpf_sensor
-  imageTag: 0.12.0
-  otel:
-    grpcEndpoint: levoai-collector.levoai:4317
+  imageTag: 0.13.1
   binary:
     - /opt/levo/sbin/levo-ebpf-sensor
   serviceAccount:
@@ -19,8 +17,8 @@ sensor:
     #bpf-object-file: /opt/levo/libexec/levo/ebpf-sensor/bpf_progs.bpf.o
     #debug: false
     #legacy-kernel-btf-path: ""
-    single-threaded-mode: true
-    #worker-threads: 4
+    #single-threaded-mode: false
+    #worker-threads: 3 # Defaults to 3, or the number of CPUs in the system, whichever is greater
     # --------------------------------------------------------------------------------------------
     
     
@@ -30,8 +28,17 @@ sensor:
     # Auto discovered API endpoints and their OpenAPI specifications are show in the API Catalog
     # grouped under this application name. The application name helps segregate and group API
     # endpoints from different environments.
-    # --------------------------------------------------------------------------------------------
+    
     default-service-name: default
+    # --------------------------------------------------------------------------------------------
+    
+    
+    # --------------------------------------------------------------------------------------------
+    # Satellite Settings:
+    # --------------------------------------------------------------------------------------------
+    # host:port for the collector service receiving the Sensor's API traces.
+    
+    collector-endpoint: levoai-collector:4317
     # --------------------------------------------------------------------------------------------
     
     
