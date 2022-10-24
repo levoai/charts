@@ -1,8 +1,8 @@
 apiVersion: v2
-appVersion: 0.17.3
+appVersion: 0.17.6
 description: The Levo eBPF Sensor
 maintainers:
 - email: mike@levo.ai
   name: Michael Przybylski
 name: levoai-ebpf-sensor
-version: 0.17.3
+version: 0.17.6
