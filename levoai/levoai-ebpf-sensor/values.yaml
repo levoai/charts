@@ -1,6 +1,6 @@
 sensor:
   imageRepo: docker.io/levoai/ebpf_sensor
-  imageTag: 0.17.7
+  imageTag: 0.17.9
   binary:
     - /opt/levo/sbin/levo-ebpf-sensor
   serviceAccount:
@@ -18,6 +18,7 @@ sensor:
     #legacy-kernel-btf-path: ""
     #single-threaded-mode: false
     #worker-threads: 3 # Defaults to 3, or the number of CPUs in the system, whichever is greater
+    #metadata-resolution-failure-policy: ignore # policy for handling metadata resolution failures
     # Enable tracing of non-kubernetes traffic when sensor is deployed within a kubernetes
     # DaemonSet
     #trace-non-k8s-traffic: false
