@@ -100,6 +100,7 @@ levoai-collector:
   livenessProbe:
     initialDelaySeconds: 5
     periodSeconds: 10
+    port: http-health
   logLevel: INFO
   maxUnavailable: 0
   minReadySeconds: 5
@@ -110,6 +111,7 @@ levoai-collector:
   readinessProbe:
     initialDelaySeconds: 5
     periodSeconds: 5
+    port: http-health
   replicaCount: 1
   resources:
     limits:

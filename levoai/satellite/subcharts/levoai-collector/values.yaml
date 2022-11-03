@@ -29,10 +29,12 @@ service:
 livenessProbe:
   initialDelaySeconds: 5
   periodSeconds: 10
+  port: http-health
 
 readinessProbe:
   initialDelaySeconds: 5
   periodSeconds: 5
+  port: http-health
 
 resources:
    limits:
