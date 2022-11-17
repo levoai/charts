@@ -85,13 +85,13 @@ config:
 
     processors:
       levoai_merge:
-        timeout: 10s
+        timeout: 60s
       batch:
         timeout: 10s
 
     exporters:
       logging:
-        logLevel: info
+        verbosity: normal
       levoai_satellite:
         endpoint: http://levoai-satellite:9999
         # Python Flask server in Levo's Satellite doesn't support gzip so don't enable any compression here.
