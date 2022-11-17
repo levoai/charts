@@ -52,7 +52,7 @@ levoai-collector:
           compression: none
           endpoint: http://levoai-satellite:9999
         logging:
-          logLevel: info
+          verbosity: normal
       extensions:
         health_check:
           endpoint: 0.0.0.0:13133
@@ -62,7 +62,7 @@ levoai-collector:
         batch:
           timeout: 10s
         levoai_merge:
-          timeout: 10s
+          timeout: 60s
       receivers:
         otlp:
           protocols:
