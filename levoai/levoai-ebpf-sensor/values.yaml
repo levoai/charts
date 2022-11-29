@@ -1,6 +1,6 @@
 sensor:
   imageRepo: docker.io/levoai/ebpf_sensor
-  imageTag: 0.18.5
+  imageTag: 0.18.7
   binary:
     - /opt/levo/sbin/levo-ebpf-sensor
   serviceAccount:
