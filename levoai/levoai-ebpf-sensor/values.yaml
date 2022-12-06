@@ -1,6 +1,6 @@
 sensor:
   imageRepo: docker.io/levoai/ebpf_sensor
-  imageTag: 0.18.7
+  imageTag: 0.18.8
   binary:
     - /opt/levo/sbin/levo-ebpf-sensor
   serviceAccount:
@@ -41,6 +41,20 @@ sensor:
     # host:port for the collector service receiving the Sensor's API traces.
     
     collector-endpoint: levoai-collector:4317
+    # --------------------------------------------------------------------------------------------
+    
+    # --------------------------------------------------------------------------------------------
+    # API Trace Export Rate Limiting:
+    # --------------------------------------------------------------------------------------------
+    # By default, the sensor rate-limits the overall number of request-response traces it exports
+    # to the satellite.  It also rate-limits traces on a per-endpoint basis.  Rate limiting can
+    # be disabled or adjusted, but doing so may affect the performance of downstream Levo
+    # services.
+    
+    # enable-export-rate-limiting: true
+    # max-total-exported-requests-per-second: 200
+    # max-per-endpoint-exported-requests-per-second: 20
+    
     # --------------------------------------------------------------------------------------------
     
     # --------------------------------------------------------------------------------------------
