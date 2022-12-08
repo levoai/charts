@@ -1,6 +1,6 @@
 sensor:
   imageRepo: docker.io/levoai/ebpf_sensor
-  imageTag: 0.18.10
+  imageTag: 0.18.11
   binary:
     - /opt/levo/sbin/levo-ebpf-sensor
   serviceAccount:
@@ -10,6 +10,13 @@ sensor:
     annotations: {}
     # The name of the service account to use (mandatory).
     name: "levoai-ebpf-sensor"
+  tolerations:
+    # this toleration is to have the sensor runnable on control plane nodes
+    # remove it if your control plane nodes can't run pods
+    - key: node-role.kubernetes.io/control-plane
+      operator: Exists
+      effect: NoSchedule
+  nodeSelector: {}
   config: 
     # Factory Settings: DO NOT MODIFY
     # --------------------------------------------------------------------------------------------

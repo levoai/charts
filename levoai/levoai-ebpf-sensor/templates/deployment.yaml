@@ -11,19 +11,19 @@ spec:
       labels:
         name: levoai-sensor
     spec:
-      tolerations:
-        # this toleration is to have the daemonset runnable on master nodes
-        # remove it if your masters can't run pods
-        - key: node-role.kubernetes.io/master
-          operator: Exists
-          effect: NoSchedule
+      {{- if .Values.sensor.tolerations }}
+      tolerations: {{- toYaml .Values.sensor.tolerations | nindent 8 }}
+      {{- end }}
+      {{- if .Values.sensor.nodeSelector }}
+      nodeSelector: {{- toYaml .Values.sensor.nodeSelector | nindent 8 }}
+      {{- end }}
       containers:
         - name: levoai-sensor
-          {{ if .Values.sensor.cpus }}
+          {{- if .Values.sensor.cpus }}
           resources:
             requests:
               cpu: {{ .Values.sensor.cpus }}
-          {{ end }}
+          {{- end }}
           image: {{ .Values.sensor.imageRepo }}:{{ .Values.sensor.imageTag }}
           imagePullPolicy: Always
           env:
@@ -55,10 +55,10 @@ spec:
             - mountPath: /sys/kernel/debug
               name: sys-kernel-debug
               readOnly: false
-      {{ if .Values.sensor.imagePullSecretName }}
+      {{- if .Values.sensor.imagePullSecretName }}
       imagePullSecrets:
         - name: {{ .Values.sensor.imagePullSecretName }}
-      {{ end }}
+      {{- end }}
       serviceAccountName: {{ .Values.sensor.serviceAccount.name }}
       volumes:
         - name: config
