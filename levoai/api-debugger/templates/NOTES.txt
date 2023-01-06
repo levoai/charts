@@ -1,0 +1,27 @@
+# Levo.ai API Debugger
+
+Three subcharts were installed:
+- sensor
+- collector
+- jaeger
+
+The sensor runs as a DaemonSet.  There will be one privileged sensor pod
+running on each node in the cluster.
+
+------------------------------------------------------------------------
+
+Follow the steps below to start debugging the API endpoints of your 
+Kubernetes service.
+
+1. Follow the instructions at 
+
+https://docs.levo.ai/api-observability/common-tasks/sensor/filter-traffic#configure-kubernetes-pod-filters
+
+to create filters to trace traffic only from your Kubernetes service. 
+Update the default values file of this helm chart and do a helm upgrade.
+
+2. Expose the Jaeger UI at localhost:16686 with:
+
+kubectl port-forward services/levoai-jaeger 16686 -n {{ .Release.Namespace }}
+
+That's it! *Happy debugging!*

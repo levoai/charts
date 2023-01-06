@@ -1,0 +1,12 @@
+apiVersion: v2
+name: api-debugger
+version: 0.1.0
+description: A collection of helm charts to help quickly debug API issues by observing live API traffic.
+
+dependencies:
+- name: levoai-ebpf-sensor
+  repository: "file://../levoai-ebpf-sensor"
+  version: ">=0.18.15"
+- name: levoai-collector
+  repository: "file://../satellite/subcharts/levoai-collector"
+  version: ">=0.12.0"

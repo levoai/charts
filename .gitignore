@@ -1,1 +1,5 @@
 .idea
+# ignore packages
+*.tgz
+# ignore lock files; always use the latest file:// dependencies
+*.lock

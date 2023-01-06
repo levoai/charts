@@ -1,0 +1,20 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Chart.Name }}
+  labels:
+    app: levoai-jaeger
+    release: {{ .Release.Name }}
+spec:
+  type: ClusterIP
+  ports:
+    - port: 14250
+      targetPort: collector
+      protocol: TCP
+      name: collector
+    - port: 16686
+      targetPort: ui
+      protocol: TCP
+      name: ui
+  selector:
+    app: {{ .Chart.Name }}
