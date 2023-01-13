@@ -2,18 +2,6 @@ apiVersion: v1
 entries:
   levoai-ebpf-sensor:
   - apiVersion: v2
-    appVersion: 0.18.17
-    created: "2023-01-13T08:32:10.161549687Z"
-    description: The Levo eBPF Sensor
-    digest: f9cfcc6fae34fe119f86ea535b86ad4417f631769269d207fbdb680d8f8cd8a5
-    maintainers:
-    - email: mike@levo.ai
-      name: Michael Przybylski
-    name: levoai-ebpf-sensor
-    urls:
-    - https://github.com/levoai/charts/releases/download/levoai-ebpf-sensor-0.18.17/levoai-ebpf-sensor-0.18.17.tgz
-    version: 0.18.17
-  - apiVersion: v2
     appVersion: 0.18.15
     created: "2023-01-05T07:15:53.600117862Z"
     description: The Levo eBPF Sensor
@@ -398,6 +386,35 @@ entries:
     - https://github.com/levoai/charts/releases/download/levoai-ebpf-sensor-0.6.6-pr.40/levoai-ebpf-sensor-0.6.6-pr.40.tgz
     version: 0.6.6-pr.40
   levoai-satellite:
+  - apiVersion: v2
+    appVersion: 0.2.222
+    created: "2023-01-13T08:32:32.514053875Z"
+    dependencies:
+    - name: satellite
+      repository: file://subcharts/satellite
+    - name: tagger
+      repository: file://subcharts/tagger
+    - name: rabbitmq
+      repository: file://subcharts/rabbitmq
+    - condition: useNginx
+      name: nginx
+      repository: file://subcharts/nginx
+    - condition: enableKubeWatch
+      name: kubewatch
+      repository: file://subcharts/kubewatch
+    - condition: enableKubeStateMetrics
+      name: kube-state-metrics
+      repository: file://subcharts/kube-state-metrics
+    - name: levoai-collector
+      repository: file://subcharts/levoai-collector
+    description: The Levoai Satellite Service, which receives observations from the
+      Sensor/Envoy filters et al.
+    digest: 15548a4ecf6603ae4fa27b7ca0c4d22422054400feff31fb2c57a6454b0a81f9
+    name: levoai-satellite
+    type: application
+    urls:
+    - https://github.com/levoai/charts/releases/download/levoai-satellite-0.2.222/levoai-satellite-0.2.222.tgz
+    version: 0.2.222
   - apiVersion: v2
     appVersion: 0.2.218
     created: "2023-01-05T06:21:27.218488627Z"
@@ -1186,4 +1203,4 @@ entries:
     urls:
     - https://github.com/levoai/charts/releases/download/satellite-0.2.43/satellite-0.2.43.tgz
     version: 0.2.43
-generated: "2023-01-13T08:32:10.162325694Z"
+generated: "2023-01-13T08:32:32.51465638Z"
