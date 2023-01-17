@@ -20,6 +20,13 @@ global:
     min_urls_required_per_pattern: 10
     rabbitmq:
       host: levoai-rabbitmq
+    sample_collection:
+      enabled: false
+      max_samples_per_end_point: 2
+      users:
+      - email: test@example.com
+        match_type: user
+        name: user1
     service_naming:
       strategies: KUBERNETES_METADATA,DEFAULT
     tagger_batch_interval_minutes: 5
