@@ -1,0 +1,26 @@
+levoai-collector:
+  config:
+    data:
+      exporters:
+        jaeger:
+          endpoint: levoai-jaeger:14250
+          tls:
+            insecure: true
+      service:
+        pipelines:
+          traces:
+            exporters: [logging, jaeger]
+
+levoai-ebpf-sensor:
+  sensor:
+    config: 
+      enable-export-rate-limiting: false
+      # See https://docs.levo.ai/api-observability/common-tasks/sensor/sensor-configuration#kubernetes-pod-filters
+      k8s-pod-filter-list:
+        default-policy: ignore
+        rules:
+          - policy: trace
+            namespace: your-namespace
+            owner-reference:
+              kind: Deployment
+              name: your-deployment
