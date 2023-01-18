@@ -19,13 +19,11 @@ spec:
       {{- end }}
       containers:
         - name: levoai-sensor
-          {{- if .Values.sensor.cpus }}
-          resources:
-            requests:
-              cpu: {{ .Values.sensor.cpus }}
-          {{- end }}
           image: {{ .Values.sensor.imageRepo }}:{{ .Values.sensor.imageTag }}
           imagePullPolicy: Always
+          {{- if .Values.sensor.containerResources }}
+          resources: {{- toYaml .Values.sensor.containerResources | nindent 12 }}
+          {{- end }}
           env:
             - name: OUTSIDE_HOSTNAME
               valueFrom:
