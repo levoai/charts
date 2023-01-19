@@ -6,6 +6,9 @@ on:
       - main
   workflow_dispatch:
 
+# Make sure there is only one instance of this workflow running at any time so that we don't override charts
+concurrency: charts
+
 jobs:
   release:
     runs-on: ubuntu-latest
