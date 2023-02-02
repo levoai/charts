@@ -146,6 +146,8 @@ levoai-collector:
         path: levoai-collector-config.yaml
       name: levoai-collector-conf
     name: levoai-collector-config-vol
+levoai-ion:
+  enabled: false
 nameOverride: ''
 nginx:
   fullnameOverride: levoai-nginx
