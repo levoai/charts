@@ -49,6 +49,8 @@ ingress:
   - host: chart-example.local
     paths: []
   tls: []
+ion:
+  enabled: false
 kubewatch:
   fullnameOverride: levoai-kubewatch
 levoai-collector:
