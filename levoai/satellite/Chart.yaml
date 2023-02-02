@@ -17,6 +17,9 @@ dependencies:
   repository: "file://subcharts/tagger"
 - name: rabbitmq
   repository: "file://subcharts/rabbitmq"
+- name: levoai-ion
+  repository: "file://subcharts/levoai-ion"
+  condition: levoai-ion.enabled
 - name: nginx
   repository: "file://subcharts/nginx"
   condition: useNginx
