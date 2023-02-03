@@ -19,6 +19,18 @@ entries:
     version: 0.1.0
   levoai-ebpf-sensor:
   - apiVersion: v2
+    appVersion: 0.18.27
+    created: "2023-02-03T05:50:03.630159945Z"
+    description: The Levo eBPF Sensor
+    digest: a2253c5d4e1edf44f07aa1ce3a1352e3bd26ae9214b8684c7b43504866dedb03
+    maintainers:
+    - email: mike@levo.ai
+      name: Michael Przybylski
+    name: levoai-ebpf-sensor
+    urls:
+    - https://github.com/levoai/charts/releases/download/levoai-ebpf-sensor-0.18.27/levoai-ebpf-sensor-0.18.27.tgz
+    version: 0.18.27
+  - apiVersion: v2
     appVersion: 0.18.26
     created: "2023-02-01T12:26:53.268532498Z"
     description: The Levo eBPF Sensor
@@ -463,38 +475,6 @@ entries:
     - https://github.com/levoai/charts/releases/download/levoai-ebpf-sensor-0.6.6-pr.40/levoai-ebpf-sensor-0.6.6-pr.40.tgz
     version: 0.6.6-pr.40
   levoai-satellite:
-  - apiVersion: v2
-    appVersion: 0.2.237
-    created: "2023-02-03T05:49:45.677030279Z"
-    dependencies:
-    - name: satellite
-      repository: file://subcharts/satellite
-    - name: tagger
-      repository: file://subcharts/tagger
-    - name: rabbitmq
-      repository: file://subcharts/rabbitmq
-    - condition: levoai-ion.enabled
-      name: levoai-ion
-      repository: file://subcharts/levoai-ion
-    - condition: useNginx
-      name: nginx
-      repository: file://subcharts/nginx
-    - condition: enableKubeWatch
-      name: kubewatch
-      repository: file://subcharts/kubewatch
-    - condition: enableKubeStateMetrics
-      name: kube-state-metrics
-      repository: file://subcharts/kube-state-metrics
-    - name: levoai-collector
-      repository: file://subcharts/levoai-collector
-    description: The Levoai Satellite Service, which receives observations from the
-      Sensor/Envoy filters et al.
-    digest: 5677c976f8bc229336ae422ca3e93d30ddde4f02753045b36863ab69f71440c1
-    name: levoai-satellite
-    type: application
-    urls:
-    - https://github.com/levoai/charts/releases/download/levoai-satellite-0.2.237/levoai-satellite-0.2.237.tgz
-    version: 0.2.237
   - apiVersion: v2
     appVersion: 0.2.236
     created: "2023-02-02T12:54:11.544852564Z"
@@ -1402,4 +1382,4 @@ entries:
     urls:
     - https://github.com/levoai/charts/releases/download/satellite-0.2.43/satellite-0.2.43.tgz
     version: 0.2.43
-generated: "2023-02-03T05:49:45.67748248Z"
+generated: "2023-02-03T05:50:03.630777052Z"
