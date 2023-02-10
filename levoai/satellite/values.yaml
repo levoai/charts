@@ -176,6 +176,8 @@ rabbitmq:
     password: levoailevoai
     username: levoai
   fullnameOverride: levoai-rabbitmq
+  persistence:
+    enabled: false
 replicaCount: 1
 resources: {}
 satellite:
