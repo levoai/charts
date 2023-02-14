@@ -52,3 +52,12 @@ jobs:
           skip_packaging: true
         env:
           CR_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
+
+      - name: Extract Chart to Repo
+        run: |
+          # We're doing this for easy auditability
+          rm -rf levoai/${{ inputs.name }}
+          tar xzf .cr-release-packages/*.tgz -C levoai/
+          git add levoai/${{ inputs.name }}
+          git commit -sm "Update ${{ inputs.name }} to latest released version"
+          git push --force-with-lease origin main

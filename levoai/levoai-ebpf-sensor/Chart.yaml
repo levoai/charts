@@ -1,5 +1,0 @@
-apiVersion: v2
-appVersion: 0.18.32
-description: The Levo eBPF Sensor
-name: levoai-ebpf-sensor
-version: 0.18.32
