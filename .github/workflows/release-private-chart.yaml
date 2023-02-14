@@ -26,6 +26,11 @@ jobs:
           git config user.name "levobot"
           git config user.email "github-bot@levo.ai"
 
+      - uses: google-github-actions/setup-gcloud@v0.6.2
+        with:
+          service_account_key: ${{ secrets.GCS_SA_KEY }}
+          export_default_credentials: true
+
       - name: Install Helm
         uses: azure/setup-helm@v1
         with:
