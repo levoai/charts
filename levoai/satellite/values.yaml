@@ -177,7 +177,7 @@ rabbitmq:
     username: levoai
   fullnameOverride: levoai-rabbitmq
   persistence:
-    enabled: false
+    enabled: true
 replicaCount: 1
 resources: {}
 satellite:
