@@ -23,13 +23,17 @@ jobs:
 
       - name: Configure Git
         run: |
+          gh auth setup-git
           git config user.name "levobot"
           git config user.email "github-bot@levo.ai"
+        env:
+          GH_TOKEN: ${{ secrets.LEVOBOT_TOKEN }}
 
-      - uses: google-github-actions/setup-gcloud@v0.6.2
+      - uses: 'google-github-actions/auth@v1'
         with:
-          service_account_key: ${{ secrets.GCS_SA_KEY }}
-          export_default_credentials: true
+          credentials_json: ${{ secrets.GCS_SA_KEY }}
+
+      - uses: 'google-github-actions/setup-gcloud@v1'
 
       - name: Install Helm
         uses: azure/setup-helm@v1
@@ -48,7 +52,6 @@ jobs:
       - name: Release Chart
         uses: helm/chart-releaser-action@v1.5.0
         with:
-          charts_repo_url: https://charts.levo.ai
           skip_packaging: true
         env:
           CR_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
