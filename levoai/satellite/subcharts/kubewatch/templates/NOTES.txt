@@ -1,1 +1,0 @@
-1. levoai-kubewatch installed. It observes k8s events and changes to k8s objects like pods, deployments and containers.

@@ -1,5 +1,0 @@
-apiVersion: v2
-description: Layer 9 watcher of k8s events
-name: kubewatch
-type: application
-version: 1.0.1
