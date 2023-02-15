@@ -6,8 +6,8 @@ on:
       - main
     paths:
       - 'levoai/**'
-      - '!levoai/levoai-satellite'
-      - '!levoai/levoai-ebpf-sensor'
+      - '!levoai/levoai-satellite/**'
+      - '!levoai/levoai-ebpf-sensor/**'
   workflow_dispatch:
 
 # Make sure there is only one instance of this workflow running at any time so that we don't override charts
