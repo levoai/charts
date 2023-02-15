@@ -1,0 +1,175 @@
+# Default values for levoai Satellite.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+replicaCount: 1
+
+image:
+  repository: nginx
+  pullPolicy: IfNotPresent
+  # Overrides the image tag whose default is the chart appVersion.
+  tag: ""
+
+nameOverride: ""
+fullnameOverride: ""
+
+serviceAccount:
+  # Specifies whether a service account should be created
+  create: true
+  # Annotations to add to the service account
+  annotations: {}
+  # The name of the service account to use.
+  # If not set and create is true, a name is generated using the fullname template
+  name: ""
+
+podAnnotations: {}
+
+podSecurityContext: {}
+  # fsGroup: 2000
+
+securityContext: {}
+  # capabilities:
+  #   drop:
+  #   - ALL
+  # readOnlyRootFilesystem: true
+  # runAsNonRoot: true
+  # runAsUser: 1000
+
+ingress:
+  enabled: false
+  annotations: {}
+    # kubernetes.io/ingress.class: nginx
+    # kubernetes.io/tls-acme: "true"
+  hosts:
+    - host: chart-example.local
+      paths: []
+  tls: []
+  #  - secretName: chart-example-tls
+  #    hosts:
+  #      - chart-example.local
+
+resources: {}
+  # We usually recommend not to specify default resources and to leave this as a conscious
+  # choice for the user. This also increases chances charts run on environments with little
+  # resources, such as Minikube. If you do want to specify resources, uncomment the following
+  # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
+  # limits:
+  #   cpu: 100m
+  #   memory: 128Mi
+  # requests:
+  #   cpu: 100m
+  #   memory: 128Mi
+
+autoscaling:
+  enabled: false
+  minReplicas: 1
+  maxReplicas: 100
+  targetCPUUtilizationPercentage: 80
+  # targetMemoryUtilizationPercentage: 80
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}
+
+global:
+  serviceAnnotations: {}
+  virtualService:
+    enabled: false
+    fullyQualifiedDomainName: ""
+    gateway: ""
+  levoai:
+    log_level: INFO
+    mode: prod_k8s
+    pi_detector_data_dir: "/opt/levoai/datasets/"
+  levoai_config_override:
+    rabbitmq:
+      host: levoai-rabbitmq
+    # onprem-api: {}  # refresh-token is required -- you must use helm --set global.levoai_config_override.onprem-api.refresh-token=T where T is a Levo.ai refresh token
+    tagger_batch_interval_minutes: 5  # run tagger batch every min by default
+    tagger_ignore_seen_flows: true
+    url_clusterer_id_len: 1 # consider a number as pathparam based on this length.
+    min_urls_required_per_pattern: 10
+    cookie_auth_keys: ""
+    service_naming:
+      strategies: KUBERNETES_METADATA,DEFAULT
+    kube-state-metrics:
+      # url is required -- you must use helm --set
+      # global.levoai_config_override.kube-state-metrics.url=http://kube-state-metrics.kube-system.svc.cluster.local:8080
+      # --set enableKubeStateMetrics=false if you have chosen to install
+      # kube-state-metrics yourself in the namespace `kube-system`:
+      url: http://kube-state-metrics:8080/
+    authentication_inspection: false  # defaults to false. if we want to send over auth secrets, we must use helm --set global.levoai_config_override.authentication_inspection=true
+    # By default, satellite will log raw traces at debug level. This can be controlled with the following parameter.
+    # WARNING: leave this at debug unless you know what you are doing.
+    traces_log_level: DEBUG
+    sample_collection:
+      # Sample collection is disabled by default so rest of the values of this section are ignored.
+      enabled: false
+      max_samples_per_end_point: 2
+      users:
+        - name: user1
+          match_type: user
+          email: test@example.com
+
+rabbitmq:
+  fullnameOverride: "levoai-rabbitmq"
+  persistence:
+    enabled: true
+  auth:
+    username: levoai
+    password: levoailevoai
+    erlangCookie: levoaierlangcookie
+
+satellite:
+  fullnameOverride: "levoai-satellite"
+
+tagger:
+  fullnameOverride: "levoai-tagger"
+
+levoai-ion:
+  enabled: false
+
+kubewatch:
+  fullnameOverride: "levoai-kubewatch"
+
+
+useNginx: false
+nginx:
+  fullnameOverride: "levoai-nginx"
+  replicaCount: 2
+  # default affinity is perfect, a soft attempt to avoid two nginx on the same node.
+  pdb:
+    create: true
+    minAvailable: 1
+  service:
+    type: ClusterIP
+    port: 9999
+  serverBlock: |-
+    server {
+        listen                8080 default_server deferred;
+        server_name           main;
+        client_max_body_size  20M;
+        keepalive_timeout 5;
+        location / {
+            proxy_redirect off;
+            proxy_pass                          http://levoai-satellite:9999;
+            proxy_set_header                    Host levoai-satellite;
+            proxy_http_version 1.1;
+            proxy_set_header X-Forwarded-Host   $server_name;
+            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+            proxy_set_header X-Forwarded-Proto $scheme;
+            proxy_set_header X-Real-IP          $remote_addr;
+        }
+    }
+
+# TODO(chandler): Do we want metrics for prometheus?
+# https://docs.bitnami.com/kubernetes/infrastructure/nginx/administration/enable-metrics/
+
+enableKubeWatch: false
+# If you enableKubeWatch, it requires kube-state-metrics. If you set this to
+# false, it means that you are already running v2.0.0 (but not v3 or later)
+# yourself, and you must use `helm --set
+# global.levoai_config_override.kube-state-metrics.url=http://....:8080:
+enableKubeStateMetrics: false

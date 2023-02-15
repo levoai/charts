@@ -1,0 +1,65 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "kubewatch.fullname" . }}
+  labels:
+    {{- include "kubewatch.labels" . | nindent 4 }}
+spec:
+{{- if not .Values.autoscaling.enabled }}
+  replicas: {{ .Values.replicaCount }}
+{{- end }}
+  selector:
+    matchLabels:
+      {{- include "kubewatch.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+    {{- with deepCopy .Values.podAnnotations | mustMerge (dict "rollme" (randAlphaNum 10)) }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+    {{- end }}
+      labels:
+        {{- include "kubewatch.selectorLabels" . | nindent 8 }}
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ include "kubewatch.serviceAccountName" . }}
+      securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      containers:
+        - name: {{ .Chart.Name }}
+          securityContext:
+            {{- toYaml .Values.securityContext | nindent 12 }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          command:
+              - python
+              - "-O"
+              - /opt/levoai/e7s/src/python/levoai_e7s/kubewatch/events.py
+          livenessProbe:
+            exec:
+              command:
+                - /opt/levoai/common-public/src/python/levoai_common_public/monitoring/test_health_file.sh
+            initialDelaySeconds: 30
+            periodSeconds: 125
+            timeoutSeconds: 1
+            successThreshold: 1
+            failureThreshold: 5
+          envFrom:
+          - configMapRef:
+              name: "{{ template "kubewatch.fullname" . }}-env"
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}

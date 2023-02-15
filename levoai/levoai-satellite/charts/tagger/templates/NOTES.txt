@@ -1,0 +1,1 @@
+1. levoai-tagger installed. It consumes items queued in rabbitmq. It has no webserver.
