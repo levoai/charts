@@ -1,4 +1,4 @@
-name: Release Private Sensor Chart
+name: Release Sensor Chart
 
 on:
   workflow_dispatch:

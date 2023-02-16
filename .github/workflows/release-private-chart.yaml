@@ -1,4 +1,4 @@
-name: Release Private Chart
+name: _Release Private Chart to Public Repo
 
 on:
   workflow_call:

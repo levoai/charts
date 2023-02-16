@@ -1,4 +1,4 @@
-name: Release Private Satellite Chart
+name: Release Satellite Chart
 
 on:
   workflow_dispatch:
