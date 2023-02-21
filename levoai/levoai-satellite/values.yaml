@@ -112,6 +112,10 @@ global:
         - name: user1
           match_type: user
           email: test@example.com
+    api_rule_evaluation:
+      enabled: false
+    ion:
+      url: http://levoai-ion:8000
 
 rabbitmq:
   fullnameOverride: "levoai-rabbitmq"
@@ -127,9 +131,6 @@ satellite:
 
 tagger:
   fullnameOverride: "levoai-tagger"
-
-levoai-ion:
-  enabled: false
 
 kubewatch:
   fullnameOverride: "levoai-kubewatch"

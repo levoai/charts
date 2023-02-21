@@ -1,16 +1,16 @@
 apiVersion: v2
-appVersion: 0.2.254
+appVersion: 0.2.255
 dependencies:
 - name: rabbitmq
   repository: https://charts.bitnami.com/bitnami
   version: 10.1.14
 - name: satellite
   repository: file://dependencies/satellite
-  version: 0.2.254
+  version: 0.2.255
 - name: tagger
   repository: file://dependencies/tagger
-  version: 0.2.254
-- condition: levoai-ion.enabled
+  version: 0.2.255
+- condition: global.levoai_config_override.api_rule_evaluation.enabled
   name: levoai-ion
   repository: file://dependencies/ion
   version: 0.2.0
@@ -33,4 +33,4 @@ description: The Levoai Satellite Service, which receives observations from the 
   filters et al.
 name: levoai-satellite
 type: application
-version: 0.2.254
+version: 0.2.255
