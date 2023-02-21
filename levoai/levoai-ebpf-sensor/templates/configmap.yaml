@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: sensor-config
+data:
+  config-file-content: |
+{{ .Values.sensor.config | toYaml | indent 4 }}
