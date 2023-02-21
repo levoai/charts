@@ -113,7 +113,7 @@ global:
           match_type: user
           email: test@example.com
     api_rule_evaluation:
-      enabled: false
+      enabled: true
     ion:
       url: http://levoai-ion:8000
 

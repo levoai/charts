@@ -13,7 +13,11 @@ spec:
       {{- include "satellite.selectorLabels" . | nindent 6 }}
   template:
     metadata:
-    {{- with deepCopy .Values.podAnnotations | mustMerge (dict "rollme" (randAlphaNum 10)) }}
+    {{- /*
+    # https://helm.sh/docs/howto/charts_tips_and_tricks/#automatically-roll-deployments
+    */}}
+    {{- with deepCopy .Values.podAnnotations |
+        mustMerge (dict "checksum/config" (include (print $.Template.BasePath "/configmap-env.yaml") . | toString | sha256sum)) }}
       annotations:
         {{- toYaml . | nindent 8 }}
     {{- end }}

@@ -14,11 +14,10 @@ spec:
   template:
     metadata:
     {{- /*
-    See T128 regarding how the following is used to release new docker image versions.
-
-    NOTE: you must bump the satellite Helm chart's version when you change this:
+    # https://helm.sh/docs/howto/charts_tips_and_tricks/#automatically-roll-deployments
     */}}
-    {{- with deepCopy .Values.podAnnotations | mustMerge (dict "imageversion" "a25fdf41e6c891540a224f27b43e3ddcfcf222d9") }}
+    {{- with deepCopy .Values.podAnnotations |
+        mustMerge (dict "checksum/config" (include (print $.Template.BasePath "/configmap-env.yaml") . | toString | sha256sum)) }}
       annotations:
         {{- toYaml . | nindent 8 }}
     {{- end }}
