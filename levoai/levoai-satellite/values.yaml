@@ -120,7 +120,9 @@ rabbitmq:
     enabled: true
     size: 32Gi
   extraConfiguration: |-
+    heartbeat = 600
     disk_free_limit.absolute = 500MB
+    consumer_timeout = 600000
   auth:
     username: levoai
     password: levoailevoai

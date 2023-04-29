@@ -1,6 +1,6 @@
 apiVersion: v2
-appVersion: 0.2.297
+appVersion: 0.2.303
 description: A Helm chart for Levoai's Schema Type Tagger
 name: tagger
 type: application
-version: 0.2.297
+version: 0.2.303
