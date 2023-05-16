@@ -43,7 +43,7 @@ jobs:
 
       - name: Download Private Chart
         run: |
-          helm plugin install https://github.com/hayorov/helm-gcs.git || echo "Helm plugin already exists."
+          helm plugin install https://github.com/hayorov/helm-gcs.git --version 0.4.1 || echo "Helm plugin already exists."
           helm repo add levoai-private ${{ secrets.HELM_GCS_REPOSITORY }} || echo "Helm repo already exists"
           helm repo update
           mkdir -p .cr-release-packages
