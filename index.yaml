@@ -582,6 +582,16 @@ entries:
     urls:
     - https://github.com/levoai/charts/releases/download/levoai-ebpf-sensor-0.6.6-pr.40/levoai-ebpf-sensor-0.6.6-pr.40.tgz
     version: 0.6.6-pr.40
+  levoai-pcap-sensor:
+  - apiVersion: v2
+    appVersion: 0.0.5
+    created: "2023-05-25T13:13:52.28695657Z"
+    description: The Levo PCAP Sensor
+    digest: 12b073eb6caaf0e86b64f4daded834e1f48c0d4642d29217a70b1e1d8a9ea409
+    name: levoai-pcap-sensor
+    urls:
+    - https://github.com/levoai/charts/releases/download/levoai-pcap-sensor-0.0.5/levoai-pcap-sensor-0.0.5.tgz
+    version: 0.0.5
   levoai-satellite:
   - apiVersion: v2
     appVersion: 0.2.322
@@ -2658,4 +2668,4 @@ entries:
     urls:
     - https://github.com/levoai/charts/releases/download/levoai-satellite-0.2.73/levoai-satellite-0.2.73.tgz
     version: 0.2.73
-generated: "2023-05-24T05:15:08.376095006Z"
+generated: "2023-05-25T13:13:52.287330175Z"
