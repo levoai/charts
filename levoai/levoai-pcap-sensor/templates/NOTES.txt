@@ -1,0 +1,35 @@
+# Levo.ai PCAP Sensor
+
+Release name:       {{ .Release.Name }}
+Release name space: {{ .Release.Namespace }}
+
+The sensor runs as a DaemonSet.  There will be one privileged sensor pod
+running on each node in the cluster.
+
+## This chart includes the following user-settable values:
+* `sensor.cpus`: (Optional) The number of Kubernetes CPU units to request for
+  sensor pods. See...
+  https://kubernetes.io/docs/tasks/configure-pod-container/assign-cpu-resource/
+  ...for more information.
+* `sensor.config`: Multi-line scalar / string in the same format as the sensor's
+  configuration file. This value should be specified in a separate YAML file
+  and passed to the helm command with the `-f` flag.  See
+  https://helm.sh/docs/chart_template_guide/values_files/ and
+  https://yaml-multiline.info/ for more information.
+
+## Useful commands:
+
+Print release-specific help:
+```
+helm {{ if .Release.Namespace }}-n {{ .Release.Namespace }} {{ end }}get notes {{ .Release.Name }}
+```
+
+Update sensor values:
+```
+# Set sensor.cpus
+helm {{ if .Release.Namespace }}-n {{ .Release.Namespace }} {{ end }}upgrade --set sensor.cpus=0.2 {{ .Release.Name }} \
+  {{ .Chart.Name }} --version {{ .Chart.Version }}
+# Set or update sensor config file contents and other helm chart values:
+helm {{ if .Release.Namespace }}-n {{ .Release.Namespace }} {{ end }}upgrade -f user-chart-values.yaml \
+  {{ .Release.Name }} {{ .Chart.Name }} --version {{ .Chart.Version }}
+```

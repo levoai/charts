@@ -1,0 +1,26 @@
+---
+sensor:
+  imageRepo: docker.io/levoai/pcap-sensor
+  imageTag: latest
+  tolerations:
+    - key: node-role.kubernetes.io/control-plane
+      operator: Exists
+      effect: NoSchedule
+  nodeSelector: {}
+  containerResources:
+    requests:
+      cpu: 0.5
+      memory: 1Gi
+    limits:
+      cpu: 1
+      memory: 2Gi
+  config:
+    satelliteUrl: "http://levo-satellite:9999"
+    traceExportInterval: "\"10.0\""
+    rateLimit: "\"1000.0\""
+    filter: "\"\""
+    hostAllow: "\"\""
+    pathAllow: "\"\""
+    hostExclusions: "\"\""
+    pathExclusions: "\"\""
+    levoaiOrgId: "\"\""

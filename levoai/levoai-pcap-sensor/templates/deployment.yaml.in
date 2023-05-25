@@ -1,0 +1,61 @@
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: levoai-pcap-sensor
+spec:
+  template:
+    metadata:
+      annotations:
+        # https://helm.sh/docs/howto/charts_tips_and_tricks/#automatically-roll-deployments
+        checksum/config: {{ .Values.sensor.config | toString | sha256sum }}
+      labels:
+        name: levoai-pcap-sensor
+    spec:
+      {{- if .Values.sensor.tolerations }}
+      tolerations: {{- toYaml .Values.sensor.tolerations | nindent 8 }}
+      {{- end }}
+      {{- if .Values.sensor.nodeSelector }}
+      nodeSelector: {{- toYaml .Values.sensor.nodeSelector | nindent 8 }}
+      {{- end }}
+      containers:
+        - name: pcap-sensor
+          image: {{ .Values.sensor.imageRepo }}:{{ .Values.sensor.imageTag }}
+          imagePullPolicy: Always
+          {{- if .Values.sensor.containerResources }}
+          resources: {{- toYaml .Values.sensor.containerResources | nindent 12 }}
+          {{- end }}
+          # Overrides docker image's entrypoint.
+          command:
+            - /go/src/github.com/levoai/pcap-sensor/bin/levo-pcap-sensor
+          args:
+            - "apidump"
+            - "--satellite-url"
+            - {{ .Values.sensor.config.satelliteUrl }}
+            - "--trace-export-interval"
+            - {{ .Values.sensor.config.traceExportInterval }}
+            - "--rate-limit"
+            - {{ .Values.sensor.config.rateLimit }}
+            - "--filter"
+            - {{ .Values.sensor.config.filter }}
+            - "--host-allow"
+            - {{ .Values.sensor.config.hostAllow }}
+            - "--path-allow"
+            - {{ .Values.sensor.config.pathAllow }}
+            - "--host-exclusions"
+            - {{ .Values.sensor.config.hostExclusions }}
+            - "--path-exclusions"
+            - {{ .Values.sensor.config.pathExclusions }}
+            - "--levoai-org-id"
+            - {{ .Values.sensor.config.levoaiOrgId }}
+          securityContext:
+            capabilities:
+              add: ["NET_RAW"]
+      dnsPolicy: ClusterFirst
+      
+      {{- if .Values.sensor.imagePullSecretName }}
+      imagePullSecrets:
+        - name: {{ .Values.sensor.imagePullSecretName }}
+      {{- end }}
+  selector:
+    matchLabels:
+      name: levoai-pcap-sensor
