@@ -37,6 +37,7 @@ jobs:
         run: |
           rm -rf levoai/levoai-satellite
           rm -rf levoai/levoai-ebpf-sensor
+          rm -rf levoai/levoai-pcap-sensor
 
       - name: Run chart-releaser
         uses: helm/chart-releaser-action@v1.5.0
