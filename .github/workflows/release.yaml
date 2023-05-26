@@ -1,15 +1,14 @@
 name: Release Other Charts
 
 on:
-  push:
-    branches:
-      - main
-    paths:
-      - 'levoai/**'
-      - '!levoai/levoai-satellite/**'
-      - '!levoai/levoai-ebpf-sensor/**'
-      - '!levoai/levoai-pcap-sensor/**'
   workflow_dispatch:
+    inputs:
+      chart:
+        description: Chart to Release
+        required: true
+        type: choice
+        options:
+          - api-debugger
 
 # Make sure there is only one instance of this workflow running at any time so that we don't override charts
 concurrency: charts
@@ -36,7 +35,7 @@ jobs:
       - name: Run chart-releaser
         uses: helm/chart-releaser-action@v1.5.0
         with:
-          charts_dir: levoai
+          charts_dir: levoai/${{ inputs.chart }}
           charts_repo_url: https://charts.levo.ai
         env:
           CR_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
