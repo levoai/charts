@@ -8,5 +8,5 @@ dependencies:
   repository: "file://../levoai-ebpf-sensor"
   version: ">=0.20.0"
 - name: levoai-collector
-  repository: "file://../satellite/subcharts/levoai-collector"
+  repository: "file://../levoai-satellite/charts/levoai-collector"
   version: ">=0.13.0"
