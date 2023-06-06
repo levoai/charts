@@ -29,29 +29,47 @@ spec:
             - /go/src/github.com/levoai/pcap-sensor/bin/levo-pcap-sensor
           args:
             - "apidump"
+            {{- if .Values.sensor.config.satelliteUrl }}
             - "--satellite-url"
             - {{ .Values.sensor.config.satelliteUrl }}
+            {{- end}}
+            {{- if .Values.sensor.config.traceExportInterval }}
             - "--trace-export-interval"
-            - {{ .Values.sensor.config.traceExportInterval }}
+            - "{{ .Values.sensor.config.traceExportInterval }}"
+            {{- end}}
+            {{- if .Values.sensor.config.rateLimit }}
             - "--rate-limit"
-            - {{ .Values.sensor.config.rateLimit }}
+            - "{{ .Values.sensor.config.rateLimit }}"
+            {{- end}}
+            {{- if .Values.sensor.config.filter }}
             - "--filter"
             - {{ .Values.sensor.config.filter }}
+            {{- end}}
+            {{- if .Values.sensor.config.hostAllow }}
             - "--host-allow"
             - {{ .Values.sensor.config.hostAllow }}
+            {{- end}}
+            {{- if .Values.sensor.config.pathAllow }}
             - "--path-allow"
             - {{ .Values.sensor.config.pathAllow }}
+            {{- end}}
+            {{- if .Values.sensor.config.hostExclusions }}
             - "--host-exclusions"
             - {{ .Values.sensor.config.hostExclusions }}
+            {{- end}}
+            {{- if .Values.sensor.config.pathExclusions }}
             - "--path-exclusions"
             - {{ .Values.sensor.config.pathExclusions }}
+            {{- end}}
+            {{- if .Values.sensor.config.levoaiOrgId }}
             - "--levoai-org-id"
             - {{ .Values.sensor.config.levoaiOrgId }}
+            {{- end}}
           securityContext:
             capabilities:
               add: ["NET_RAW"]
-      dnsPolicy: ClusterFirst
-      
+      dnsPolicy: ClusterFirstWithHostNet
+      hostNetwork: true
       {{- if .Values.sensor.imagePullSecretName }}
       imagePullSecrets:
         - name: {{ .Values.sensor.imagePullSecretName }}

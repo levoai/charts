@@ -15,12 +15,12 @@ sensor:
       cpu: 1
       memory: 2Gi
   config:
-    satelliteUrl: "http://levo-satellite:9999"
-    traceExportInterval: "\"10.0\""
-    rateLimit: "\"1000.0\""
-    filter: "\"\""
-    hostAllow: "\"\""
-    pathAllow: "\"\""
-    hostExclusions: "\"\""
-    pathExclusions: "\"\""
-    levoaiOrgId: "\"\""
+    satelliteUrl: "http://levoai-satellite:9999"
+    traceExportInterval: "10.0"
+    rateLimit: "1000.0"
+    filter: ""
+    hostAllow: ""
+    pathAllow: ""
+    hostExclusions: ""
+    pathExclusions: ""
+    levoaiOrgId: ""
