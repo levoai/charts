@@ -8,6 +8,7 @@ metadata:
     release: {{ .Release.Name }}
     heritage: {{ .Release.Service }}
 data:
+  LEVOAI_VERSION: {{ .Values.image.tag | default .Chart.AppVersion }}
   LEVOAI_MODE: {{ .Values.global.levoai.mode }}
   LEVOAI_LOG_LEVEL: {{ .Values.global.levoai.log_level }}
   LEVOAI_CONF_OVERRIDES: '{{ mustToJson .Values.global.levoai_config_override }}'

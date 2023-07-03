@@ -113,6 +113,12 @@ global:
     ion:
       url: http://levoai-ion:8000
     enable_ssl_cert_checks: true
+    ignore_user_agents:
+      - "levoai/"
+      - "schemathesis/"
+      - "kube-probe/"
+      - "Prometheus/"
+      - "Blackbox Exporter/"
 
 rabbitmq:
   fullnameOverride: "levoai-rabbitmq"
