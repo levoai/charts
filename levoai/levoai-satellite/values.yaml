@@ -119,6 +119,7 @@ global:
       - "kube-probe/"
       - "Prometheus/"
       - "Blackbox Exporter/"
+  useRabbitmq: true
 
 rabbitmq:
   fullnameOverride: "levoai-rabbitmq"
