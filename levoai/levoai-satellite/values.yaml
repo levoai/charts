@@ -123,6 +123,8 @@ global:
 
 rabbitmq:
   fullnameOverride: "levoai-rabbitmq"
+  nodeSelector:
+    kubernetes.io/arch: amd64
   persistence:
     enabled: true
     size: 32Gi
