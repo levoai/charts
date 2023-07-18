@@ -33,6 +33,11 @@ spec:
               valueFrom:
                 fieldRef:
                   fieldPath: spec.nodeName
+            - name: MEMORY_LIMIT
+              valueFrom:
+                resourceFieldRef:
+                  containerName: levoai-sensor
+                  resource: limits.memory
           # Overrides docker image's entrypoint.
           command:
             - /sbin/init_lite
