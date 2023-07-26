@@ -38,6 +38,11 @@ spec:
                 resourceFieldRef:
                   containerName: levoai-sensor
                   resource: limits.memory
+            - name: CPU_LIMIT
+              valueFrom:
+                resourceFieldRef:
+                  containerName: levoai-sensor
+                  resource: limits.cpu
           # Overrides docker image's entrypoint.
           command:
             - /sbin/init_lite
