@@ -15,6 +15,8 @@ env:
 containerPorts:
   - name: grpc-otel
     containerPort: 4317
+  - name: http-otel
+    containerPort: 4318
   - name: http-health
     containerPort: 13133
 
@@ -24,6 +26,10 @@ service:
   - name: grpc-otlp
     port: 4317
     targetPort: 4317
+    protocol: TCP
+  - name: http-otlp
+    port: 4318
+    targetPort: 4318
     protocol: TCP
 
 livenessProbe:
@@ -82,7 +88,8 @@ config:
           grpc:
             endpoint: 0.0.0.0:4317
             max_recv_msg_size_mib: 16
-
+          http:
+            endpoint: 0.0.0.0:4318
     processors:
       levoai_merge:
         timeout: 60s
