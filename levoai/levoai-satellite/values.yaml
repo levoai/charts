@@ -106,7 +106,7 @@ global:
     traces_log_level: DEBUG
     sample_collection:
       # Sample collection is disabled by default so rest of the values of this section are ignored.
-      enabled: true
+      enabled: false
       max_samples_per_end_point: 2
     api_rule_evaluation:
       enabled: true
