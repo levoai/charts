@@ -50,10 +50,7 @@ spec:
             - "--host-proc-path"
             - "/host/proc"
           securityContext:
-            capabilities:
-              drop:
-                - all
-              add: ["SYS_ADMIN", "SYS_RESOURCE", "DAC_OVERRIDE"]
+            privileged: true
           volumeMounts:
             - name: config
               mountPath: etc/levo/sensor

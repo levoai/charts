@@ -1,6 +1,6 @@
 sensor:
   imageRepo: docker.io/levoai/ebpf_sensor
-  imageTag: 0.24.2
+  imageTag: 0.24.6
   binary:
     - /opt/levo/sbin/levo-ebpf-sensor
   serviceAccount:
@@ -65,7 +65,7 @@ sensor:
     collector-traces-endpoint: levoai-collector:4317
     
     # host:port for receiving the sensor's metrics
-    collector-metrics-endpoint: 
+    # collector-metrics-endpoint: levoai-collector:4317
     # --------------------------------------------------------------------------------------------
     
     # --------------------------------------------------------------------------------------------
@@ -89,6 +89,7 @@ sensor:
     # messages.
     
     # export-metrics-to-log: false
+    # enable-metrics: false
     
     # --------------------------------------------------------------------------------------------
     # Process Filters: process command names/IDs to monitor & capture API traffic.
