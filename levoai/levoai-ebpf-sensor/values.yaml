@@ -1,6 +1,6 @@
 sensor:
   imageRepo: docker.io/levoai/ebpf_sensor
-  imageTag: 0.24.6
+  imageTag: 0.24.8
   binary:
     - /opt/levo/sbin/levo-ebpf-sensor
   serviceAccount:
@@ -41,13 +41,15 @@ sensor:
     
     
     # --------------------------------------------------------------------------------------------
-    # Default Application Name:
+    # Default Application Settings:
     # --------------------------------------------------------------------------------------------
     # Auto discovered API endpoints and their OpenAPI specifications are show in the API Catalog
     # grouped under this application name. The application name helps segregate and group API
-    # endpoints from different environments.
+    # endpoints from different environments. The environment lets us know what environment the 
+    # sensor is installed in e.g. staging, prod, dev.
     
     default-service-name: default
+    env: staging
     # --------------------------------------------------------------------------------------------
     
     
