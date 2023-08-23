@@ -1,6 +1,6 @@
 sensor:
   imageRepo: docker.io/levoai/ebpf_sensor
-  imageTag: 0.24.8
+  imageTag: 0.25.0
   binary:
     - /opt/levo/sbin/levo-ebpf-sensor
   serviceAccount:
@@ -222,7 +222,7 @@ sensor:
     # --------------------------------------------------------------------------------------------
     # The maximum request or response body size the sensor will parse.  Request or response bodies
     # larger than this limit will be ignored by the sensor.
-    # max-msg-body-size-bytes: 5000000
+    # max-msg-body-size-bytes: 512000
     
     # --------------------------------------------------------------------------------------------
 
