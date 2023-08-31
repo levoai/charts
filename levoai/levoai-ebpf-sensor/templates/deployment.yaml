@@ -25,6 +25,10 @@ spec:
           resources: {{- toYaml .Values.sensor.containerResources | nindent 12 }}
           {{- end }}
           env:
+            {{- range $key, $value := .Values.sensor.env }}
+            - name: {{ $value.name }}
+              value: "{{ $value.value }}"
+            {{- end }}
             - name: OUTSIDE_HOSTNAME
               valueFrom:
                 fieldRef:
