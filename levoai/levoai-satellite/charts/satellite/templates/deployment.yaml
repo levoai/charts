@@ -33,8 +33,8 @@ spec:
       {{- if .Values.global.useRabbitmq }}
       initContainers:
         - name: wait-for-rabbitmq
-          image: levoai/rmq_healthcheck:latest
-          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          image: busybox
+          command: [ 'sh', '-c', 'until wget http://levoai:levoailevoai@levoai-rabbitmq:15672/api/aliveness-test/%2F; do echo waiting for rabbitmq; sleep 2; done;' ]
       {{- end }}
       containers:
         - name: {{ .Chart.Name }}

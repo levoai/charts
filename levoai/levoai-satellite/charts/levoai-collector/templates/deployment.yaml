@@ -24,14 +24,22 @@ spec:
       labels:
         {{- toYaml .Values.podLabels | nindent 8 }}
     spec:
-    {{- with .Values.volumes }}
+      {{- with .Values.volumes }}
       volumes:
-      {{- toYaml . | nindent 8 }}
-    {{- end }}
-    {{- with .Values.nodeSelector }}
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.nodeSelector }}
       nodeSelector:
-      {{- toYaml . | nindent 8 }}
-    {{- end }}
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
       containers:
         - name: {{ .Chart.Name }}
           image: "{{ .Values.image }}:{{ default .Chart.AppVersion .Values.imageTag }}"

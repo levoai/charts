@@ -122,9 +122,9 @@ global:
   useRabbitmq: true
 
 rabbitmq:
+  image:
+    tag: 3.10.25
   fullnameOverride: "levoai-rabbitmq"
-  nodeSelector:
-    kubernetes.io/arch: amd64
   persistence:
     enabled: true
     size: 32Gi

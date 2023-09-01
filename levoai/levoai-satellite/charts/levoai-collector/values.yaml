@@ -73,6 +73,10 @@ volumes:
 
 nodeSelector: {}
 
+tolerations: []
+
+affinity: {}
+
 config:
   name: levoai-collector-conf
   data:
@@ -103,6 +107,9 @@ config:
         endpoint: http://levoai-satellite:9999
         # Python Flask server in Levo's Satellite doesn't support gzip so don't enable any compression here.
         compression: none
+      otlphttp:
+        endpoint: http://levoai-satellite:9999
+        compression: none
 
     service:
       pipelines:
@@ -110,5 +117,9 @@ config:
           receivers: [otlp]
           processors: [levoai_merge, batch]
           exporters: [logging, levoai_satellite]
+        metrics:
+          receivers: [otlp]
+          processors: [batch]
+          exporters: [logging, otlphttp]
 
       extensions: [health_check, memory_ballast]
