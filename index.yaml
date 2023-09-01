@@ -765,6 +765,47 @@ entries:
     version: 0.0.5
   levoai-satellite:
   - apiVersion: v2
+    appVersion: 0.2.372
+    created: "2023-09-01T05:42:26.441203175Z"
+    dependencies:
+    - condition: global.useRabbitmq
+      name: rabbitmq
+      repository: https://charts.bitnami.com/bitnami
+      version: 10.1.14
+    - name: satellite
+      repository: file://dependencies/satellite
+      version: 0.2.372
+    - name: tagger
+      repository: file://dependencies/tagger
+      version: 0.2.372
+    - condition: global.levoai_config_override.api_rule_evaluation.enabled
+      name: levoai-ion
+      repository: file://dependencies/ion
+      version: 0.4.1
+    - condition: useNginx
+      name: nginx
+      repository: file://dependencies/nginx
+      version: 8.5.5
+    - condition: enableKubeWatch
+      name: kubewatch
+      repository: file://dependencies/kubewatch
+      version: 1.0.1
+    - condition: enableKubeStateMetrics
+      name: kube-state-metrics
+      repository: file://dependencies/kube-state-metrics
+      version: 2.0.0
+    - name: levoai-collector
+      repository: '@levoai-private'
+      version: 0.14.5
+    description: The Levoai Satellite Service, which receives observations from the
+      Sensor/Envoy filters et al.
+    digest: 7f9eff6b02c65878adabd81678682c13cff889af961f2f889bb742b2e2b4ab1b
+    name: levoai-satellite
+    type: application
+    urls:
+    - https://github.com/levoai/charts/releases/download/levoai-satellite-0.2.372/levoai-satellite-0.2.372.tgz
+    version: 0.2.372
+  - apiVersion: v2
     appVersion: 0.2.365
     created: "2023-08-31T10:00:26.911947789Z"
     dependencies:
@@ -3569,4 +3610,4 @@ entries:
     urls:
     - https://github.com/levoai/charts/releases/download/levoai-satellite-0.2.73/levoai-satellite-0.2.73.tgz
     version: 0.2.73
-generated: "2023-08-31T10:03:41.510109287Z"
+generated: "2023-09-01T05:42:26.441712322Z"
