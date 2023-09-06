@@ -1,6 +1,6 @@
 apiVersion: v2
-appVersion: 0.2.375
+appVersion: 0.2.376
 description: A Helm chart for Levoai's HTTP receiver of observations
 name: satellite
 type: application
-version: 0.2.375
+version: 0.2.376
