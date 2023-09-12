@@ -33,6 +33,10 @@ spec:
             - "--satellite-url"
             - {{ .Values.sensor.config.satelliteUrl }}
             {{- end}}
+            {{- if .Values.sensor.config.levoEnv }}
+            - "--levo-env"
+            - {{ .Values.sensor.config.levoEnv }}
+            {{- end}}
             {{- if .Values.sensor.config.traceExportInterval }}
             - "--trace-export-interval"
             - "{{ .Values.sensor.config.traceExportInterval }}"

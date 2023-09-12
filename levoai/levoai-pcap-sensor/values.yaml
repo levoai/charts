@@ -16,6 +16,7 @@ sensor:
       memory: 2Gi
   config:
     satelliteUrl: "http://levoai-satellite:9999"
+    levoEnv: "staging"
     traceExportInterval: "10.0"
     rateLimit: "1000.0"
     filter: ""
