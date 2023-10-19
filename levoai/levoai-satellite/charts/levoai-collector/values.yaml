@@ -84,7 +84,7 @@ config:
       health_check:
         endpoint: "0.0.0.0:13133"
       memory_ballast:
-        size_mib: 512
+        size_in_percentage: 30
 
     receivers:
       otlp:
@@ -99,6 +99,10 @@ config:
         timeout: 60s
       batch:
         timeout: 10s
+      memory_limiter:
+        check_interval: 1s
+        limit_percentage: 60
+        spike_limit_percentage: 20
 
     exporters:
       logging:
@@ -115,11 +119,10 @@ config:
       pipelines:
         traces:
           receivers: [otlp]
-          processors: [levoai_merge, batch]
+          processors: [memory_limiter, levoai_merge, batch]
           exporters: [logging, levoai_satellite]
         metrics:
           receivers: [otlp]
-          processors: [batch]
+          processors: [memory_limiter, batch]
           exporters: [logging, otlphttp]
-
       extensions: [health_check, memory_ballast]
