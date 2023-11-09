@@ -125,4 +125,8 @@ config:
           receivers: [otlp]
           processors: [memory_limiter, batch]
           exporters: [logging, otlphttp]
+        logs:
+          receivers: [otlp]
+          processors: [memory_limiter, batch]
+          exporters: [logging]
       extensions: [health_check, memory_ballast]
