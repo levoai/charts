@@ -64,7 +64,7 @@ spec:
               readOnly: true
             - mountPath: /sys/kernel/tracing
               name: sys-kernel-debug
-              readOnly: false
+              readOnly: true
       {{- if .Values.sensor.imagePullSecretName }}
       imagePullSecrets:
         - name: {{ .Values.sensor.imagePullSecretName }}
