@@ -122,8 +122,6 @@ global:
   useRabbitmq: true
 
 rabbitmq:
-  image:
-    tag: 3.10.25
   fullnameOverride: "levoai-rabbitmq"
   persistence:
     enabled: true
