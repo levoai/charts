@@ -1,5 +1,5 @@
 apiVersion: v2
-appVersion: 0.0.13
+appVersion: 0.0.17
 description: The Levo PCAP Sensor
 name: levoai-pcap-sensor
-version: 0.0.13
+version: 0.0.17
