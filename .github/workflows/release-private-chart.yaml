@@ -17,7 +17,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
           token: ${{ secrets.LEVOBOT_TOKEN }}
@@ -30,14 +30,14 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.LEVOBOT_TOKEN }}
 
-      - uses: 'google-github-actions/auth@v1'
+      - uses: 'google-github-actions/auth@v2'
         with:
           credentials_json: ${{ secrets.GCS_SA_KEY }}
 
       - uses: 'google-github-actions/setup-gcloud@v1'
 
       - name: Install Helm
-        uses: azure/setup-helm@v1
+        uses: azure/setup-helm@v3
         with:
           version: v3.4.0
 
@@ -51,7 +51,7 @@ jobs:
           helm pull levoai-private/${{ inputs.name }} --version "${{ inputs.version }}"
 
       - name: Release Chart
-        uses: helm/chart-releaser-action@v1.5.0
+        uses: helm/chart-releaser-action@v1.6.0
         with:
           skip_packaging: true
           skip_existing: true
