@@ -18,6 +18,8 @@ spec:
       labels:
         app: {{ .Chart.Name }}
     spec:
+      securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
       containers:
         - name: {{ .Chart.Name }}
           securityContext:

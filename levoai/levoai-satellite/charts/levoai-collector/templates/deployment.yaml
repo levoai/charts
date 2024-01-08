@@ -24,6 +24,8 @@ spec:
       labels:
         {{- toYaml .Values.podLabels | nindent 8 }}
     spec:
+      securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
       {{- with .Values.volumes }}
       volumes:
         {{- toYaml . | nindent 8 }}

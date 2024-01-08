@@ -1,5 +1,9 @@
 logLevel: INFO
 
+podSecurityContext:
+  runAsNonRoot: true
+  runAsUser: 1001
+
 minReadySeconds: 5
 progressDeadlineSeconds: 120
 replicaCount: 1

@@ -5,3 +5,8 @@ image:
   pullPolicy: IfNotPresent
   # Overrides the image tag whose default is the chart appVersion.
   tag: ""
+
+podSecurityContext:
+  runAsNonRoot: true
+  runAsUser: 1001
+  # fsGroup: 2000
