@@ -26,7 +26,7 @@ spec:
           {{- end }}
           # Overrides docker image's entrypoint.
           command:
-            - /go/src/github.com/levoai/pcap-sensor/bin/levo-pcap-sensor
+            - /levoai/pcap-sensor/bin/init
           args:
             - "apidump"
             {{- if .Values.sensor.config.satelliteUrl }}
