@@ -50,9 +50,11 @@ resources:
    limits:
      cpu: 1
      memory: 2Gi
+     ephemeral-storage: 2Mi
    requests:
      cpu: 200m
      memory: 400Mi
+     ephemeral-storage: 64Ki
 
 podLabels:
   app: levoai-collector
@@ -102,7 +104,11 @@ config:
       levoai_merge:
         timeout: 60s
       batch:
-        timeout: 10s
+        # send_batch_size is the maximum number of spans to be sent in a single batch.
+        # Keep it low so that we don't send too large of a batch to Levo's Satellite.
+        send_batch_size: 20
+        send_batch_max_size: 50
+        timeout: 5s
       memory_limiter:
         check_interval: 1s
         limit_percentage: 60
