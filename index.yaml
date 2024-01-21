@@ -17,6 +17,17 @@ entries:
     urls:
     - https://github.com/levoai/charts/releases/download/api-debugger-0.1.0/api-debugger-0.1.0.tgz
     version: 0.1.0
+  levoai-api-portal:
+  - apiVersion: v2
+    appVersion: 0.1.0
+    created: "2024-01-21T18:36:05.325923925Z"
+    description: Levo.ai API Portal
+    digest: 6c66290967e1743f2ce02ff5e27855c5ff7238196afeaaf6177fabc2f0513302
+    name: levoai-api-portal
+    type: application
+    urls:
+    - https://github.com/levoai/charts/releases/download/levoai-api-portal-0.1.0/levoai-api-portal-0.1.0.tgz
+    version: 0.1.0
   levoai-ebpf-sensor:
   - apiVersion: v2
     appVersion: 0.30.0
@@ -4975,4 +4986,4 @@ entries:
     urls:
     - https://github.com/levoai/charts/releases/download/levoai-satellite-0.2.73/levoai-satellite-0.2.73.tgz
     version: 0.2.73
-generated: "2024-01-16T07:28:46.210529026Z"
+generated: "2024-01-21T18:36:05.326277333Z"
