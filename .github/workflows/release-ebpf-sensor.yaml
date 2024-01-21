@@ -1,4 +1,4 @@
-name: Release Sensor Chart
+name: Release eBPF Sensor Chart
 
 on:
   workflow_dispatch:

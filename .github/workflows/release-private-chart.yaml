@@ -1,6 +1,16 @@
-name: _Release Private Chart to Public Repo
+name: Release Private Chart to Public Repo
 
 on:
+  workflow_dispatch:
+    inputs:
+      name:
+        description: name of the chart (e.g. `levoai/levoai-ebpf-sensor`)
+        required: true
+        type: string
+      version:
+        description: version of the chart (e.g. `0.1.0`)
+        required: false
+        type: string
   workflow_call:
     inputs:
       name:

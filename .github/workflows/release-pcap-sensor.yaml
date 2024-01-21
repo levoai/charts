@@ -1,4 +1,4 @@
-name: Release pcap-sensor Chart
+name: Release PCAP Sensor Chart
 
 on:
   workflow_dispatch:
