@@ -1,0 +1,12 @@
+replicaCount: 1
+
+image:
+  repository: levoai/api-portal
+  pullPolicy: IfNotPresent
+  # Overrides the image tag whose default is the chart appVersion.
+  # tag: ""
+
+levoAuthKey: ""
+levoAppName: ""
+levoEnvName: "staging"
+levoBaseUrl: "https://api.levo.ai"
