@@ -120,6 +120,7 @@ global:
       - "Prometheus/"
       - "Blackbox Exporter/"
   useRabbitmq: true
+  busyboxImage: levoai/busybox
 
 rabbitmq:
   fullnameOverride: "levoai-rabbitmq"

@@ -33,7 +33,7 @@ spec:
       {{- if .Values.global.useRabbitmq }}
       initContainers:
         - name: wait-for-rabbitmq
-          image: levoai/busybox
+          image: {{ .Values.global.busyboxImage }}
           command: [ 'sh', '-c', 'until wget -qO- http://levoai:levoailevoai@levoai-rabbitmq:15672/api/health/checks/local-alarms &> /dev/null; do echo waiting for rabbitmq; sleep 2; done;' ]
       {{- end }}
       containers:
