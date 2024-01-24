@@ -1,5 +1,5 @@
 apiVersion: v2
-appVersion: 0.2.465
+appVersion: 0.2.466
 dependencies:
 - condition: global.useRabbitmq
   name: rabbitmq
@@ -7,10 +7,10 @@ dependencies:
   version: 12.4.2
 - name: satellite
   repository: file://dependencies/satellite
-  version: 0.2.465
+  version: 0.2.466
 - name: tagger
   repository: file://dependencies/tagger
-  version: 0.2.465
+  version: 0.2.466
 - condition: global.levoai_config_override.api_rule_evaluation.enabled
   name: levoai-ion
   repository: file://dependencies/ion
@@ -29,9 +29,9 @@ dependencies:
   version: 2.0.0
 - name: levoai-collector
   repository: '@levoai-private'
-  version: 0.17.3
+  version: 0.17.4
 description: The Levoai Satellite Service, which receives observations from the Sensor/Envoy
   filters et al.
 name: levoai-satellite
 type: application
-version: 0.2.465
+version: 0.2.466
