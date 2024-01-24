@@ -1,6 +1,6 @@
 sensor:
   imageRepo: docker.io/levoai/ebpf_sensor
-  imageTag: 0.30.0
+  imageTag: 0.30.1
   binary:
     - /opt/levo/sbin/levo-ebpf-sensor
   serviceAccount:
@@ -80,7 +80,8 @@ sensor:
     # enable-export-rate-limiting: true
     # max-total-exported-requests-per-second: 200
     # max-per-endpoint-exported-requests-per-second: 20
-    
+    # bpf-rate-limit-window-size: 1000  # Maximum number of events within a fixed window of time
+    # bpf-rate-limit-window-duration-ms: 1000 # Time interval in milli-seconds during which the specified number of events (bpf-rate-limit-window-size) are allowed
     # --------------------------------------------------------------------------------------------
     
     # --------------------------------------------------------------------------------------------
