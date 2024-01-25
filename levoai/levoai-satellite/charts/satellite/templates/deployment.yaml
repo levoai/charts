@@ -44,7 +44,7 @@ spec:
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           args:
             - "-w"
-            - "1"
+            - "4"
             - "-b"
             - "0.0.0.0:{{ .Values.service.port }}"
             - "--worker-tmp-dir"
@@ -52,7 +52,7 @@ spec:
             - "--worker-class"
             - "gevent"
             - "--worker-connections"
-            - "30"
+            - "500"
             - "levoai_e7s.satellite.satellite:create_server()"
           ports:
             - name: http

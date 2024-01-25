@@ -135,6 +135,18 @@ rabbitmq:
     username: levoai
     password: levoailevoai
     erlangCookie: levoaierlangcookie
+  customReadinessProbe:
+    exec:
+      command:
+        - sh
+        - '-ec'
+        - >-
+          curl -f --user $RABBITMQ_USERNAME:$RABBITMQ_PASSWORD 127.0.0.1:15672/api/health/checks/virtual-hosts
+    initialDelaySeconds: 10
+    timeoutSeconds: 20
+    periodSeconds: 30
+    successThreshold: 1
+    failureThreshold: 3
 
 satellite:
   fullnameOverride: "levoai-satellite"
