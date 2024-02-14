@@ -44,7 +44,7 @@ spec:
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           args:
             - "-w"
-            - "4"
+            - "{{ .Values.workers  }}"
             - "-b"
             - "0.0.0.0:{{ .Values.service.port }}"
             - "--worker-tmp-dir"
@@ -52,7 +52,7 @@ spec:
             - "--worker-class"
             - "gevent"
             - "--worker-connections"
-            - "500"
+            - "{{ .Values.workerConnections }}"
             - "levoai_e7s.satellite.satellite:create_server()"
           ports:
             - name: http
@@ -65,10 +65,20 @@ spec:
             httpGet:
               path: /_status
               port: http
+            initialDelaySeconds: 10
+            periodSeconds: 3
+            successThreshold: 1
+            failureThreshold: 3
+            timeoutSeconds: 5
           readinessProbe:
             httpGet:
               path: /_status
               port: http
+            initialDelaySeconds: 10
+            periodSeconds: 5
+            successThreshold: 1
+            failureThreshold: 3
+            timeoutSeconds: 5
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
       {{- with .Values.nodeSelector }}
