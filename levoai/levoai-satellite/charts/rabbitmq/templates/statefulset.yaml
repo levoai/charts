@@ -61,11 +61,11 @@ spec:
       {{- if .Values.hostAliases }}
       hostAliases: {{- include "common.tplvalues.render" (dict "value" .Values.hostAliases "context" $) | nindent 8 }}
       {{- end }}
-      {{- if .Values.nodeSelector }}
-      nodeSelector: {{- include "common.tplvalues.render" (dict "value" .Values.nodeSelector "context" .) | nindent 8 }}
+      {{- if .Values.global.nodeSelector }}
+      nodeSelector: {{- include "common.tplvalues.render" (dict "value" .Values.global.nodeSelector "context" .) | nindent 8 }}
       {{- end }}
-      {{- if .Values.tolerations }}
-      tolerations: {{- include "common.tplvalues.render" (dict "value" .Values.tolerations "context" .) | nindent 8 }}
+      {{- if .Values.global.tolerations }}
+      tolerations: {{- include "common.tplvalues.render" (dict "value" .Values.global.tolerations "context" .) | nindent 8 }}
       {{- end }}
       {{- if .Values.topologySpreadConstraints }}
       topologySpreadConstraints: {{- include "common.tplvalues.render" (dict "value" .Values.topologySpreadConstraints "context" .) | nindent 8 }}
@@ -364,10 +364,10 @@ spec:
               - secret:
                   name: {{ template "rabbitmq.tlsSecretName" . }}
                   items:
-                    {{- if not .Values.auth.tls.overrideCaCertificate }}                  
+                    {{- if not .Values.auth.tls.overrideCaCertificate }}
                     - key: {{ ternary "tls.crt" "ca.crt" .Values.auth.tls.existingSecretFullChain }}
                       path: ca_certificate.pem
-                    {{- end }}                      
+                    {{- end }}
                     - key: tls.crt
                       path: server_certificate.pem
                     - key: tls.key
@@ -391,7 +391,7 @@ spec:
               {{- if or (and (empty .Values.configurationExistingSecret) .Values.configuration) (and (not .Values.advancedConfigurationExistingSecret) .Values.advancedConfiguration) }}
               - secret:
                   name: {{ printf "%s-config" (include "common.names.fullname" .) }}
-              {{- end }}    
+              {{- end }}
               {{- if and .Values.advancedConfigurationExistingSecret (not .Values.advancedConfiguration) }}
               - secret:
                   name: {{ tpl .Values.advancedConfigurationExistingSecret . | quote }}

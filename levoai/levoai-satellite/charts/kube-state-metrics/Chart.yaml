@@ -1,5 +1,0 @@
-apiVersion: v2
-description: kubewatch helper; the open source project https://github.com/kubernetes/kube-state-metrics
-name: kube-state-metrics
-type: application
-version: 2.0.0

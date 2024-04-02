@@ -94,12 +94,6 @@ global:
     cookie_auth_keys: ""
     service_naming:
       strategies: KUBERNETES_METADATA,HOST_HEADER,DEFAULT
-    kube-state-metrics:
-      # url is required -- you must use helm --set
-      # global.levoai_config_override.kube-state-metrics.url=http://kube-state-metrics.kube-system.svc.cluster.local:8080
-      # --set enableKubeStateMetrics=false if you have chosen to install
-      # kube-state-metrics yourself in the namespace `kube-system`:
-      url: http://kube-state-metrics:8080/
     authentication_inspection: false  # defaults to false. if we want to send over auth secrets, we must use helm --set global.levoai_config_override.authentication_inspection=true
     # By default, satellite will log raw traces at debug level. This can be controlled with the following parameter.
     # WARNING: leave this at debug unless you know what you are doing.
@@ -119,6 +113,7 @@ global:
       - "kube-probe/"
       - "Prometheus/"
       - "Blackbox Exporter/"
+  nodeSelector: {}
   useRabbitmq: true
   busyboxImage: levoai/busybox
 
@@ -160,46 +155,3 @@ satellite:
 
 tagger:
   fullnameOverride: "levoai-tagger"
-
-kubewatch:
-  fullnameOverride: "levoai-kubewatch"
-
-
-useNginx: false
-nginx:
-  fullnameOverride: "levoai-nginx"
-  replicaCount: 2
-  # default affinity is perfect, a soft attempt to avoid two nginx on the same node.
-  pdb:
-    create: true
-    minAvailable: 1
-  service:
-    type: ClusterIP
-    port: 9999
-  serverBlock: |-
-    server {
-        listen                8080 default_server deferred;
-        server_name           main;
-        client_max_body_size  20M;
-        keepalive_timeout 5;
-        location / {
-            proxy_redirect off;
-            proxy_pass                          http://levoai-satellite:9999;
-            proxy_set_header                    Host levoai-satellite;
-            proxy_http_version 1.1;
-            proxy_set_header X-Forwarded-Host   $server_name;
-            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-            proxy_set_header X-Forwarded-Proto $scheme;
-            proxy_set_header X-Real-IP          $remote_addr;
-        }
-    }
-
-# TODO(chandler): Do we want metrics for prometheus?
-# https://docs.bitnami.com/kubernetes/infrastructure/nginx/administration/enable-metrics/
-
-enableKubeWatch: false
-# If you enableKubeWatch, it requires kube-state-metrics. If you set this to
-# false, it means that you are already running v2.0.0 (but not v3 or later)
-# yourself, and you must use `helm --set
-# global.levoai_config_override.kube-state-metrics.url=http://....:8080:
-enableKubeStateMetrics: false
