@@ -83,7 +83,7 @@ haproxy:
       timeout server 60s
 
     frontend http-in
-      bind :8080 proto h2
+      bind :8080 alpn h2,http/1.1
       mode http
       default_backend levoai-collector-4317
       use_backend levoai-collector-4318 if { path_beg /v1/traces } || { path_beg /v1/metrics } || { path_beg /v1/logs }
@@ -92,7 +92,7 @@ haproxy:
 
     backend levoai-collector-4317
       mode http
-      server levoai-collector levoai-collector:4317 check proto h2
+      server levoai-collector levoai-collector:4317 proto h2
 
     backend levoai-collector-4318
       mode http
