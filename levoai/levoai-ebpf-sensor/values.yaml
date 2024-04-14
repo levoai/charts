@@ -1,6 +1,6 @@
 sensor:
   imageRepo: docker.io/levoai/ebpf_sensor
-  imageTag: 0.36.0
+  imageTag: 0.37.0
   binary:
     - /opt/levo/sbin/levo-ebpf-sensor
   serviceAccount:
@@ -38,6 +38,7 @@ sensor:
     #http-proxy: "" # Proxy used for HTTP requests
     #https-proxy: "" # Proxy used for HTTPS requests
     #kube-api-rate-limit-time: 30 # Interval between each successful Kube Api call
+    #enable-fetch-sensor-config: true # Enable sensor communication with the backend for fetching config
     # --------------------------------------------------------------------------------------------
     
     
@@ -244,8 +245,7 @@ sensor:
     # The maximum request or response body size the sensor will parse.  Request or response bodies
     # larger than this limit will be ignored by the sensor.
     # max-msg-body-size-bytes: 512000
-    
-    # --------------------------------------------------------------------------------------------
+    # ---------------------------------------------------------------------------------------------
 
 
     # --------------------------------------------------------------------------------------------
