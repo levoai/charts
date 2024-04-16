@@ -1,6 +1,6 @@
 sensor:
   imageRepo: docker.io/levoai/ebpf_sensor
-  imageTag: 0.37.0
+  imageTag: 0.37.2
   binary:
     - /opt/levo/sbin/levo-ebpf-sensor
   serviceAccount:
@@ -103,6 +103,8 @@ sensor:
     # Uncomment and modify appropriately to limit capture to specific process names or IDs.
     # Both monitored-commands and monitored-pids support list of names & IDs respectively.
     # NOTE: monitored-commands and monitored-pids settings are mutually exclusive
+    # Command names will be truncated to 15 characters, since that is the maximum allowed comm size.
+    # https://www.kernel.org/doc/html/latest/filesystems/proc.html#proc-pid-comm-proc-pid-task-tid-comm
     
     #monitored-commands:
     #  - <process command name. Example: nginx>
