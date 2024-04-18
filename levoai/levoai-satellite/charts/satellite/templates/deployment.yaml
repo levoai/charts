@@ -61,6 +61,8 @@ spec:
           envFrom:
           - configMapRef:
               name: "{{ template "satellite.fullname" . }}-env"
+          env:
+            {{- toYaml .Values.env | nindent 12 }}
           livenessProbe:
             httpGet:
               path: /_status

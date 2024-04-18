@@ -142,6 +142,8 @@ rabbitmq:
 
 satellite:
   fullnameOverride: "levoai-satellite"
+  env: []
 
 tagger:
   fullnameOverride: "levoai-tagger"
+  env: []
