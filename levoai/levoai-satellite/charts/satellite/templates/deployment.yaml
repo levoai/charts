@@ -53,6 +53,8 @@ spec:
             - "gevent"
             - "--worker-connections"
             - "{{ .Values.workerConnections }}"
+            - "--timeout"
+            - "{{ .Values.workerTimeout }}"
             - "levoai_e7s.satellite.satellite:create_server()"
           ports:
             - name: http
@@ -67,8 +69,8 @@ spec:
             httpGet:
               path: /_status
               port: http
-            initialDelaySeconds: 10
-            periodSeconds: 3
+            initialDelaySeconds: 30
+            periodSeconds: 10
             successThreshold: 1
             failureThreshold: 3
             timeoutSeconds: 5
@@ -76,8 +78,8 @@ spec:
             httpGet:
               path: /_status
               port: http
-            initialDelaySeconds: 10
-            periodSeconds: 5
+            initialDelaySeconds: 30
+            periodSeconds: 10
             successThreshold: 1
             failureThreshold: 3
             timeoutSeconds: 5

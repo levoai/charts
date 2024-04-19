@@ -79,7 +79,8 @@ tolerations: []
 
 affinity: {}
 
-workers: 1
+workers: 2
 workerConnections: 50
+workerTimeout: 120
 
 env: []
