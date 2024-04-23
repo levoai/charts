@@ -76,9 +76,9 @@ volumes:
           path: levoai-collector-config.yaml
     name: levoai-collector-config-vol
 
-nodeSelector: {}
-
-tolerations: []
+global:
+  nodeSelector: {}
+  tolerations: []
 
 affinity: {}
 
