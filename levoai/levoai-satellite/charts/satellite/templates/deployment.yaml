@@ -50,7 +50,7 @@ spec:
             - "--worker-tmp-dir"
             - "/dev/shm"
             - "--worker-class"
-            - "gevent"
+            - "uvicorn.workers.UvicornWorker"
             - "--worker-connections"
             - "{{ .Values.workerConnections }}"
             - "--timeout"
