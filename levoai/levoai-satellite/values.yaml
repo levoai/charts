@@ -33,23 +33,14 @@ global:
     pi_detector_data_dir: "/opt/levoai/datasets/"
   levoai_config_override:
     rabbitmq:
-      host: levoai-rabbitmq:5671
+      host: levoai-rabbitmq
+      use_ssl: false
     # onprem-api: {}  # refresh-token is required -- you must use helm --set global.levoai_config_override.onprem-api.refresh-token=T where T is a Levo.ai refresh token
-    tagger_batch_interval_minutes: 5  # run tagger batch every min by default
     tagger_ignore_seen_flows: true
-    url_clusterer_id_len: 1 # consider a number as pathparam based on this length.
-    min_urls_required_per_pattern: 10
-    cookie_auth_keys: ""
-    service_naming:
-      strategies: KUBERNETES_METADATA,HOST_HEADER,DEFAULT
     authentication_inspection: false  # defaults to false. if we want to send over auth secrets, we must use helm --set global.levoai_config_override.authentication_inspection=true
     # By default, satellite will log raw traces at debug level. This can be controlled with the following parameter.
     # WARNING: leave this at debug unless you know what you are doing.
     traces_log_level: DEBUG
-    sample_collection:
-      # Sample collection is disabled by default so rest of the values of this section are ignored.
-      enabled: false
-      max_samples_per_end_point: 2
     api_rule_evaluation:
       enabled: true
     ion:
@@ -126,7 +117,7 @@ rabbitmq:
       sslOptionsVerify: "verify_none"
       failIfNoPeerCert: false
   service:
-    portEnabled: false
+    portEnabled: true
   customReadinessProbe:
     exec:
       command:
