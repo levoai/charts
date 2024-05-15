@@ -53,6 +53,8 @@ spec:
           args:
             - "--host-proc-path"
             - "/host/proc"
+            - "--levo-env"
+            - {{ .Values.sensor.levoEnv }}
           securityContext:
             privileged: true
           volumeMounts:
