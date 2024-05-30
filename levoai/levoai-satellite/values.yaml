@@ -79,7 +79,7 @@ haproxy:
       default_backend levoai-collector-4317
       use_backend levoai-collector-4318 if { path_beg /v1/traces } || { path_beg /v1/metrics } || { path_beg /v1/logs }
       use_backend levoai-collector-4320 if { path_beg /v1/cloudfront-event }
-      use_backend levoai-satellite-9999 if { path_beg /1.0/ebpf/traces } || { path_beg /1.0/suricata } || { path_beg /1.0/har } || { path_beg /tracer-config } || { path_beg /sensor-config }
+      use_backend levoai-satellite-9999 if { path_beg /1.0/ebpf/traces } || { path_beg /1.0/suricata } || { path_beg /1.0/har } || { path_beg /tracer-config } || { path_beg /sensor-config } || { path_beg /sensor-btf }
 
     backend levoai-collector-4317
       mode http
