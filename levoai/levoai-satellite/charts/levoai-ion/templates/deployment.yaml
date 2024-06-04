@@ -1,22 +1,28 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ .Chart.Name }}
+  name: levoai-ion
   labels:
-    app: {{ .Chart.Name }}
+    app: levoai-ion
     release: {{ .Release.Name }}
 spec:
+{{- if not .Values.autoscaling.enabled }}
+  replicas: {{ .Values.replicaCount }}
+{{- end }}
   selector:
     matchLabels:
-      app: {{ .Chart.Name }}
+      app: levoai-ion
   template:
     metadata:
-      {{- with .Values.podAnnotations }}
+    {{- /*
+    # https://helm.sh/docs/howto/charts_tips_and_tricks/#automatically-roll-deployments
+    */}}
+    {{- with deepCopy .Values.podAnnotations | mustMerge (dict "checksum/config" (include (print $.Template.BasePath "/configmap-env.yaml") . | toString | sha256sum)) }}
       annotations:
         {{- toYaml . | nindent 8 }}
-      {{- end }}
+    {{- end }}
       labels:
-        app: {{ .Chart.Name }}
+        app: levoai-ion
     spec:
       {{- with .Values.imagePullSecrets }}
       imagePullSecrets:
@@ -24,16 +30,36 @@ spec:
       {{- end }}
       securityContext:
         {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      initContainers:
+        - name: wait-for-rabbitmq
+          image: {{ .Values.global.busyboxImage }}
+          command: [ 'sh', '-c', 'until wget -qO- http://levoai:levoailevoai@levoai-rabbitmq:15672/api/health/checks/virtual-hosts &> /dev/null; do echo waiting for rabbitmq; sleep 2; done;' ]
       containers:
-        - name: {{ .Chart.Name }}
+        - name: levoai-ion
           securityContext:
             {{- toYaml .Values.securityContext | nindent 12 }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
-          ports:
-            - name: http
-              containerPort: 8000
-              protocol: TCP
+          command:
+              - python
+              - "-OO"
+              - /opt/levoai/e7s/src/python/levoai_ion/ion_server.py
+          {{- if .Values.livenessProbeEnabled }}
+          livenessProbe:
+            exec:
+              command:
+                - /opt/levoai/common-public/src/python/levoai_common_public/monitoring/test_health_file.sh
+            initialDelaySeconds: 30
+            periodSeconds: 125
+            timeoutSeconds: 1
+            successThreshold: 1
+            failureThreshold: 50
+          {{- end }}
+          envFrom:
+          - configMapRef:
+              name: levoai-ion-env
+          env:
+            {{- toYaml .Values.env | nindent 12 }}
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
       {{- with .Values.global.nodeSelector }}
