@@ -17,7 +17,7 @@ spec:
     {{- /*
     # https://helm.sh/docs/howto/charts_tips_and_tricks/#automatically-roll-deployments
     */}}
-    {{- with deepCopy .Values.podAnnotations | mustMerge (dict "checksum/config" (include (print $.Template.BasePath "/configmap-env.yaml") . | toString | sha256sum)) }}
+    {{- with deepCopy .Values.global.podAnnotations | mustMerge (dict "checksum/config" (include (print $.Template.BasePath "/configmap-env.yaml") . | toString | sha256sum)) }}
       annotations:
         {{- toYaml . | nindent 8 }}
     {{- end }}

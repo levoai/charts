@@ -79,6 +79,7 @@ volumes:
 global:
   nodeSelector: {}
   tolerations: []
+  podAnnotations: {}
 
 affinity: {}
 

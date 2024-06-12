@@ -52,6 +52,7 @@ global:
       - "Blackbox Exporter/"
   nodeSelector: {}
   tolerations: []
+  podAnnotations: {}
   useRabbitmq: true
   busyboxImage: levoai/busybox
 

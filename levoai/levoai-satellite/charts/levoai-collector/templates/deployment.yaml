@@ -21,6 +21,9 @@ spec:
       annotations:
         # https://helm.sh/docs/howto/charts_tips_and_tricks/#automatically-roll-deployments
         checksum/config: {{ .Values.config | toString | sha256sum }}
+        {{- if .Values.global.podAnnotations }}
+          {{- toYaml .Values.global.podAnnotations | nindent 8 }}
+        {{- end }}
       labels:
         {{- toYaml .Values.podLabels | nindent 8 }}
     spec:
