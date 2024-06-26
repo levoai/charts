@@ -6073,4 +6073,15 @@ entries:
     urls:
     - https://github.com/levoai/charts/releases/download/levoai-satellite-0.2.73/levoai-satellite-0.2.73.tgz
     version: 0.2.73
-generated: "2024-06-17T08:37:24.520682857Z"
+  testrunner:
+  - apiVersion: v2
+    appVersion: 2.0.3
+    created: "2024-06-26T14:51:45.107737736Z"
+    description: A Helm chart for Kubernetes
+    digest: 20a338363e6077b93f7de39c0dbcc34fd50e84fcae2bdb7be642332af244cfaa
+    name: testrunner
+    type: application
+    urls:
+    - https://github.com/levoai/charts/releases/download/testrunner-2.0.3/testrunner-2.0.3.tgz
+    version: 2.0.3
+generated: "2024-06-26T14:51:45.108286083Z"
