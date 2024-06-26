@@ -1,0 +1,17 @@
+name: Release Testrunner Chart
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: Private Chart Version
+        required: false
+        type: string
+
+jobs:
+  release:
+    uses: ./.github/workflows/release-private-chart.yaml
+    with:
+      name: testrunner
+      version: ${{ inputs.version }}
+    secrets: inherit
