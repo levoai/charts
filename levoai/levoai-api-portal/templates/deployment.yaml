@@ -41,6 +41,8 @@ spec:
             value: {{ .Values.levoAppName }}
           - name: ENV_NAME
             value: {{ default "staging" .Values.levoEnvName }}
+          - name: LEVO_ORG_ID
+            value: {{ .Values.levoOrgId }}
       {{- with .Values.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}
