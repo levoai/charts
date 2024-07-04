@@ -27,7 +27,7 @@ spec:
       labels:
         {{- toYaml .Values.podLabels | nindent 8 }}
     spec:
-      {{- with .Values.imagePullSecrets }}
+      {{- with (default .Values.image.pullSecrets .Values.global.imagePullSecrets) }}
       imagePullSecrets:
         {{- toYaml . | nindent 8 }}
       {{- end }}
@@ -51,8 +51,8 @@ spec:
       {{- end }}
       containers:
         - name: {{ .Chart.Name }}
-          image: "{{ .Values.image }}:{{ default .Chart.AppVersion .Values.imageTag }}"
-          imagePullPolicy: {{ .Values.imagePullPolicy }}
+          image: "{{ default .Values.image.registry .Values.global.imageRegistry }}/{{ .Values.image.repository }}:{{ default .Chart.AppVersion .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
           command:
             - "/usr/local/bin/levoai/collector"
             - "--config=/conf/levoai-collector-config.yaml"

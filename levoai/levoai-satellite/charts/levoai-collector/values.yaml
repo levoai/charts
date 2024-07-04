@@ -9,8 +9,13 @@ progressDeadlineSeconds: 120
 replicaCount: 1
 maxUnavailable: 0
 
-image: levoai/collector
-imagePullPolicy: IfNotPresent
+image:
+  registry: docker.io
+  repository: levoai/collector
+  pullPolicy: IfNotPresent
+  pullSecrets: []
+  # Overrides the image tag whose default is the chart appVersion.
+  tag: ""
 
 env:
   - name: GOGC
@@ -21,6 +26,10 @@ containerPorts:
     containerPort: 4317
   - name: http-otel
     containerPort: 4318
+  - name: http-cloudfront
+    containerPort: 4320
+  - name: http-apigateway
+    containerPort: 4321
   - name: http-health
     containerPort: 13133
 
@@ -34,6 +43,14 @@ service:
   - name: http-otlp
     port: 4318
     targetPort: 4318
+    protocol: TCP
+  - name: http-cloudfront
+    port: 4320
+    targetPort: 4320
+    protocol: TCP
+  - name: http-apigateway
+    port: 4321
+    targetPort: 4321
     protocol: TCP
 
 livenessProbe:
@@ -77,6 +94,8 @@ volumes:
     name: levoai-collector-config-vol
 
 global:
+  imageRegistry: ""
+  imagePullSecrets: []
   nodeSelector: {}
   tolerations: []
   podAnnotations: {}
