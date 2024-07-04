@@ -2,17 +2,19 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: testrunner
+  labels:
+    app: testrunner
 spec:
   {{- if not .Values.autoscaling.enabled }}
   replicas: {{ .Values.replicaCount }}
   {{- end }}
   selector:
     matchLabels:
-      app.kubernetes.io/version: {{ .Chart.AppVersion | quote }}
+      app: testrunner
   template:
     metadata:
       labels:
-        app.kubernetes.io/version: {{ .Chart.AppVersion | quote }}
+        app: testrunner
     spec:
       {{- with .Values.imagePullSecrets }}
       imagePullSecrets:
@@ -36,17 +38,13 @@ spec:
               [
                "start",
                "--key",
-               "{{ .Values.refreshToken }}",
+               "{{ .Values.key }}",
                "--organization",
                "{{ .Values.orgId }}"
               ]
           workingDir: /home/levo/work
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
-      # volumes:
-      #   - name: configstore
-      #     hostPath:
-      #       path: {{ .Values.configstorePath }}
       {{- with .Values.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}
