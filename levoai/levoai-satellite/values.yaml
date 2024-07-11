@@ -22,6 +22,8 @@ autoscaling:
 affinity: {}
 
 global:
+  imageRegistry: ""
+  imagePullSecrets: []
   serviceAnnotations: {}
   virtualService:
     enabled: false
@@ -75,6 +77,7 @@ haproxy:
     frontend http-in
       bind :8080 alpn h2,http/1.1
       mode http
+      monitor-uri /healthz
       default_backend levoai-collector-4317
       use_backend levoai-collector-4318 if { path_beg /v1/traces } || { path_beg /v1/metrics } || { path_beg /v1/logs }
       use_backend levoai-collector-4320 if { path_beg /v1/cloudfront-event }

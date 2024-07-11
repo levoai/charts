@@ -23,7 +23,7 @@ spec:
       labels:
         {{- include "tagger.selectorLabels" . | nindent 8 }}
     spec:
-      {{- with .Values.imagePullSecrets }}
+      {{- with (default .Values.image.pullSecrets .Values.global.imagePullSecrets) }}
       imagePullSecrets:
         {{- toYaml . | nindent 8 }}
       {{- end }}
@@ -33,14 +33,14 @@ spec:
       {{- if .Values.global.useRabbitmq }}
       initContainers:
         - name: wait-for-rabbitmq
-          image: {{ .Values.global.busyboxImage }}
+          image: {{ default .Values.image.registry .Values.global.imageRegistry }}/{{ .Values.global.busyboxImage }}
           command: [ 'sh', '-c', 'until wget -qO- http://levoai:levoailevoai@levoai-rabbitmq:15672/api/health/checks/virtual-hosts &> /dev/null; do echo waiting for rabbitmq; sleep 2; done;' ]
       {{- end }}
       containers:
         - name: {{ .Chart.Name }}
           securityContext:
             {{- toYaml .Values.securityContext | nindent 12 }}
-          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          image: "{{ default .Values.image.registry .Values.global.imageRegistry }}/{{ .Values.image.repository }}:{{ default .Chart.AppVersion .Values.image.tag }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           command:
               - python

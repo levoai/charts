@@ -1,8 +1,14 @@
 replicaCount: 1
 
+global:
+  imageRegistry: ""
+  imagePullSecrets: []
+
 image:
+  registry: docker.io
   repository: levoai/satellite
   pullPolicy: IfNotPresent
+  pullSecrets: []
   # Overrides the image tag whose default is the chart appVersion.
   tag: ""
 

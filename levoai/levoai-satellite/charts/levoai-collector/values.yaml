@@ -134,8 +134,10 @@ config:
         spike_limit_percentage: 20
 
     exporters:
-      logging:
-        verbosity: normal
+      debug:
+        verbosity: basic  # detailed, normal, basic
+        # sampling_initial: 2  # number of messages initially logged each second
+        # sampling_thereafter: 1  # sampling rate after the initial messages are logged, 1 means log every message
       levoai_satellite:
         endpoint: http://levoai-satellite:9999
         # Python Flask server in Levo's Satellite doesn't support gzip so don't enable any compression here.
@@ -149,13 +151,13 @@ config:
         traces:
           receivers: [otlp]
           processors: [memory_limiter, levoai_merge, batch]
-          exporters: [logging, levoai_satellite]
+          exporters: [debug, levoai_satellite]
         metrics:
           receivers: [otlp]
           processors: [memory_limiter, batch]
-          exporters: [logging, otlphttp]
+          exporters: [debug, otlphttp]
         logs:
           receivers: [otlp]
           processors: [memory_limiter, batch]
-          exporters: [logging]
+          exporters: [debug]
       extensions: [health_check, memory_ballast]
