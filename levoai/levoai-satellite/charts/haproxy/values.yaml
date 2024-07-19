@@ -342,7 +342,7 @@ startupProbe:
 ## @param livenessProbe.successThreshold Success threshold for livenessProbe
 ##
 livenessProbe:
-  enabled: true
+  enabled: false
   failureThreshold: 5
   initialDelaySeconds: 15
   periodSeconds: 10
@@ -356,7 +356,7 @@ livenessProbe:
 ## @param readinessProbe.successThreshold Success threshold for readinessProbe
 ##
 readinessProbe:
-  enabled: true
+  enabled: false
   failureThreshold: 5
   initialDelaySeconds: 15
   periodSeconds: 10
@@ -367,10 +367,20 @@ readinessProbe:
 customStartupProbe: {}
 ## @param customLivenessProbe Custom livenessProbe that overrides the default one
 ##
-customLivenessProbe: {}
+customLivenessProbe:
+  httpGet:
+    path: /healthz
+    port: 8080
+  initialDelaySeconds: 3
+  periodSeconds: 3
 ## @param customReadinessProbe Custom readinessProbe that overrides the default one
 ##
-customReadinessProbe: {}
+customReadinessProbe:
+  httpGet:
+    path: /healthz
+    port: 8080
+  initialDelaySeconds: 3
+  periodSeconds: 3
 ## haproxy resource requests and limits
 ## ref: https://kubernetes.io/docs/concepts/configuration/manage-compute-resources-container/
 ## @param resourcesPreset Set container resources according to one common preset (allowed values: none, nano, micro, small, medium, large, xlarge, 2xlarge). This is ignored if resources is set (resources is recommended for production).

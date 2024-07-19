@@ -1,16 +1,15 @@
 replicaCount: 1
-
 resources: {}
-  # We usually recommend not to specify default resources and to leave this as a conscious
-  # choice for the user. This also increases chances charts run on environments with little
-  # resources, such as Minikube. If you do want to specify resources, uncomment the following
-  # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
-  # limits:
-  #   cpu: 100m
-  #   memory: 128Mi
-  # requests:
-  #   cpu: 100m
-  #   memory: 128Mi
+# We usually recommend not to specify default resources and to leave this as a conscious
+# choice for the user. This also increases chances charts run on environments with little
+# resources, such as Minikube. If you do want to specify resources, uncomment the following
+# lines, adjust them as necessary, and remove the curly braces after 'resources:'.
+# limits:
+#   cpu: 100m
+#   memory: 128Mi
+# requests:
+#   cpu: 100m
+#   memory: 128Mi
 
 autoscaling:
   enabled: false
@@ -18,9 +17,7 @@ autoscaling:
   maxReplicas: 100
   targetCPUUtilizationPercentage: 80
   # targetMemoryUtilizationPercentage: 80
-
 affinity: {}
-
 global:
   imageRegistry: ""
   imagePullSecrets: []
@@ -39,7 +36,7 @@ global:
       use_ssl: false
     # onprem-api: {}  # refresh-token is required -- you must use helm --set global.levoai_config_override.onprem-api.refresh-token=T where T is a Levo.ai refresh token
     tagger_ignore_seen_flows: true
-    authentication_inspection: false  # defaults to false. if we want to send over auth secrets, we must use helm --set global.levoai_config_override.authentication_inspection=true
+    authentication_inspection: false # defaults to false. if we want to send over auth secrets, we must use helm --set global.levoai_config_override.authentication_inspection=true
     # By default, satellite will log raw traces at debug level. This can be controlled with the following parameter.
     # WARNING: leave this at debug unless you know what you are doing.
     traces_log_level: DEBUG
@@ -57,49 +54,14 @@ global:
   podAnnotations: {}
   useRabbitmq: true
   busyboxImage: levoai/busybox
-
 haproxy:
   enabled: true
   fullnameOverride: "levoai-haproxy"
+  image:
+    repository: levoai/haproxy
+    tag: 0.1.0
   service:
     type: ClusterIP # Change to LoadBalancer to expose it
-  configuration: |
-    global
-      log stdout format raw local0
-      maxconn 1024
-
-    defaults
-      log global
-      timeout client 60s
-      timeout connect 60s
-      timeout server 60s
-
-    frontend http-in
-      bind :8080 alpn h2,http/1.1
-      mode http
-      monitor-uri /healthz
-      default_backend levoai-collector-4317
-      use_backend levoai-collector-4318 if { path_beg /v1/traces } || { path_beg /v1/metrics } || { path_beg /v1/logs }
-      use_backend levoai-collector-4320 if { path_beg /v1/cloudfront-event }
-      use_backend levoai-satellite-9999 if { path_beg /1.0/ebpf/traces } || { path_beg /1.0/suricata } || { path_beg /1.0/har } || { path_beg /tracer-config } || { path_beg /sensor-config } || { path_beg /sensor-btf }
-
-    backend levoai-collector-4317
-      mode http
-      server levoai-collector levoai-collector:4317 proto h2
-
-    backend levoai-collector-4318
-      mode http
-      server levoai-collector levoai-collector:4318
-
-    backend levoai-collector-4320
-      mode http
-      server levoai-collector levoai-collector:4320
-
-    backend levoai-satellite-9999
-      mode http
-      server levoai-satellite levoai-satellite:9999
-
-
 rabbitmq:
   fullnameOverride: "levoai-rabbitmq"
   persistence:
@@ -132,11 +94,9 @@ rabbitmq:
     periodSeconds: 30
     successThreshold: 1
     failureThreshold: 3
-
 satellite:
   fullnameOverride: "levoai-satellite"
   env: []
-
 tagger:
   fullnameOverride: "levoai-tagger"
   env: []
