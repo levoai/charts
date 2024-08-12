@@ -58,6 +58,8 @@ spec:
             - "/host/proc"
             - "--levo-env"
             - {{ .Values.sensor.levoEnv }}
+            - "--satellite-url"
+            - {{ .Values.sensor.satelliteUrl }}
           securityContext:
             privileged: true
           volumeMounts:

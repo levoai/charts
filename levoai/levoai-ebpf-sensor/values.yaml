@@ -1,6 +1,6 @@
 sensor:
   imageRepo: docker.io/levoai/ebpf_sensor
-  imageTag: 0.43.3
+  imageTag: 0.43.6
   binary:
     - /opt/levo/sbin/levo-ebpf-sensor
   serviceAccount:
@@ -63,8 +63,6 @@ sensor:
     # Use HTTP/2 (gRPC) for communication with the collector. If this is disabled, HTTP/1.1 will be used.
     collector-grpc-transport: true
     
-    # URL for the satellite receiving the Sensor's API traces and metrics.
-    satellite-url: levoai-haproxy
     # --------------------------------------------------------------------------------------------
     
     # --------------------------------------------------------------------------------------------
@@ -326,6 +324,7 @@ sensor:
             name: .*
     # --------------------------------------------------------------------------------------------
   levoEnv: "staging"
+  satelliteUrl: "levoai-haproxy"
   env:
     - name: MALLOC_CONF
       value: "background_thread:true,narenas:1,tcache:false,dirty_decay_ms:0,muzzy_decay_ms:0,abort_conf:true"
