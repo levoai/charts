@@ -17,6 +17,9 @@ spec:
       {{- if .Values.sensor.tolerations }}
       tolerations: {{- toYaml .Values.sensor.tolerations | nindent 8 }}
       {{- end }}
+      {{- if .Values.sensor.affinity }}
+      affinity: {{- toYaml .Values.sensor.affinity | nindent 8 }}
+      {{- end }}
       {{- if .Values.sensor.nodeSelector }}
       nodeSelector: {{- toYaml .Values.sensor.nodeSelector | nindent 8 }}
       {{- end }}
