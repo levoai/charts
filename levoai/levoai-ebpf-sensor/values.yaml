@@ -1,6 +1,6 @@
 sensor:
   imageRepo: docker.io/levoai/ebpf_sensor
-  imageTag: 0.43.6
+  imageTag: 0.43.7
   binary:
     - /opt/levo/sbin/levo-ebpf-sensor
   serviceAccount:
@@ -10,42 +10,43 @@ sensor:
     annotations: {}
     # The name of the service account to use (mandatory).
     name: "levoai-ebpf-sensor"
-  # Kubernetes pod spec affinity section
+
+  #  Kubernetes pod spec affinity section
   #
-  # https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/
+  #  https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/
   #
-  # Example:
+  #  Example:
   #
-  # affinity:
-  #   nodeAffinity:
-  #     requiredDuringSchedulingIgnoredDuringExecution:
-  #       nodeSelectorTerms:
-  #       - matchExpressions:
-  #         - key: kubernetes.io/e2e-az-name
-  #           operator: In
-  #           values:
-  #           - e2e-az1
-  #           - e2e-az2
-  #   podAffinity:
-  #     requiredDuringSchedulingIgnoredDuringExecution:
-  #     - labelSelector:
-  #         matchExpressions:
-  #         - key: security
-  #           operator: In
-  #           values:
-  #           - S1
-  #       topologyKey: failure-domain.beta.kubernetes.io/zone
-  #   podAntiAffinity:
-  #     preferredDuringSchedulingIgnoredDuringExecution:
-  #     - weight: 100
-  #       podAffinityTerm:
-  #         labelSelector:
-  #           matchExpressions:
-  #           - key: security
-  #             operator: In
-  #             values:
-  #             - S1
-  #         topologyKey: failure-domain.beta.kubernetes.io/zone
+  #  affinity:
+  #    nodeAffinity:
+  #      requiredDuringSchedulingIgnoredDuringExecution:
+  #        nodeSelectorTerms:
+  #        - matchExpressions:
+  #          - key: kubernetes.io/e2e-az-name
+  #            operator: In
+  #            values:
+  #            - e2e-az1
+  #            - e2e-az2
+  #    podAffinity:
+  #      requiredDuringSchedulingIgnoredDuringExecution:
+  #      - labelSelector:
+  #          matchExpressions:
+  #          - key: security
+  #            operator: In
+  #            values:
+  #            - S1
+  #        topologyKey: failure-domain.beta.kubernetes.io/zone
+  #    podAntiAffinity:
+  #      preferredDuringSchedulingIgnoredDuringExecution:
+  #      - weight: 100
+  #        podAffinityTerm:
+  #          labelSelector:
+  #            matchExpressions:
+  #            - key: security
+  #              operator: In
+  #              values:
+  #               - S1
+  #           topologyKey: failure-domain.beta.kubernetes.io/zone
   #
   affinity: {}
   tolerations:
