@@ -36,13 +36,17 @@ spec:
           - name: LEVO_BASE_URL
             value: {{ default "https://api.levo.ai" .Values.levoBaseUrl }}
           - name: REFRESH_TOKEN
-            value: {{ .Values.levoAuthKey }}
-          - name: APP_NAME
-            value: {{ .Values.levoAppName }}
-          - name: ENV_NAME
-            value: {{ default "staging" .Values.levoEnvName }}
+            value: "{{ .Values.levoAuthKey }}"
           - name: LEVO_ORG_ID
-            value: {{ .Values.levoOrgId }}
+            value: "{{ .Values.levoOrgId }}"
+          - name: ALLOWED_ORIGINS
+            value: "{{ .Values.allowedOrigins }}"
+          readinessProbe:
+            failureThreshold: 30
+            httpGet:
+              path: /
+              port: 80
+              scheme: HTTP
       {{- with .Values.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}
