@@ -1,20 +1,20 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: testrunner
+  name: {{ include "testrunner.name" . }}
   labels:
-    app: testrunner
+    app: {{ include "testrunner.name" . }}
 spec:
   {{- if not .Values.autoscaling.enabled }}
   replicas: {{ .Values.replicaCount }}
   {{- end }}
   selector:
     matchLabels:
-      app: testrunner
+      app: {{ include "testrunner.name" . }}
   template:
     metadata:
       labels:
-        app: testrunner
+        app: {{ include "testrunner.name" . }}
     spec:
       {{- with .Values.imagePullSecrets }}
       imagePullSecrets:
@@ -40,7 +40,11 @@ spec:
                "--key",
                "{{ .Values.key }}",
                "--organization",
-               "{{ .Values.orgId }}"
+               "{{ .Values.orgId }}",
+               {{- if .Values.scheduled }}
+               "--scheduled",
+               "{{ .Values.scheduled }}"
+               {{- end }}
               ]
           workingDir: /home/levo/work
           resources:

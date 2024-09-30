@@ -11,6 +11,7 @@ imagePullSecrets: []
 levoBaseUrl: "https://api.levo.ai"
 key: ""
 orgId: ""
+scheduled: False
 localUserId: "1000" # Replace with your actual user ID
 localGroupId: "1000" # Replace with your actual group ID
 configstorePath: "/home/levo/.config/configstore"
