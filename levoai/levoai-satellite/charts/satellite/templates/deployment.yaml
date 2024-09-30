@@ -42,6 +42,15 @@ spec:
             {{- toYaml .Values.securityContext | nindent 12 }}
           image: "{{ default .Values.image.registry .Values.global.imageRegistry }}/{{ .Values.image.repository }}:{{ default .Chart.AppVersion .Values.image.tag }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
+          {{- if .Values.otel.enabled }}
+          command:
+            - "opentelemetry-instrument"
+            - "gunicorn"
+            - "--capture-output"
+            - "--enable-stdio-inheritance"
+            - "-c" 
+            - "/opt/levoai/common-public/src/python/levoai_common_public/gun.conf.py"
+          {{end}}
           args:
             - "-w"
             - "{{ .Values.workers  }}"
@@ -64,7 +73,15 @@ spec:
           - configMapRef:
               name: "{{ template "satellite.fullname" . }}-env"
           env:
-            {{- toYaml .Values.env | nindent 12 }}
+            {{- if .Values.env }}
+              {{- toYaml .Values.env | nindent 12 }}
+            {{- end }}
+            {{- if .Values.otel.enabled }}
+              {{- range $key, $value := .Values.otel.env }}
+            - name: {{ $key }}
+              value: {{ $value | quote }}
+              {{- end }}
+            {{- end }}
           livenessProbe:
             httpGet:
               path: /_status

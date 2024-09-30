@@ -25,3 +25,14 @@ autoscaling:
   maxReplicas: 100
   targetCPUUtilizationPercentage: 80
   # targetMemoryUtilizationPercentage: 80
+
+otel:
+  enabled: false
+  env:
+    OTEL_EXPORTER_OTLP_ENDPOINT: http://signoz-otel-collector.signoz:4317
+    OTEL_RESOURCE_ATTRIBUTES: deployment.environment=dev
+    OTEL_SERVICE_NAME: Ion
+    OTEL_METRICS_EXPORTER: otlp
+    OTEL_TRACES_EXPORTER: otlp
+    OTEL_LOGS_EXPORTER: otlp
+    OTEL_EXPORTER_OTLP_PROTOCOL: grpc

@@ -43,9 +43,12 @@ spec:
           image: "{{ default .Values.image.registry .Values.global.imageRegistry }}/{{ .Values.image.repository }}:{{ default .Chart.AppVersion .Values.image.tag }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           command:
-              - python
-              - "-OO"
-              - /opt/levoai/e7s/src/python/levoai_e7s/tag_server.py
+          {{- if .Values.otel.enabled }}
+            - opentelemetry-instrument
+          {{- end}}
+            - python
+            - "-OO"
+            - /opt/levoai/e7s/src/python/levoai_e7s/tag_server.py
           {{- if .Values.livenessProbeEnabled }}
           livenessProbe:
             exec:
@@ -61,7 +64,15 @@ spec:
           - configMapRef:
               name: "{{ template "tagger.fullname" . }}-env"
           env:
-            {{- toYaml .Values.env | nindent 12 }}
+            {{- if .Values.env }}
+              {{- toYaml .Values.env | nindent 12 }}
+            {{- end }}
+            {{- if .Values.otel.enabled }}
+              {{- range $key, $value := .Values.otel.env }}
+            - name: {{ $key }}
+              value: {{ $value | quote }}
+              {{- end }}
+            {{- end }}
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
       {{- with .Values.global.nodeSelector }}

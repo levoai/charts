@@ -90,3 +90,13 @@ workerConnections: 50
 workerTimeout: 120
 
 env: []
+otel:
+  enabled: false
+  env:
+    OTEL_EXPORTER_OTLP_ENDPOINT: http://signoz-otel-collector.signoz:4317
+    OTEL_RESOURCE_ATTRIBUTES: deployment.environment=dev
+    OTEL_SERVICE_NAME: Satellite
+    OTEL_METRICS_EXPORTER: otlp
+    OTEL_TRACES_EXPORTER: otlp
+    OTEL_LOGS_EXPORTER: otlp
+    OTEL_EXPORTER_OTLP_PROTOCOL: grpc
