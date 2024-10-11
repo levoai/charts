@@ -95,6 +95,10 @@ spec:
           args: {{- include "common.tplvalues.render" (dict "value" .Values.args "context" $) | nindent 12 }}
           {{- end }}
           env:
+            - name: LEVOAI_ORG_ID
+              value: {{ index .Values "global" "levoai_config_override" "onprem-api" "org-id" | default "" }}
+            - name: LEVOAI_SATELLITE_AUTHN_ENABLED
+              value: {{ .Values.satelliteAuthnEnabled | quote }}
             {{- if .Values.extraEnvVars }}
             {{- include "common.tplvalues.render" (dict "value" .Values.extraEnvVars "context" $) | nindent 12 }}
             {{- end }}
@@ -166,6 +170,8 @@ spec:
             - name: empty-dir
               mountPath: /tmp
               subPath: tmp-dir
+            - name: levo
+              mountPath: /levo
           {{- if .Values.extraVolumeMounts }}
           {{- include "common.tplvalues.render" (dict "value" .Values.extraVolumeMounts "context" $) | nindent 12 }}
           {{- end }}
@@ -178,6 +184,8 @@ spec:
         - name: haproxy-conf
           configMap:
             name: {{ include "haproxy.configMapName"  . }}
+        - name: levo
+          emptyDir: {}
         {{- if .Values.extraVolumes }}
         {{- include "common.tplvalues.render" (dict "value" .Values.extraVolumes "context" $) | nindent 8 }}
         {{- end }}

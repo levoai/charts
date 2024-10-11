@@ -34,7 +34,9 @@ global:
     rabbitmq:
       host: levoai-rabbitmq
       use_ssl: false
-    # onprem-api: {}  # refresh-token is required -- you must use helm --set global.levoai_config_override.onprem-api.refresh-token=T where T is a Levo.ai refresh token
+    onprem-api:
+      refresh-token: "" # refresh-token is required -- you must use helm --set global.levoai_config_override.onprem-api.refresh-token=T where T is a Levo.ai refresh token
+      org-id: "" # org-id is required -- you must use helm --set global.levoai_config_override.onprem-api.org-id=O where O is a Levo.ai organization ID
     tagger_ignore_seen_flows: true
     authentication_inspection: false # defaults to false. if we want to send over auth secrets, we must use helm --set global.levoai_config_override.authentication_inspection=true
     # By default, satellite will log raw traces at debug level. This can be controlled with the following parameter.
@@ -59,9 +61,10 @@ haproxy:
   fullnameOverride: "levoai-haproxy"
   image:
     repository: levoai/haproxy
-    tag: 0.1.0
+    tag: 0.2.0
   service:
     type: ClusterIP # Change to LoadBalancer to expose it
+  satelliteAuthnEnabled: false
 rabbitmq:
   fullnameOverride: "levoai-rabbitmq"
   persistence:
