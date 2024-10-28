@@ -63,6 +63,8 @@ spec:
             - {{ .Values.sensor.levoEnv }}
             - "--satellite-url"
             - {{ .Values.sensor.satelliteUrl }}
+            - "--organization-id"
+            - {{ default "" .Values.sensor.orgId }}
           securityContext:
             privileged: true
           volumeMounts:
