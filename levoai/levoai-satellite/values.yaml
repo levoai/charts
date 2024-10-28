@@ -73,7 +73,12 @@ rabbitmq:
   extraConfiguration: |-
     heartbeat = 600
     disk_free_limit.absolute = 500MB
-    consumer_timeout = 600000
+    tcp_listen_options.keepalive = true
+    tcp_listen_options.nodelay = true
+    tcp_listen_options.send_timeout = 120000
+  extraEnvVars:
+    - name: RABBITMQ_SERVER_ADDITIONAL_ERL_ARGS
+      value: "-rabbit consumer_timeout 600000"
   auth:
     username: levoai
     password: levoailevoai
