@@ -1,0 +1,19 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: levoai-logstash
+  labels:
+    app: levoai-logstash
+    app.kubernetes.io/name: levoai-logstash-service
+    app.kubernetes.io/version: {{ .Chart.AppVersion | quote }}
+    app.kubernetes.io/managed-by: {{ .Release.Service | quote }}
+    app.kubernetes.io/instance: {{ .Release.Name | quote }}
+    helm.sh/chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
+spec:
+  type: ClusterIP
+  selector:
+    app: levoai-logstash
+  ports:
+    - name: beats
+      port: {{ .Values.global.logstashBeatsPort | int }}
+      targetPort: {{ .Values.global.logstashBeatsPort | int }}

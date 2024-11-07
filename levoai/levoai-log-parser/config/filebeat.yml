@@ -1,0 +1,29 @@
+filebeat.inputs:
+  - type: aws-s3
+    bucket_arn: ${AWS_BUCKET_ARN}
+    number_of_workers: 5
+    bucket_list_interval: 300s
+    access_key_id: ${AWS_ACCESS_KEY_ID}
+    secret_access_key: ${AWS_SECRET_ACCESS_KEY}
+    default_region: ${AWS_DEFAULT_REGION}
+    expand_event_list_from_field: Records
+    processors:
+      - add_fields:
+          target: "resource"
+          fields:
+            telemetry_sdk_type: "access-logs"
+            source: "incapsula"
+            codec: "cef"
+            service_name: "${APP_NAME}"
+            levo_env: "${ENV_NAME}"
+      - drop_event:
+          when:
+            not:
+              regexp:
+                aws.s3.object.key: "^imperva/cef/"
+
+output.logstash:
+  hosts: ["${LOGSTASH_HOST}:${LOGSTASH_BEATS_PORT}"]
+
+logging.level: '${LOG_LEVEL}'
+logging.selectors: ["*"]

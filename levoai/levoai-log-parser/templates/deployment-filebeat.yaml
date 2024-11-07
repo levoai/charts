@@ -1,0 +1,104 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: levoai-filebeat
+  labels:
+    app: levoai-filebeat
+    app.kubernetes.io/name: levoai-filebeat-deployment
+    app.kubernetes.io/version: {{ .Chart.AppVersion | quote }}
+    app.kubernetes.io/managed-by: {{ .Release.Service | quote }}
+    app.kubernetes.io/instance: {{ .Release.Name | quote }}
+    helm.sh/chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
+  annotations:
+    checksum/config: {{ include (print $.Template.BasePath "/configmap-filebeat.yaml") . | sha256sum }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: levoai-filebeat
+  template:
+    metadata:
+      labels:
+        app: levoai-filebeat
+      annotations:
+        checksum/config: {{ include (print $.Template.BasePath "/configmap-filebeat.yaml") . | sha256sum }}
+    spec:
+      containers:
+        - name: levoai-filebeat
+          image: "{{ .Values.filebeat.image.registry }}/{{ .Values.filebeat.image.repository }}:{{ .Values.filebeat.image.tag }}"
+          args:
+            - "-e"
+            - "-c"
+            - "/usr/share/filebeat/filebeat.yml"
+            - "-E"
+            - "http.enabled=true"
+          imagePullPolicy: "IfNotPresent"
+          env:
+            - name: LOG_LEVEL
+              value: {{ .Values.filebeat.logLevel | default .Values.global.logLevel | quote }}
+            - name: LOGSTASH_HOST
+              value: {{ .Values.global.logstashHost }}
+            - name: LOGSTASH_BEATS_PORT
+              value: {{ .Values.global.logstashBeatsPort | quote }}
+            - name: AWS_BUCKET_ARN
+              valueFrom:
+                secretKeyRef:
+                  name: aws-credentials
+                  key: aws-bucket-arn
+            - name: AWS_ACCESS_KEY_ID
+              valueFrom:
+                secretKeyRef:
+                  name: aws-credentials
+                  key: aws-access-key-id
+            - name: AWS_SECRET_ACCESS_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: aws-credentials
+                  key: aws-secret-access-key
+            - name: AWS_DEFAULT_REGION
+              valueFrom:
+                secretKeyRef:
+                  name: aws-credentials
+                  key: aws-default-region
+            - name: APP_NAME
+              value: {{ .Values.filebeat.appName }}
+            - name: ENV_NAME
+              value: {{ .Values.filebeat.envName }}
+          volumeMounts:
+            - name: filebeat-config
+              mountPath: /usr/share/filebeat/filebeat.yml
+              subPath: filebeat.yml
+            - name: varlog
+              mountPath: /var/log
+          livenessProbe:
+            exec:
+              command:
+                - sh
+                - -c
+                - |
+                  #!/usr/bin/env bash -e
+                  curl --fail 127.0.0.1:5066
+            failureThreshold: 3
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            timeoutSeconds: 5
+          readinessProbe:
+            exec:
+              command:
+                - sh
+                - -c
+                - |
+                  #!/usr/bin/env bash -e
+                  filebeat test output
+            failureThreshold: 3
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            timeoutSeconds: 5
+      volumes:
+        - name: filebeat-config
+          configMap:
+            name: levoai-filebeat-config
+        - name: varlog
+          hostPath:
+            path: /var/log
+            type: Directory

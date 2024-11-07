@@ -1,0 +1,22 @@
+global:
+  logLevel: "info"
+  levoaiOrgId: ""
+  levoSatelliteUrl: "http://levoai-haproxy:80"
+  logstashHost: "levoai-logstash"
+  logstashBeatsPort: "5044"
+
+filebeat:
+  image:
+    registry: "docker.elastic.co"
+    repository: "beats/filebeat"
+    tag: "8.15.3"
+  appName: "s3-logs"
+  envName: "staging"
+  logLevel: ""
+
+logstash:
+  image:
+    registry: "docker.elastic.co"
+    repository: "logstash/logstash"
+    tag: "8.15.3"
+  logLevel: ""

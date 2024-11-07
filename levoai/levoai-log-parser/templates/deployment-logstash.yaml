@@ -1,0 +1,79 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: levoai-logstash
+  labels:
+    app: levoai-logstash
+    app.kubernetes.io/name: levoai-logstash-deployment
+    app.kubernetes.io/version: {{ .Chart.AppVersion | quote }}
+    app.kubernetes.io/managed-by: {{ .Release.Service | quote }}
+    app.kubernetes.io/instance: {{ .Release.Name | quote }}
+    helm.sh/chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
+  annotations:
+    checksum/config: {{ include (print $.Template.BasePath "/configmap-logstash.yaml") . | sha256sum }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: levoai-logstash
+  template:
+    metadata:
+      labels:
+        app: levoai-logstash
+      annotations:
+        checksum/config: {{ include (print $.Template.BasePath "/configmap-logstash.yaml") . | sha256sum }}
+    spec:
+      containers:
+        - name: levoai-logstash
+          image: "{{ .Values.logstash.image.registry }}/{{ .Values.logstash.image.repository }}:{{ .Values.logstash.image.tag }}"
+          args:
+            - "-f"
+            - "/usr/share/logstash/pipeline/logstash.conf"
+            - "--config.reload.automatic"
+            - "--log.level"
+            - {{ .Values.logstash.logLevel | default .Values.global.logLevel | quote }}
+          imagePullPolicy: "IfNotPresent"
+          ports:
+            - containerPort: {{ .Values.global.logstashBeatsPort | int }}
+              name: beats
+            - containerPort: 9600
+              name: http
+          env:
+            - name: LEVO_SATELLITE_URL
+              value: {{ .Values.global.levoSatelliteUrl }}
+            - name: LEVOAI_ORG_ID
+              value: {{ .Values.global.levoaiOrgId }}
+            - name: LOGSTASH_BEATS_PORT
+              value: {{ .Values.global.logstashBeatsPort | quote }}
+          volumeMounts:
+            - name: logstash-config
+              mountPath: /usr/share/logstash/pipeline/logstash.conf
+              subPath: logstash.conf
+            - name: logstash-config
+              mountPath: /usr/share/logstash/config/logstash.yml
+              subPath: logstash.yml
+            - name: queue
+              mountPath: /usr/share/logstash/data/queue
+          livenessProbe:
+            httpGet:
+              path: /
+              port: http
+            initialDelaySeconds: 300
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 3
+            successThreshold: 1
+          readinessProbe:
+            httpGet:
+              path: /
+              port: http
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 3
+      volumes:
+        - name: logstash-config
+          configMap:
+            name: levoai-logstash-config
+        - name: queue
+          emptyDir: {}
