@@ -1137,6 +1137,23 @@ entries:
     urls:
     - https://github.com/levoai/charts/releases/download/levoai-ebpf-sensor-0.6.6-pr.40/levoai-ebpf-sensor-0.6.6-pr.40.tgz
     version: 0.6.6-pr.40
+  levoai-log-parser:
+  - apiVersion: v1
+    appVersion: 1.0.0
+    created: "2024-11-07T14:14:57.705592198Z"
+    description: Levo helm chart for Filebeat
+    digest: b2ea3dcd834d262a877b01aa22d5414f61369ab4a42303ef510b7270abde067e
+    home: https://github.com/levoai/charts
+    icon: https://helm.elastic.co/icons/beats.png
+    maintainers:
+    - email: support@levo.ai
+      name: Support
+    name: levoai-log-parser
+    sources:
+    - https://github.com/elastic/helm-charts
+    urls:
+    - https://github.com/levoai/charts/releases/download/levoai-log-parser-1.0.0/levoai-log-parser-1.0.0.tgz
+    version: 1.0.0
   levoai-pcap-sensor:
   - apiVersion: v2
     appVersion: 0.1.3
@@ -7263,4 +7280,4 @@ entries:
     urls:
     - https://github.com/levoai/charts/releases/download/testrunner-2.0.3/testrunner-2.0.3.tgz
     version: 2.0.3
-generated: "2024-11-06T06:30:21.763460345Z"
+generated: "2024-11-07T14:14:57.706185147Z"
