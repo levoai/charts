@@ -61,7 +61,7 @@ haproxy:
   fullnameOverride: "levoai-haproxy"
   image:
     repository: levoai/haproxy
-    tag: 0.2.1
+    tag: 0.2.3
   service:
     type: ClusterIP # Change to LoadBalancer to expose it
   satelliteAuthnEnabled: false
