@@ -1,6 +1,6 @@
 apiVersion: v2
-appVersion: 0.2.625
+appVersion: 0.2.630
 description: Versatile API Governance REST service.
 name: levoai-ion
 type: application
-version: 0.2.625
+version: 0.2.630
