@@ -1,7 +1,7 @@
 ---
 sensor:
   imageRepo: docker.io/levoai/pcap-sensor
-  imageTag: 0.1.3
+  imageTag: 0.1.7
   tolerations:
     - key: node-role.kubernetes.io/control-plane
       operator: Exists
