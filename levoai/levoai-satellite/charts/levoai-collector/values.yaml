@@ -167,3 +167,6 @@ config:
           processors: [memory_limiter, batch]
           exporters: [debug]
       extensions: [health_check, memory_ballast]
+      telemetry:
+        logs:
+          output_paths: [stdout]
