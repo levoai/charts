@@ -41,6 +41,8 @@ spec:
             value: "{{ .Values.levoOrgId }}"
           - name: ALLOWED_ORIGINS
             value: "{{ .Values.allowedOrigins }}"
+          - name: LOG_LEVEL
+            value: "{{ .Values.logLevel }}"
           readinessProbe:
             failureThreshold: 30
             httpGet:

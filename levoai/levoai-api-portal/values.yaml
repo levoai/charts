@@ -10,6 +10,7 @@ levoAuthKey: ""
 levoBaseUrl: "https://api.levo.ai"
 levoOrgId: ""
 allowedOrigins: "*"
+logLevel: "INFO"
 
 service:
   type: ClusterIP
