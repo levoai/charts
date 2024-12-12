@@ -69,6 +69,14 @@ spec:
             - "--levoai-org-id"
             - {{ .Values.sensor.config.levoaiOrgId }}
             {{- end}}
+            {{- if .Values.sensor.config.maxHttpLength }}
+            - "--max-http-length"
+            - "{{ .Values.sensor.config.maxHttpLength }}"
+            {{- end}}
+            {{- if .Values.sensor.config.streamTimeoutSeconds }}
+            - "--stream-timeout-seconds"
+            - "{{ .Values.sensor.config.streamTimeoutSeconds }}"
+            {{- end}}
           securityContext:
             capabilities:
               add: ["NET_RAW"]
