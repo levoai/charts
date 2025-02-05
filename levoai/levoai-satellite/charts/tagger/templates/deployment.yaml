@@ -73,6 +73,8 @@ spec:
               value: {{ $value | quote }}
               {{- end }}
             {{- end }}
+            - name: OTEL_ENABLED
+              value: {{ .Values.otel.enabled | quote }}
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
       {{- with .Values.global.nodeSelector }}

@@ -48,7 +48,7 @@ spec:
             - "gunicorn"
             - "--capture-output"
             - "--enable-stdio-inheritance"
-            - "-c" 
+            - "-c"
             - "/opt/levoai/common-public/src/python/levoai_common_public/gun.conf.py"
           {{end}}
           args:
@@ -82,6 +82,8 @@ spec:
               value: {{ $value | quote }}
               {{- end }}
             {{- end }}
+            - name: OTEL_ENABLED
+              value: {{ .Values.otel.enabled | quote }}
           livenessProbe:
             httpGet:
               path: /_status
