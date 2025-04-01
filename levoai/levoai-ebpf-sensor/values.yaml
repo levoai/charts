@@ -1,6 +1,6 @@
 sensor:
   imageRepo: docker.io/levoai/ebpf_sensor
-  imageTag: 0.46.3
+  imageTag: 0.46.4
   binary:
     - /opt/levo/sbin/levo-ebpf-sensor
   serviceAccount:
@@ -78,6 +78,7 @@ sensor:
     #http-proxy: "" # Proxy used for HTTP requests
     #https-proxy: "" # Proxy used for HTTPS requests
     #kube-api-rate-limit-time: 30 # Interval between each successful Kube Api call
+    #ignore-ssl-verify: false # Ignore ssl verify when connecting to the collector
     # --------------------------------------------------------------------------------------------
     
     
