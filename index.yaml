@@ -8134,6 +8134,16 @@ entries:
     version: 0.2.73
   testrunner:
   - apiVersion: v2
+    appVersion: 2.8.1
+    created: "2025-04-14T07:20:04.720681594Z"
+    description: A Helm chart for Kubernetes
+    digest: dd279c1b244c5598e511e346bea3d89aa93279664d18c18425d58f753183db71
+    name: testrunner
+    type: application
+    urls:
+    - https://github.com/levoai/charts/releases/download/testrunner-2.8.1/testrunner-2.8.1.tgz
+    version: 2.8.1
+  - apiVersion: v2
     appVersion: 2.6.15
     created: "2025-03-19T09:14:51.181037819Z"
     description: A Helm chart for Kubernetes
@@ -8323,4 +8333,4 @@ entries:
     urls:
     - https://github.com/levoai/charts/releases/download/testrunner-2.0.3/testrunner-2.0.3.tgz
     version: 2.0.3
-generated: "2025-04-07T06:38:55.423560698Z"
+generated: "2025-04-14T07:20:04.721233747Z"
