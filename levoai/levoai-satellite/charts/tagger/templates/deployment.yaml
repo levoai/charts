@@ -3,6 +3,7 @@ kind: Deployment
 metadata:
   name: {{ include "tagger.fullname" . }}
   labels:
+    app: levoai-tagger
     {{- include "tagger.labels" . | nindent 4 }}
 spec:
 {{- if not .Values.autoscaling.enabled }}
@@ -21,6 +22,7 @@ spec:
         {{- toYaml . | nindent 8 }}
     {{- end }}
       labels:
+        app: levoai-tagger
         {{- include "tagger.selectorLabels" . | nindent 8 }}
     spec:
       {{- with (default .Values.image.pullSecrets .Values.global.imagePullSecrets) }}

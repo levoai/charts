@@ -41,6 +41,7 @@ helm.sh/chart: {{ include "satellite.chart" . }}
 app.kubernetes.io/version: {{ .Chart.AppVersion | quote }}
 {{- end }}
 app.kubernetes.io/managed-by: {{ .Release.Service }}
+release: {{ .Release.Name }}
 {{- end }}
 
 {{/*

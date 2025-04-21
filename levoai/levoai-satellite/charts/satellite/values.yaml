@@ -89,7 +89,10 @@ workers: 2
 workerConnections: 50
 workerTimeout: 120
 
-env: []
+env:
+  # Enable lifespan so that the FastAPI app can be started with lifespan=on
+  - name: UVICORN_CMD_ARGS
+    value: "--lifespan=on"
 otel:
   enabled: false
   env:
