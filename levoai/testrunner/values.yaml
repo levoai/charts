@@ -1,3 +1,34 @@
+# Example global configuration
+#global:
+#  levo:
+#    secretMounts:
+#      - name: global-tls-cert
+#        secretName: global-tls
+#        mountPath: /app/global-certs
+#        items:
+#          - key: tls.crt
+#            path: tls.crt
+#          - key: tls.key
+#            path: tls.key
+#    env:
+#      SPRING_APPLICATION_JSON: |-
+#        {
+#          "javax": {
+#            "net": {
+#              "ssl": {
+#                "trustStore": "/var/certs/truststore.jks",
+#                "trustStorePassword": "changeit"
+#              }
+#            }
+#          }
+#        }
+
+global:
+  levo:
+    secretMounts: []
+    configMapMounts: []
+    env: {}
+
 replicaCount: 3
 
 image:
@@ -41,3 +72,51 @@ nodeSelector: {}
 tolerations: []
 
 affinity: {}
+
+podLabels: {}
+
+podAnnotations: {}
+
+extraEnv: {}
+
+extraEnvVars: []
+
+extraEnvVarsCM: []
+
+extraEnvVarsSecret: []
+
+# Example secretMounts configuration
+#secretMounts:
+#  - name: config-secret
+#    secretName: my-app-config
+#    mountPath: /app/config
+#    defaultMode: 256  # Optional: 0400 in decimal
+#    items:  # Optional: if you want to mount specific keys
+#      - key: config.json
+#        path: config.json
+#      - key: credentials
+#        path: credentials.txt
+#
+#  - name: tls-cert
+#    secretName: my-app-tls
+#    mountPath: /app/certs
+#    items:
+#      - key: tls.crt
+#        path: tls.crt
+#      - key: tls.key
+#        path: tls.key
+
+secretMounts: []
+
+# Example configMapMounts configuration
+#configMapMounts:
+#  - name: config-map
+#    configMapName: my-app-config
+#    mountPath: /app/config
+#    subPath: config.json
+#    defaultMode: 256  # Optional: 0400 in decimal
+#    items:  # Optional: if you want to mount specific keys
+#      - key: config.json
+#        path: config.json
+
+configMapMounts: []
