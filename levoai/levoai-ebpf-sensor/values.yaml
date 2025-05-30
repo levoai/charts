@@ -1,6 +1,6 @@
 sensor:
   imageRepo: docker.io/levoai/ebpf_sensor
-  imageTag: 0.47.1
+  imageTag: 0.47.4
   binary:
     - /opt/levo/sbin/levo-ebpf-sensor
   serviceAccount:
@@ -77,7 +77,7 @@ sensor:
     #trace-non-k8s-traffic: false # enable tracing of non-Kubernetes traffic when deployed within a Kubernetes DaemonSet
     #http-proxy: "" # Proxy used for HTTP requests
     #https-proxy: "" # Proxy used for HTTPS requests
-    #kube-api-rate-limit-time: 30 # Interval between each successful Kube Api call
+    #kube-api-rate-limit-time: 10 # Interval between each successful Kube Api call in seconds
     # --------------------------------------------------------------------------------------------
     
     
