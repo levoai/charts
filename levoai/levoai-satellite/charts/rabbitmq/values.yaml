@@ -33,8 +33,8 @@ global:
 ##
 image:
   registry: docker.io
-  repository: bitnami/rabbitmq
-  tag: 3.12.8-debian-11-r1
+  repository: rabbitmq
+  tag: 3.13.7-management-alpine
   digest: ""
   ## set to true if you would like to see extra information on logs
   ## It turns BASH and/or NAMI debugging in the image
@@ -415,9 +415,9 @@ configuration: |-
   ssl_options.verify = {{ .Values.auth.tls.sslOptionsVerify }}
   listeners.ssl.default = {{ .Values.service.ports.amqpTls }}
   ssl_options.fail_if_no_peer_cert = {{ .Values.auth.tls.failIfNoPeerCert }}
-  ssl_options.cacertfile = /opt/bitnami/rabbitmq/certs/ca_certificate.pem
-  ssl_options.certfile = /opt/bitnami/rabbitmq/certs/server_certificate.pem
-  ssl_options.keyfile = /opt/bitnami/rabbitmq/certs/server_key.pem
+  ssl_options.cacertfile = /etc/rabbitmq/certs/ca_certificate.pem
+  ssl_options.certfile = /etc/rabbitmq/certs/server_certificate.pem
+  ssl_options.keyfile = /etc/rabbitmq/certs/server_key.pem
   {{- if .Values.auth.tls.sslOptionsPassword.enabled }}
   ssl_options.password = {{ template "rabbitmq.tlsSslOptionsPassword" . }}
   {{- end }}

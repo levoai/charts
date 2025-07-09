@@ -151,15 +151,9 @@ spec:
                   - /bin/bash
                   - -ec
                   - |
-                    if [[ -f /opt/bitnami/scripts/rabbitmq/nodeshutdown.sh ]]; then
-                        /opt/bitnami/scripts/rabbitmq/nodeshutdown.sh -t {{ .Values.terminationGracePeriodSeconds | quote }} -d {{ ternary "true" "false" .Values.image.debug | quote }}
-                    else
-                        rabbitmqctl stop_app
-                    fi
+                    rabbitmqctl stop_app
           {{- end }}
           env:
-            - name: BITNAMI_DEBUG
-              value: {{ ternary "true" "false" (or .Values.image.debug .Values.diagnosticMode.enabled) | quote }}
             - name: MY_POD_IP
               valueFrom:
                 fieldRef:
@@ -180,58 +174,26 @@ spec:
             - name: RABBITMQ_FEATURE_FLAGS
               value: {{ .Values.featureFlags }}
             {{- end }}
-            - name: RABBITMQ_FORCE_BOOT
-              value: {{ ternary "yes" "no" .Values.clustering.forceBoot | quote }}
             {{- if (eq "hostname" .Values.clustering.addressType) }}
-            - name: RABBITMQ_NODE_NAME
+            - name: RABBITMQ_NODENAME
               value: "rabbit@$(MY_POD_NAME).$(K8S_SERVICE_NAME).$(MY_POD_NAMESPACE).svc.{{ .Values.clusterDomain }}"
             - name: K8S_HOSTNAME_SUFFIX
               value: ".$(K8S_SERVICE_NAME).$(MY_POD_NAMESPACE).svc.{{ .Values.clusterDomain }}"
             {{- else }}
-            - name: RABBITMQ_NODE_NAME
+            - name: RABBITMQ_NODENAME
               value: "rabbit@$(MY_POD_NAME)"
-            {{- end }}
-            - name: RABBITMQ_MNESIA_DIR
-              value: "{{ .Values.persistence.mountPath }}/$(RABBITMQ_NODE_NAME)"
-            - name: RABBITMQ_LDAP_ENABLE
-              value: {{ ternary "yes" "no" .Values.ldap.enabled | quote }}
-            {{- if .Values.ldap.enabled }}
-            - name: RABBITMQ_LDAP_TLS
-              value: {{ ternary "yes" "no" .Values.ldap.tls.enabled | quote }}
-            - name: RABBITMQ_LDAP_SERVERS
-              value: {{ .Values.ldap.servers | join "," | quote }}
-            - name: RABBITMQ_LDAP_SERVERS_PORT
-              value: {{ .Values.ldap.port | quote }}
-            - name: RABBITMQ_LDAP_USER_DN_PATTERN
-              value: {{ .Values.ldap.user_dn_pattern }}
             {{- end }}
             {{- if .Values.logs }}
             - name: RABBITMQ_LOGS
               value: {{ .Values.logs | quote }}
             {{- end }}
-            - name: RABBITMQ_ULIMIT_NOFILES
-              value: {{ .Values.ulimitNofiles | quote }}
-            {{- if and .Values.maxAvailableSchedulers }}
-            - name: RABBITMQ_SERVER_ADDITIONAL_ERL_ARGS
-              value: {{ printf "+S %s:%s" (toString .Values.maxAvailableSchedulers) (toString .Values.onlineSchedulers) -}}
-            {{- end }}
             - name: RABBITMQ_USE_LONGNAME
               value: "true"
-            - name: RABBITMQ_ERL_COOKIE
+            - name: RABBITMQ_ERLANG_COOKIE
               valueFrom:
                 secretKeyRef:
                   name: {{ template "rabbitmq.secretErlangName" . }}
                   key: rabbitmq-erlang-cookie
-            {{- if and .Values.clustering.rebalance (gt (.Values.replicaCount | int) 1) }}
-            - name: RABBITMQ_CLUSTER_REBALANCE
-              value: "true"
-            {{- end }}
-            - name: RABBITMQ_LOAD_DEFINITIONS
-              value: {{ ternary "yes" "no" .Values.loadDefinition.enabled | quote }}
-            - name: RABBITMQ_DEFINITIONS_FILE
-              value: {{ .Values.loadDefinition.file | quote }}
-            - name: RABBITMQ_SECURE_PASSWORD
-              value: {{ ternary "yes" "no" (or .Values.auth.securePassword (not .Values.auth.password)) | quote }}
             - name: RABBITMQ_USERNAME
               value: {{ .Values.auth.username | quote }}
             - name: RABBITMQ_PASSWORD
@@ -239,8 +201,10 @@ spec:
                 secretKeyRef:
                   name: {{ template "rabbitmq.secretPasswordName" . }}
                   key: rabbitmq-password
-            - name: RABBITMQ_PLUGINS
-              value: {{ include "rabbitmq.plugins" . | quote }}
+            {{- if .Values.loadDefinition.enabled }}
+            - name: RABBITMQ_MANAGEMENT_LOAD_DEFINITIONS
+              value: {{ .Values.loadDefinition.file | quote }}
+            {{- end }}
             {{- if .Values.communityPlugins }}
             - name: RABBITMQ_COMMUNITY_PLUGINS
               value: {{ .Values.communityPlugins | quote }}
@@ -286,11 +250,7 @@ spec:
               command:
                 - sh
                 - -ec
-                {{- if or (.Values.loadDefinition.enabled) (not (contains "rabbitmq_management" .Values.plugins )) }}
                 - rabbitmq-diagnostics -q ping
-                {{- else }}
-                - curl -f --user {{ .Values.auth.username }}:$RABBITMQ_PASSWORD 127.0.0.1:{{ .Values.containerPorts.manager }}/api/health/checks/virtual-hosts
-                {{- end }}
           {{- end }}
           {{- if .Values.customReadinessProbe }}
           readinessProbe: {{- include "common.tplvalues.render" (dict "value" .Values.customReadinessProbe "context" $) | nindent 12 }}
@@ -300,11 +260,7 @@ spec:
               command:
                 - sh
                 - -ec
-                {{- if or (.Values.loadDefinition.enabled) (not (contains "rabbitmq_management" .Values.plugins )) }}
                 - rabbitmq-diagnostics -q check_running && rabbitmq-diagnostics -q check_local_alarms
-                {{- else }}
-                - curl -f --user {{ .Values.auth.username }}:$RABBITMQ_PASSWORD 127.0.0.1:{{ .Values.containerPorts.manager }}/api/health/checks/local-alarms
-                {{- end }}
           {{- end }}
           {{- if .Values.customStartupProbe }}
           startupProbe: {{- include "common.tplvalues.render" (dict "value" .Values.customStartupProbe "context" $) | nindent 12 }}
@@ -319,7 +275,7 @@ spec:
           {{- end }}
           volumeMounts:
             - name: configuration
-              mountPath: /bitnami/rabbitmq/conf
+              mountPath: /etc/rabbitmq
             - name: data
               mountPath: {{ .Values.persistence.mountPath }}
               {{- if .Values.persistence.subPath }}
@@ -327,7 +283,7 @@ spec:
               {{- end }}
             {{- if .Values.auth.tls.enabled }}
             - name: certs
-              mountPath: /opt/bitnami/rabbitmq/certs
+              mountPath: /etc/rabbitmq/certs
             {{- end }}
             {{- if and .Values.ldap.tls.enabled .Values.ldap.tls.certificatesSecret }}
             - name: ldap-certs
