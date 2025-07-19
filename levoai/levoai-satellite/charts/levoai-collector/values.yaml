@@ -84,6 +84,9 @@ resources:
      memory: 400Mi
      ephemeral-storage: 64Ki
 
+deploymentLabels:
+  app: levoai-collector
+
 podLabels:
   app: levoai-collector
 
