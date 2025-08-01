@@ -88,7 +88,7 @@ rabbitmq:
         - sh
         - -c
         - |
-          echo '[rabbitmq_management,rabbitmq_peer_discovery_k8s,rabbitmq_auth_backend_ldap].' > /bitnami/rabbitmq/mnesia/enabled_plugins
+          echo '[rabbitmq_management].' > /bitnami/rabbitmq/mnesia/enabled_plugins
           chmod 644 /bitnami/rabbitmq/mnesia/enabled_plugins
       volumeMounts:
         - name: data
@@ -97,12 +97,6 @@ rabbitmq:
   configuration: |-
     default_user = levoai
     default_pass = levoailevoai
-    cluster_formation.peer_discovery_backend  = rabbit_peer_discovery_k8s
-    cluster_formation.k8s.host = kubernetes.default.svc.cluster.local
-    cluster_formation.node_cleanup.interval = 30
-    cluster_formation.node_cleanup.only_log_warning = true
-    cluster_partition_handling = autoheal
-    queue_master_locator = min-masters
     loopback_users.guest = false
   auth:
     username: levoai

@@ -237,7 +237,7 @@ memoryHighWatermark:
 
 ## @param plugins List of default plugins to enable (should only be altered to remove defaults; for additional plugins use `extraPlugins`)
 ##
-plugins: "rabbitmq_management rabbitmq_peer_discovery_k8s"
+plugins: "rabbitmq_management"
 ## @param communityPlugins List of Community plugins (URLs) to be downloaded during container initialization
 ## Combine it with extraPlugins to also enable them.
 ##
@@ -245,7 +245,7 @@ communityPlugins: ""
 ## @param extraPlugins Extra plugins to enable (single string containing a space-separated list)
 ## Use this instead of `plugins` to add new plugins
 ##
-extraPlugins: "rabbitmq_auth_backend_ldap"
+extraPlugins: ""
 
 ## Clustering settings
 ##

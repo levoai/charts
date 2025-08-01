@@ -31,9 +31,9 @@ spec:
         {{- if .Values.global.podAnnotations }}
         {{- include "common.tplvalues.render" ( dict "value" .Values.global.podAnnotations "context" $ ) | nindent 8 }}
         {{- end }}
-        checksum/config: {{ include (print $.Template.BasePath "/config-secret.yaml") . | sha256sum }}
+        checksum/secret-config: {{ include (print $.Template.BasePath "/config-secret.yaml") . | sha256sum }}
         {{- if (include "rabbitmq.createTlsSecret" . ) }}
-        checksum/config: {{ include (print $.Template.BasePath "/tls-secrets.yaml") . | sha256sum }}
+        checksum/tls-config: {{ include (print $.Template.BasePath "/tls-secrets.yaml") . | sha256sum }}
         {{- end }}
         {{- if or (not .Values.auth.existingErlangSecret) (not .Values.auth.existingPasswordSecret) .Values.extraSecrets }}
         checksum/secret: {{ include (print $.Template.BasePath "/secrets.yaml") . | sha256sum }}
