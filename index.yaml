@@ -19,6 +19,16 @@ entries:
     version: 0.1.0
   levoai-api-portal:
   - apiVersion: v2
+    appVersion: 0.1.13
+    created: "2025-09-03T01:29:04.537587965Z"
+    description: Levo.ai API Portal
+    digest: a6672400a24b7f4081da92a9e90f45a488a116a30068e1fcae5ba83a88e9ff9a
+    name: levoai-api-portal
+    type: application
+    urls:
+    - https://github.com/levoai/charts/releases/download/levoai-api-portal-0.1.13/levoai-api-portal-0.1.13.tgz
+    version: 0.1.13
+  - apiVersion: v2
     appVersion: 0.1.10
     created: "2025-08-26T06:27:58.42872335Z"
     description: Levo.ai API Portal
@@ -8814,4 +8824,4 @@ entries:
     urls:
     - https://github.com/levoai/charts/releases/download/testrunner-2.0.3/testrunner-2.0.3.tgz
     version: 2.0.3
-generated: "2025-09-02T05:55:08.019530272Z"
+generated: "2025-09-03T01:29:04.538244078Z"
