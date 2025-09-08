@@ -1452,6 +1452,39 @@ entries:
     version: 0.0.5
   levoai-satellite:
   - apiVersion: v2
+    appVersion: 1.2.710
+    created: "2025-09-08T07:25:48.13949034Z"
+    dependencies:
+    - condition: global.useRabbitmq
+      name: rabbitmq
+      repository: file://dependencies/rabbitmq
+      version: 12.4.2
+    - name: satellite
+      repository: file://dependencies/satellite
+      version: 1.2.710
+    - name: tagger
+      repository: file://dependencies/tagger
+      version: 1.2.710
+    - condition: global.levoai_config_override.api_rule_evaluation.enabled
+      name: levoai-ion
+      repository: file://dependencies/ion
+      version: 1.2.710
+    - name: levoai-collector
+      repository: '@levoai-private'
+      version: 0.24.2
+    - condition: haproxy.enabled
+      name: haproxy
+      repository: file://dependencies/haproxy
+      version: 1.0.6
+    description: The Levoai Satellite Service, which receives observations from the
+      Sensor/Envoy filters et al.
+    digest: 60d954903418ffda1f3d5aeb937dcad36de40d98c656c6005fd34c7a2023375c
+    name: levoai-satellite
+    type: application
+    urls:
+    - https://github.com/levoai/charts/releases/download/levoai-satellite-1.2.710/levoai-satellite-1.2.710.tgz
+    version: 1.2.710
+  - apiVersion: v2
     appVersion: 1.2.703
     created: "2025-08-01T01:28:08.736620355Z"
     dependencies:
@@ -8834,4 +8867,4 @@ entries:
     urls:
     - https://github.com/levoai/charts/releases/download/testrunner-2.0.3/testrunner-2.0.3.tgz
     version: 2.0.3
-generated: "2025-09-03T23:03:51.165850883Z"
+generated: "2025-09-08T07:25:48.140187929Z"
