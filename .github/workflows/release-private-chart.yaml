@@ -71,6 +71,7 @@ jobs:
           fi
 
       - name: Release Chart
+        id: release_step
         uses: helm/chart-releaser-action@v1.5.0
         with:
           skip_packaging: true
