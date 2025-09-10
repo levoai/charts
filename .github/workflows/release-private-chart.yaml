@@ -75,9 +75,27 @@ jobs:
         with:
           skip_packaging: true
           #skip_existing: true
-
         env:
           CR_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
+        continue-on-error: true
+
+      - name: Check what happened
+        run: |
+          CHART_FILE=$(ls .cr-release-packages/*.tgz | head -n1)
+          TAG="$(basename $CHART_FILE .tgz)"
+
+          if [ "${{ steps.release_step.outcome }}" == "failure" ]; then
+            if gh release view "$TAG" >/dev/null 2>&1; then
+              echo "Release $TAG already existed - that's why it 'failed'"
+            else
+              echo "Release $TAG truly failed to create"
+              exit 1
+            fi
+          else
+            echo "Release $TAG was created successfully"
+          fi
+        env:
+          GH_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
 
       - name: Extract Chart to Repo
         run: |
