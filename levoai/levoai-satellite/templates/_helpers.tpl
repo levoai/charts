@@ -61,3 +61,30 @@ Create the name of the service account to use
 {{- default "default" .Values.serviceAccount.name }}
 {{- end }}
 {{- end }}
+
+{{/*
+Validates that the levoai-satellite secret exists and has required keys.
+Skips validation if no cluster is detected (e.g., during CI or helm template).
+*/}}
+{{- define "levoai.validatesecrets" -}}
+  {{- if .Capabilities.APIVersions.Has "v1/Secret" }}
+    {{- /* Only validate during actual install/upgrade operations, not during chart operations */ -}}
+    {{- if or .Release.IsInstall .Release.IsUpgrade }}
+      {{- $secret := lookup "v1" "Secret" .Release.Namespace "levoai-satellite" }}
+      {{- if not $secret }}
+        {{- fail (printf "ERROR: Secret 'levoai-satellite' must exist. Create it with:\n  kubectl create secret generic levoai-satellite --from-literal=refresh-token=YOUR_TOKEN -n %s" .Release.Namespace) }}
+      {{- end }}
+      {{- $refreshToken := index $secret.data "refresh-token" }}
+      {{- if not $refreshToken }}
+        {{- fail "ERROR: Secret 'levoai-satellite' must contain 'refresh-token' key" }}
+      {{- end }}
+      {{- if eq (toString $refreshToken) "" }}
+        {{- fail "ERROR: Secret 'levoai-satellite' refresh-token cannot be empty" }}
+      {{- end }}
+    {{- end }}
+  {{- else }}
+    {{- /* Skip validation in CI / helm template */ -}}
+  {{- end }}
+{{- end }}
+
+

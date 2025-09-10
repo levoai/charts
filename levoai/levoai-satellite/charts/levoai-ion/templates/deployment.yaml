@@ -1,3 +1,4 @@
+{{- include "levoai.validatesecrets" . }}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -76,6 +77,11 @@ spec:
             {{- end }}
             - name: OTEL_ENABLED
               value: {{ .Values.otel.enabled | quote }}
+            - name: LEVOAI_AUTH_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: levoai-satellite
+                  key: refresh-token
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
       {{- with .Values.global.nodeSelector }}

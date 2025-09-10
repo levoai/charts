@@ -50,9 +50,6 @@
             },
             "onprem-api": {
               "type": "object",
-              "required": [
-                "refresh-token"
-              ],
               "properties": {
                 "key": {
                   "type": "string"
