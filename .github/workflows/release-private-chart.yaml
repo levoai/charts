@@ -60,16 +60,6 @@ jobs:
           cd .cr-release-packages
           helm pull levoai-private/${{ inputs.name }} --version "${{ inputs.version }}"
 
-      - name: Check for existing tags
-        run: |
-          git fetch --tags
-          if git tag --list | grep .; then
-            echo "Found tags:"
-            git tag --list | tail -n 5
-          else
-            echo "⚠️ No tags exist in this repo"
-          fi
-
       - name: Release Chart
         uses: helm/chart-releaser-action@v1.5.0
         with:
