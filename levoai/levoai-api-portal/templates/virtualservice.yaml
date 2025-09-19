@@ -1,0 +1,87 @@
+{{ if .Values.gateway.enabled }}
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: {{ .Chart.Name }}-app-vs
+  namespace: istio-system
+spec:
+  hosts:
+    - "{{ .Values.istio.host }}"
+  gateways:
+    - app-gateway
+  http:
+    - match:
+        - uri:
+            prefix: "/apiportal/1.0"
+      directResponse:
+        status: 403
+        body:
+          string: "Forbidden: No API calls allowed on this domain"
+      timeout: 30s
+    - match:
+        - uri:
+            prefix: "/apiportal"
+      route:
+        - destination:
+            host: {{ .Chart.Name }}.{{ .Release.Namespace }}.svc.cluster.local
+            port:
+              number: {{ .Values.service.port }}
+      timeout: 30s
+      retries:
+        attempts: 3
+        perTryTimeout: 10s
+    - directResponse:
+        status: 403
+        body:
+          string: "Forbidden: Missing or invalid Org ID or Token"
+---
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: {{ .Chart.Name }}-api-vs
+  namespace: istio-system
+spec:
+  hosts:
+    - "{{ .Values.istio.host }}"
+  gateways:
+    - api-gateway
+  http:
+    - match:
+        - uri:
+            prefix: "/apiportal/1.0"
+      route:
+        - destination:
+            host: {{ .Chart.Name }}.{{ .Release.Namespace }}.svc.cluster.local
+            port:
+              number: {{ .Values.service.port }}
+      timeout: 30s
+      corsPolicy:
+        unmatchedPreflights: IGNORE
+        allowOrigins:
+          - exact: "{{ .Values.service.corsWebOrigin.app }}"
+          {{ if .Values.service.enableLocalhostCors }}
+          - exact: "http://localhost:3000"
+          {{ end }}
+        allowMethods:
+          - GET
+          - HEAD
+          - POST
+          - DELETE
+        allowHeaders:
+          - authorization
+          - content-type
+          - baggage
+          - x-levo-organization-id
+          - x-levo-workspace-id
+          - x-levo-email-verified
+          - x-levo-roles-enabled
+          - x-levo-roles
+          - x-levo-permissions
+          - x-auth-provider
+        maxAge: 1800s
+        allowCredentials: true
+    - directResponse:
+        status: 403
+        body:
+          string: "Forbidden: Missing or invalid Org ID or Token"
+{{ end }}

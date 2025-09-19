@@ -6,6 +6,7 @@ metadata:
     app: {{ .Chart.Name }}
     release: {{ .Release.Name }}
 spec:
+  replicas: {{ .Values.replicaCount }}
   selector:
     matchLabels:
       app: {{ .Chart.Name }}
@@ -24,7 +25,7 @@ spec:
         - name: {{ .Chart.Name }}
           securityContext:
             {{- toYaml .Values.containerSecurityContext | nindent 12 }}
-          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tagOverride | default .Chart.AppVersion }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           ports:
             - name: http
@@ -33,22 +34,37 @@ spec:
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
           env:
-          - name: LEVO_BASE_URL
-            value: {{ default "https://api.levo.ai" .Values.levoBaseUrl }}
-          - name: REFRESH_TOKEN
-            value: "{{ .Values.levoAuthKey }}"
-          - name: LEVO_ORG_ID
-            value: "{{ .Values.levoOrgId }}"
-          - name: ALLOWED_ORIGINS
-            value: "{{ .Values.allowedOrigins }}"
-          - name: LOG_LEVEL
-            value: "{{ .Values.logLevel }}"
+            - name: LEVOAI_BASE_URL
+              value: {{ .Values.levoBaseUrl }}
+            - name: NEXT_PUBLIC_LEVOAI_AUTH_KEY
+              value: "{{ .Values.levoAuthKey }}"
+            - name: NEXT_PUBLIC_LEVOAI_ORG_ID
+              value: "{{ .Values.levoOrgId }}"
+            - name: ALLOWED_ORIGINS
+              value: "{{ .Values.allowedOrigins }}"
+            - name: LOG_LEVEL
+              value: "{{ .Values.logLevel }}"
+            {{- if .Values.hostedOnLevo }}
+            - name: NEXT_PUBLIC_API_BASE_URL
+              value: {{ .Values.levoBaseUrl }}
+            {{- end }}
+            - name: NEXT_PUBLIC_BASE_PATH
+              value: {{ .Values.basePath | quote }}
+
           readinessProbe:
             failureThreshold: 30
+            initialDelaySeconds: 90
+            periodSeconds: 30
             httpGet:
               path: /
               port: http
-              scheme: HTTP
+          livenessProbe:
+            tcpSocket:
+              port: http
+            failureThreshold: 5
+            initialDelaySeconds: 90
+            periodSeconds: 30
+
       {{- with .Values.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}
