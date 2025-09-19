@@ -1,0 +1,17 @@
+name: Release Protection Chart
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: Private Chart Version
+        required: false
+        type: string
+
+jobs:
+  release:
+    uses: ./.github/workflows/release-private-chart.yaml
+    with:
+      name: levoai-protection
+      version: ${{ inputs.version }}
+    secrets: inherit
