@@ -69,6 +69,10 @@ spec:
             - "--levoai-org-id"
             - {{ .Values.sensor.config.levoaiOrgId }}
             {{- end}}
+            {{- if .Values.sensor.config.levoaiWorkspaceId }}
+            - "--levoai-workspace-id"
+            - {{ .Values.sensor.config.levoaiWorkspaceId }}
+            {{- end}}
             {{- if .Values.sensor.config.maxHttpLength }}
             - "--max-http-length"
             - "{{ .Values.sensor.config.maxHttpLength }}"
