@@ -267,3 +267,9 @@ Get the TLS.sslOptions.Password secret.
     {{- include "getValueFromSecret" (dict "Namespace" .Release.Namespace "Name" .Values.auth.tls.sslOptionsPassword.existingSecret "Length" 10 "Key" .Values.auth.tls.sslOptionsPassword.key)  -}}
 {{- end -}}
 {{- end -}}
+{{/*
+Return the RabbitMQ Plugin Setup image name (always use main RabbitMQ image)
+*/}}
+{{- define "rabbitmq.pluginSetup.image" -}}
+{{ template "rabbitmq.image" . }}
+{{- end -}}

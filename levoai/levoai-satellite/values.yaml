@@ -69,6 +69,12 @@ haproxy:
   satelliteAuthnEnabled: false
 rabbitmq:
   fullnameOverride: "levoai-rabbitmq"
+  # Override the dependency chart's image if needed
+  image:
+    registry: "docker.io"
+    repository: "rabbitmq"
+    tag: "3.13.7-management-alpine"
+    pullPolicy: "IfNotPresent"
   persistence:
     enabled: true
     size: 32Gi
@@ -83,18 +89,15 @@ rabbitmq:
       value: "-rabbit consumer_timeout 600000"
     - name: RABBITMQ_ENABLED_PLUGINS_FILE
       value: "/bitnami/rabbitmq/mnesia/enabled_plugins"
-  initContainers:
-    - name: setup-plugins
-      image: rabbitmq:3.13.7-management-alpine
-      command:
-        - sh
-        - -c
-        - |
-          echo '[rabbitmq_management].' > /bitnami/rabbitmq/mnesia/enabled_plugins
-          chmod 644 /bitnami/rabbitmq/mnesia/enabled_plugins
-      volumeMounts:
-        - name: data
-          mountPath: /bitnami/rabbitmq/mnesia
+  # NEW: Plugin setup configuration (uses same image as main container)
+  pluginSetup:
+    enabled: true
+    plugins:
+      - "rabbitmq_management"
+    resources: {}
+    securityContext: {}
+  # REMOVE: The hardcoded initContainers section
+  # initContainers: []
   configurationExistingSecret: ""
   configuration: |-
     default_user = levoai
@@ -120,3 +123,6 @@ tagger:
   env:
     - name: RUN_SEPARATE_PROCESSES
       value: "true"
+testrunner:
+  enabled: true
+  fullnameOverride: "levoai-testrunner"

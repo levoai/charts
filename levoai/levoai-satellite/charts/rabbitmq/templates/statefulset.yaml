@@ -88,7 +88,7 @@ spec:
         {{- if and .Values.volumePermissions.enabled .Values.persistence.enabled }}
         - name: volume-permissions
           image: {{ include "rabbitmq.volumePermissions.image" . }}
-          imagePullPolicy: {{ .Values.volumePermissions.image.pullPolicy | quote }}
+          imagePullPolicy: {{ default .Values.image.pullPolicy .Values.volumePermissions.image.pullPolicy | quote }}
           command:
             - /bin/bash
           args:
@@ -113,6 +113,32 @@ spec:
           {{- end }}
           {{- if .Values.volumePermissions.resources }}
           resources: {{- toYaml .Values.volumePermissions.resources | nindent 12 }}
+          {{- end }}
+          volumeMounts:
+            - name: data
+              mountPath: {{ .Values.persistence.mountPath }}
+              {{- if .Values.persistence.subPath }}
+              subPath: {{ .Values.persistence.subPath }}
+              {{- end }}
+        {{- end }}
+        {{- if .Values.pluginSetup.enabled }}
+        - name: setup-plugins
+          image: {{ include "rabbitmq.pluginSetup.image" . }}
+          imagePullPolicy: {{ .Values.image.pullPolicy | quote }}
+          command:
+            - sh
+            - -c
+            - |
+              echo "Setting up RabbitMQ plugins..."
+              mkdir -p {{ .Values.persistence.mountPath }}/mnesia
+              {{- range .Values.pluginSetup.plugins }}
+              echo "{{ . }}." >> {{ $.Values.persistence.mountPath }}/mnesia/enabled_plugins
+              {{- end }}
+              chmod 644 {{ .Values.persistence.mountPath }}/mnesia/enabled_plugins
+              echo "Plugin setup completed. Enabled plugins:"
+              cat {{ $.Values.persistence.mountPath }}/mnesia/enabled_plugins
+          {{- if .Values.pluginSetup.resources }}
+          resources: {{- toYaml .Values.pluginSetup.resources | nindent 12 }}
           {{- end }}
           volumeMounts:
             - name: data

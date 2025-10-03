@@ -1,0 +1,183 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "testrunner.name" . }}
+  labels:
+    release: {{ .Release.Name }}
+    app: {{ include "testrunner.name" . }}
+spec:
+  {{- if not .Values.autoscaling.enabled }}
+  replicas: {{ .Values.replicaCount }}
+  {{- end }}
+  selector:
+    matchLabels:
+      app: {{ include "testrunner.name" . }}
+  template:
+    metadata:
+      labels:
+        release: {{ .Release.Name }}
+        app: {{ include "testrunner.name" . }}
+      {{- with .Values.podLabels }}
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      annotations:
+        checksum/config: "{{ include "calculateConfigChecksum" . }}"
+      {{- with .Values.podAnnotations }}
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- $secretMounts := list }}
+      {{- if .Values.secretMounts }}
+      {{- $secretMounts = concat $secretMounts .Values.secretMounts }}
+      {{- end }}
+      {{- if hasKey .Values "global" }}
+      {{- if hasKey .Values.global "levo" }}
+      {{- if hasKey .Values.global.levo "secretMounts" }}
+      {{- $secretMounts = concat $secretMounts .Values.global.levo.secretMounts }}
+      {{- end }}
+      {{- end }}
+      {{- end }}
+      {{- $configMapMounts := list }}
+      {{- if .Values.configMapMounts }}
+      {{- $configMapMounts = concat $configMapMounts .Values.configMapMounts }}
+      {{- end }}
+      {{- if hasKey .Values "global" }}
+      {{- if hasKey .Values.global "levo" }}
+      {{- if hasKey .Values.global.levo "configMapMounts" }}
+      {{- $configMapMounts = concat $configMapMounts .Values.global.levo.configMapMounts }}
+      {{- end }}
+      {{- end }}
+      {{- end }}
+      {{- if or $secretMounts $configMapMounts }}
+      volumes:
+        {{- range $secretMounts }}
+        - name: {{ .name }}
+          secret:
+            secretName: {{ .secretName }}
+            {{- if .items }}
+            items:
+              {{- range .items }}
+              - key: {{ .key }}
+                path: {{ .path }}
+              {{- end }}
+            {{- end }}
+            {{- if .defaultMode }}
+            defaultMode: {{ .defaultMode }}
+            {{- end }}
+        {{- end }}
+        {{- range $configMapMounts }}
+        - name: {{ .name }}
+          configMap:
+            name: {{ .configMapName }}
+            {{- if .items }}
+            items:
+              {{- range .items }}
+              - key: {{ .key }}
+                path: {{ .path }}
+              {{- end }}
+            {{- end }}
+            {{- if .defaultMode }}
+            defaultMode: {{ .defaultMode }}
+            {{- end }}
+        {{- end }}
+      {{- end }}
+      containers:
+        - name: {{ .Chart.Name }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          tty: true
+          args:
+
+            - "start"
+            - "--key"
+            - "$(LEVOAI_AUTH_KEY)"
+            - "--organization"
+            - "{{ index $.Values "global" "levoai_config_override" "onprem-api" "org-id" }}"
+            {{- if .Values.scheduled }}
+            - "--scheduled"
+            - "{{ .Values.scheduled }}"
+            {{- end }}
+
+          workingDir: /home/levo/work
+          env:
+            - name: LOCAL_USER_ID
+              value: "{{ .Values.localUserId }}"
+            - name: LOCAL_GROUP_ID
+              value: "{{ .Values.localGroupId }}"
+            - name: TERM
+              value: "xterm-256color"
+            - name: LEVO_BASE_URL
+              value: "{{ index $.Values "global" "levoai_config_override" "onprem-api" "url" }}"
+            - name: LEVOAI_AUTH_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: levoai-satellite
+                  key: refresh-token
+
+          {{- $envVars := dict }}
+          {{- if hasKey .Values "global" }}
+          {{- if hasKey .Values.global "levo" }}
+          {{- if hasKey .Values.global.levo "env" }}
+          {{- $envVars = merge $envVars .Values.global.levo.env }}
+          {{- end }}
+          {{- end }}
+          {{- end }}
+          {{- if .Values.extraEnv }}
+          {{- $envVars = merge $envVars .Values.extraEnv }}
+          {{- end }}
+          {{- range $key, $value := $envVars }}
+            - name: {{ $key }}
+              value: {{ $value | quote }}
+          {{- end }}
+          {{- if .Values.extraEnvVars }}
+          {{- toYaml .Values.extraEnvVars | nindent 2 }}
+          {{- end }}
+          {{- if or .Values.extraEnvVarsCM .Values.extraEnvVarsSecret }}
+          envFrom:
+            {{- if .Values.extraEnvVarsCM }}
+            - configMapRef:
+                name: {{ tpl .Values.extraEnvVarsCM . | quote }}
+            {{- end }}
+            {{- if .Values.extraEnvVarsSecret }}
+            - secretRef:
+                name: {{ tpl .Values.extraEnvVarsSecret . | quote }}
+            {{- end }}
+          {{- end }}
+          {{- if or $secretMounts $configMapMounts }}
+          volumeMounts:
+            {{- range $secretMounts }}
+            - name: {{ .name }}
+              mountPath: {{ .mountPath }}
+              {{- if .subPath }}
+              subPath: {{ .subPath }}
+              {{- end }}
+              readOnly: true
+            {{- end }}
+            {{- range $configMapMounts }}
+            - name: {{ .name }}
+              mountPath: {{ .mountPath }}
+              {{- if .subPath }}
+              subPath: {{ .subPath }}
+              {{- end }}
+              readOnly: true
+            {{- end }}
+          {{- end }}
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+

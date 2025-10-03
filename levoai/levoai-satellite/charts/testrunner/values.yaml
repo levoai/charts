@@ -1,0 +1,122 @@
+# Example global configuration
+#global:
+#  levo:
+#    secretMounts:
+#      - name: global-tls-cert
+#        secretName: global-tls
+#        mountPath: /app/global-certs
+#        items:
+#          - key: tls.crt
+#            path: tls.crt
+#          - key: tls.key
+#            path: tls.key
+#    env:
+#      SPRING_APPLICATION_JSON: |-
+#        {
+#          "javax": {
+#            "net": {
+#              "ssl": {
+#                "trustStore": "/var/certs/truststore.jks",
+#                "trustStorePassword": "changeit"
+#              }
+#            }
+#          }
+#        }
+
+global:
+  levo:
+    secretMounts: []
+    configMapMounts: []
+    env: {}
+
+replicaCount: 3
+
+image:
+  repository: levoai/levo
+  pullPolicy: Always
+  # Overrides the image tag whose default is the chart appVersion.
+  tag: ""
+
+imagePullSecrets: []
+
+levoBaseUrl: "https://api.levo.ai"
+key: ""
+orgId: ""
+scheduled: False
+localUserId: "1000" # Replace with your actual user ID
+localGroupId: "1000" # Replace with your actual group ID
+configstorePath: "/home/levo/.config/configstore"
+
+
+resources: {}
+  # We usually recommend not to specify default resources and to leave this as a conscious
+  # choice for the user. This also increases chances charts run on environments with little
+  # resources, such as Minikube. If you do want to specify resources, uncomment the following
+  # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
+  # limits:
+  #   cpu: 100m
+  #   memory: 128Mi
+  # requests:
+  #   cpu: 100m
+  #   memory: 128Mi
+
+autoscaling:
+  enabled: false
+  minReplicas: 1
+  maxReplicas: 100
+  targetCPUUtilizationPercentage: 80
+  # targetMemoryUtilizationPercentage: 80
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}
+
+podLabels: {}
+
+podAnnotations: {}
+
+extraEnv: {}
+
+extraEnvVars: []
+
+extraEnvVarsCM: []
+
+extraEnvVarsSecret: []
+
+# Example secretMounts configuration
+#secretMounts:
+#  - name: config-secret
+#    secretName: my-app-config
+#    mountPath: /app/config
+#    defaultMode: 256  # Optional: 0400 in decimal
+#    items:  # Optional: if you want to mount specific keys
+#      - key: config.json
+#        path: config.json
+#      - key: credentials
+#        path: credentials.txt
+#
+#  - name: tls-cert
+#    secretName: my-app-tls
+#    mountPath: /app/certs
+#    items:
+#      - key: tls.crt
+#        path: tls.crt
+#      - key: tls.key
+#        path: tls.key
+
+secretMounts: []
+
+# Example configMapMounts configuration
+#configMapMounts:
+#  - name: config-map
+#    configMapName: my-app-config
+#    mountPath: /app/config
+#    subPath: config.json
+#    defaultMode: 256  # Optional: 0400 in decimal
+#    items:  # Optional: if you want to mount specific keys
+#      - key: config.json
+#        path: config.json
+
+configMapMounts: []
