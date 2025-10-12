@@ -7,6 +7,7 @@ replicaCount: 1
 global:
   imageRegistry: ""
   imagePullSecrets: []
+  multiTenancyEnabled: false
 
 image:
   registry: docker.io

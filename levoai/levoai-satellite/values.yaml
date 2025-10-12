@@ -35,10 +35,11 @@ global:
       host: levoai-rabbitmq
       use_ssl: false
     onprem-api:
-      #      refresh-token: "" # # DEPRECATED: Do not set refresh-token via Helm values.
+      # refresh-token: "" # # DEPRECATED: Do not set refresh-token via Helm values.
       #  # Instead, create a Kubernetes Secret (e.g., `levoai-satellite`) with the refresh-token
       #  # and reference it in your configuration.
       org-id: "" # org-id is required -- you must use helm --set global.levoai_config_override.onprem-api.org-id=O where O is a Levo.ai organization ID
+      url: "https://api.levo.ai"
     tagger_ignore_seen_flows: true
     authentication_inspection: false # defaults to false. if we want to send over auth secrets, we must use helm --set global.levoai_config_override.authentication_inspection=true
     # By default, satellite will log raw traces at debug level. This can be controlled with the following parameter.
@@ -58,6 +59,7 @@ global:
   podAnnotations: {}
   useRabbitmq: true
   busyboxImage: levoai/busybox
+  multiTenancyEnabled: false
 haproxy:
   enabled: true
   fullnameOverride: "levoai-haproxy"

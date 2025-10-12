@@ -93,6 +93,9 @@ env:
   # Enable lifespan so that the FastAPI app can be started with lifespan=on
   - name: UVICORN_CMD_ARGS
     value: "--lifespan=on"
+
+# Toggle multi-tenancy (can also be set via .Values.global.multiTenancyEnabled)
+multiTenancyEnabled: false
 otel:
   enabled: false
   env:

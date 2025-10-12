@@ -132,7 +132,7 @@ spec:
               echo "Setting up RabbitMQ plugins..."
               mkdir -p {{ .Values.persistence.mountPath }}/mnesia
               {{- range .Values.pluginSetup.plugins }}
-              echo "{{ . }}." >> {{ $.Values.persistence.mountPath }}/mnesia/enabled_plugins
+              echo "[{{ . }}.]" >> {{ $.Values.persistence.mountPath }}/mnesia/enabled_plugins
               {{- end }}
               chmod 644 {{ .Values.persistence.mountPath }}/mnesia/enabled_plugins
               echo "Plugin setup completed. Enabled plugins:"
