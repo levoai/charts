@@ -36,7 +36,18 @@ spec:
       initContainers:
         - name: wait-for-rabbitmq
           image: {{ default .Values.image.registry .Values.global.imageRegistry }}/{{ .Values.global.busyboxImage }}
-          command: [ 'sh', '-c', 'until wget -qO- http://levoai:levoailevoai@levoai-rabbitmq:15672/api/health/checks/virtual-hosts &> /dev/null; do echo waiting for rabbitmq; sleep 2; done;' ]
+          env:
+            - name: RABBITMQ_DEFAULT_USER
+              valueFrom:
+                secretKeyRef:
+                  name: levoai-rabbitmq-auth
+                  key: rabbitmq-username
+            - name: RABBITMQ_DEFAULT_PASS
+              valueFrom:
+                secretKeyRef:
+                  name: levoai-rabbitmq-auth
+                  key: rabbitmq-password
+          command: [ 'sh', '-c', 'until wget -qO- http://$RABBITMQ_DEFAULT_USER:$RABBITMQ_DEFAULT_PASS@levoai-rabbitmq:15672/api/health/checks/virtual-hosts &> /dev/null; do echo waiting for rabbitmq; sleep 2; done;' ]
       {{- end }}
       containers:
         - name: levoai-ion

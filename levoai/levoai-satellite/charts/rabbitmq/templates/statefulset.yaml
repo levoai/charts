@@ -130,13 +130,13 @@ spec:
             - -c
             - |
               echo "Setting up RabbitMQ plugins..."
-              mkdir -p {{ .Values.persistence.mountPath }}/mnesia
+              mkdir -p {{ .Values.persistence.mountPath }}
               {{- range .Values.pluginSetup.plugins }}
-              echo "[{{ . }}.]" >> {{ $.Values.persistence.mountPath }}/mnesia/enabled_plugins
+              echo "[{{ . }}]." > {{ $.Values.persistence.mountPath }}/enabled_plugins
               {{- end }}
-              chmod 644 {{ .Values.persistence.mountPath }}/mnesia/enabled_plugins
+              chmod 644 {{ .Values.persistence.mountPath }}/enabled_plugins
               echo "Plugin setup completed. Enabled plugins:"
-              cat {{ $.Values.persistence.mountPath }}/mnesia/enabled_plugins
+              cat {{ $.Values.persistence.mountPath }}/enabled_plugins
           {{- if .Values.pluginSetup.resources }}
           resources: {{- toYaml .Values.pluginSetup.resources | nindent 12 }}
           {{- end }}
@@ -215,18 +215,6 @@ spec:
             {{- end }}
             - name: RABBITMQ_USE_LONGNAME
               value: "true"
-            - name: RABBITMQ_ERLANG_COOKIE
-              valueFrom:
-                secretKeyRef:
-                  name: {{ template "rabbitmq.secretErlangName" . }}
-                  key: rabbitmq-erlang-cookie
-            - name: RABBITMQ_USERNAME
-              value: {{ .Values.auth.username | quote }}
-            - name: RABBITMQ_PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  name: {{ template "rabbitmq.secretPasswordName" . }}
-                  key: rabbitmq-password
             {{- if .Values.loadDefinition.enabled }}
             - name: RABBITMQ_MANAGEMENT_LOAD_DEFINITIONS
               value: {{ .Values.loadDefinition.file | quote }}
