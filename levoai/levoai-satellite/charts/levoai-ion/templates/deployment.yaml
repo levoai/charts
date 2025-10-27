@@ -37,17 +37,17 @@ spec:
         - name: wait-for-rabbitmq
           image: {{ default .Values.image.registry .Values.global.imageRegistry }}/{{ .Values.global.busyboxImage }}
           env:
-            - name: RABBITMQ_DEFAULT_USER
+            - name: RABBITMQ_USERNAME
               valueFrom:
                 secretKeyRef:
                   name: levoai-rabbitmq-auth
                   key: rabbitmq-username
-            - name: RABBITMQ_DEFAULT_PASS
+            - name: RABBITMQ_PASSWORD
               valueFrom:
                 secretKeyRef:
                   name: levoai-rabbitmq-auth
                   key: rabbitmq-password
-          command: [ 'sh', '-c', 'until wget -qO- http://$RABBITMQ_DEFAULT_USER:$RABBITMQ_DEFAULT_PASS@levoai-rabbitmq:15672/api/health/checks/virtual-hosts &> /dev/null; do echo waiting for rabbitmq; sleep 2; done;' ]
+          command: [ 'sh', '-c', 'until wget -qO- http://$RABBITMQ_USERNAME:$RABBITMQ_PASSWORD@levoai-rabbitmq:15672/api/health/checks/virtual-hosts &> /dev/null; do echo waiting for rabbitmq; sleep 2; done;' ]
       {{- end }}
       containers:
         - name: levoai-ion
@@ -95,6 +95,18 @@ spec:
                   key: refresh-token
             - name: LEVOAI_MULTI_TENANCY_ENABLED
               value: {{ (default .Values.global.multiTenancyEnabled .Values.multiTenancyEnabled) | default false | quote }}
+            {{- if .Values.global.useRabbitmq }}
+            - name: RABBITMQ_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: levoai-rabbitmq-auth
+                  key: rabbitmq-username
+            - name: RABBITMQ_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: levoai-rabbitmq-auth
+                  key: rabbitmq-password
+            {{- end }}
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
       {{- with .Values.global.nodeSelector }}
