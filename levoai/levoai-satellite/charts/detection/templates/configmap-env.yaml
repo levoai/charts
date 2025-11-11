@@ -1,0 +1,9 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: "levoai-detection-env"
+  labels:
+    app: "levoai-detection"
+    chart: "levoai-detection"
+data:
+  LEVOAI_CONF_OVERRIDES: '{{ mustToJson .Values.global.levoai_config_override }}'

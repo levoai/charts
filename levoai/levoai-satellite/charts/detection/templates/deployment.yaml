@@ -1,0 +1,96 @@
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: levoai-detection
+  labels:
+    app: levoai-detection
+    release: {{ .Release.Name }}
+spec:
+{{- if not .Values.autoscaling.enabled }}
+  replicas: {{ .Values.replicaCount }}
+{{- end }}
+  selector:
+    matchLabels:
+      app: levoai-detection
+  template:
+    metadata:
+      labels:
+        release: {{ .Release.Name }}
+        app: levoai-detection
+      {{- with .Values.podLabels }}
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      annotations:
+        checksum/config: "{{ include "calculateConfigChecksum" . }}"
+      {{- with .Values.podAnnotations }}
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+    spec:
+      {{- with (default .Values.image.pullSecrets .Values.global.imagePullSecrets) }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      {{- if .Values.global.useRabbitmq }}
+      initContainers:
+        - name: wait-for-rabbitmq
+          image: {{ default .Values.image.registry .Values.global.imageRegistry }}/{{ .Values.global.busyboxImage }}
+          env:
+            - name: RABBITMQ_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: levoai-rabbitmq-auth
+                  key: rabbitmq-username
+            - name: RABBITMQ_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: levoai-rabbitmq-auth
+                  key: rabbitmq-password
+          command: [ 'sh', '-c', 'until wget -qO- http://$RABBITMQ_USERNAME:$RABBITMQ_PASSWORD@levoai-rabbitmq:15672/api/health/checks/virtual-hosts &> /dev/null; do echo waiting for rabbitmq; sleep 2; done;' ]
+      {{- end }}
+      containers:
+        - name: levoai-detection
+          securityContext:
+            {{- toYaml .Values.securityContext | nindent 12 }}
+          image: "{{ default .Values.image.registry .Values.global.imageRegistry }}/{{ .Values.image.repository }}:{{ default .Chart.AppVersion .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          envFrom:
+            - configMapRef:
+                name: "levoai-detection-env"
+          env:
+            {{- if .Values.env }}
+              {{- toYaml .Values.env | nindent 12 }}
+            {{- end }}
+            - name: LEVOAI_AUTH_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: levoai-satellite
+                  key: refresh-token
+            {{- if .Values.global.useRabbitmq }}
+            - name: RABBITMQ_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: levoai-rabbitmq-auth
+                  key: rabbitmq-username
+            - name: RABBITMQ_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: levoai-rabbitmq-auth
+                  key: rabbitmq-password
+            {{- end }}
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+      {{- with .Values.global.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.global.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}

@@ -47,6 +47,8 @@ global:
     traces_log_level: DEBUG
     api_rule_evaluation:
       enabled: true
+    detection:
+      enabled: false
     enable_ssl_cert_checks: true
     ignore_user_agents:
       - "levoai/"
@@ -139,3 +141,5 @@ tagger:
 testrunner:
   enabled: true
   fullnameOverride: "levoai-testrunner"
+detection:
+  enabled: false
