@@ -60,14 +60,13 @@ spec:
             - configMapRef:
                 name: "levoai-detection-env"
           env:
-            {{- if .Values.env }}
-              {{- toYaml .Values.env | nindent 12 }}
-            {{- end }}
             - name: LEVOAI_AUTH_KEY
               valueFrom:
                 secretKeyRef:
                   name: levoai-satellite
                   key: refresh-token
+            - name: LEVOAI_MULTI_TENANCY_ENABLED
+              value: {{ (default .Values.global.multiTenancyEnabled .Values.multiTenancyEnabled) | default false | quote }}
             {{- if .Values.global.useRabbitmq }}
             - name: RABBITMQ_USERNAME
               valueFrom:
