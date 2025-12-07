@@ -1,6 +1,6 @@
 sensor:
   imageRepo: docker.io/levoai/ebpf_sensor
-  imageTag: 0.48.5
+  imageTag: 0.49.7
   binary:
     - /opt/levo/sbin/levo-ebpf-sensor
   serviceAccount:
@@ -161,20 +161,20 @@ sensor:
       - pod_nanny
       - MetricsExtension
       - postgres
-      - kube_state_metrics  # ref: https://github.com/kubernetes/kube-state-metrics
+      - kube-state-metrics  # ref: https://github.com/kubernetes/kube-state-metrics
       - prometheus  # ref: https://github.com/prometheus/prometheus
       - node_exporter  # ref: https://github.com/prometheus/node_exporter
       - redis_exporter  # ref: https://github.com/oliver006/redis_exporter
-      - cloud_node_manager  # ref: https://github.com/kubernetes-sigs/cloud-provider-azure/blob/ce798999ad48f6fb2063a808b9dcedec2fadd49a/examples/out-of-tree/cloud-node-manager.yaml
-      - kube_proxy
+      - cloud-node-manager  # ref: https://github.com/kubernetes-sigs/cloud-provider-azure/blob/ce798999ad48f6fb2063a808b9dcedec2fadd49a/examples/out-of-tree/cloud-node-manager.yaml
+      - kube-proxy
       - loki
-      - argocd_server
-      - argocd_applicat
-      - argocd_dex
-      - argocd_notifica
-      - argocd_repo_ser
-      - kubectl_argo_ro
-      - amazon_ssm_agen
+      - argocd-server
+      - argocd-applicat
+      - argocd-dex
+      - argocd-notifica
+      - argocd-repo-ser
+      - kubectl-argo-ro
+      - amazon-ssm-agen
       - aws
       - awsagent
       - aws_k8s_agent
@@ -191,6 +191,7 @@ sensor:
       - agent
       - process_agent
       - trace_agent
+      - fluent-bit
     
     #monitored-pids:
     #  - <pid. Example: 123>
@@ -372,6 +373,7 @@ sensor:
   levoEnv: "staging"
   satelliteUrl: "levoai-haproxy"
   orgId: ""
+  workspaceId: ""
   env:
     - name: MALLOC_CONF
       value: "background_thread:true,narenas:1,tcache:false,dirty_decay_ms:0,muzzy_decay_ms:0,abort_conf:true"

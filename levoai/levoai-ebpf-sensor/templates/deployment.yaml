@@ -65,6 +65,8 @@ spec:
             - {{ .Values.sensor.satelliteUrl }}
             - "--organization-id"
             - {{ default "" .Values.sensor.orgId }}
+            - "--workspace-id"
+            - {{ default "" .Values.sensor.workspaceId }}
           securityContext:
             privileged: true
           volumeMounts:
