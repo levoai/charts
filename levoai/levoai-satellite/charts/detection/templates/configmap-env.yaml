@@ -6,8 +6,8 @@ metadata:
     app: "levoai-detection"
     chart: "levoai-detection"
 data:
-  LEVOAI_BASE_URL: {{ .Values.global.levoai_config_override.onprem-api.url }}
-  LEVOAI_ORG_ID: {{ .Values.global.levoai_config_override.onprem-api.org-id }}
-  RABBITMQ_HOST: {{ .Values.global.levoai.rabbitmq.host | default "levoai-rabbitmq" }}
-  RABBITMQ_PORT: {{ .Values.global.levoai.rabbitmq.port | default "5672" }}
-  RABBITMQ_USE_SSL: {{ .Values.global.levoai.rabbitmq.use_ssl | default false }}
+  LEVOAI_BASE_URL: {{ index .Values.global.levoai_config_override "onprem-api" "url"  }}
+  LEVOAI_ORG_ID: {{ index .Values.global.levoai_config_override "onprem-api" "org-id"  }}
+  RABBITMQ_HOST: {{ index .Values.global.levoai_config_override "rabbitmq" "host" | default "levoai-rabbitmq" }}
+  RABBITMQ_PORT: {{ index .Values.global.levoai_config_override "rabbitmq" "port" | default "5672" | quote }}
+  RABBITMQ_USE_SSL: {{ index .Values.global.levoai_config_override "rabbitmq" "use_ssl" | default false | quote }}
