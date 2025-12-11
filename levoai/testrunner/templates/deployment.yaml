@@ -99,7 +99,11 @@ spec:
                "{{ .Values.orgId }}",
                {{- if .Values.scheduled }}
                "--scheduled",
-               "{{ .Values.scheduled }}"
+               "{{ .Values.scheduled }}",
+               {{- end }}
+               {{- if .Values.group }}
+               "--group",
+               "{{ .Values.group }}"
                {{- end }}
               ]
           workingDir: /home/levo/work
