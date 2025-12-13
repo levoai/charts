@@ -99,7 +99,11 @@ spec:
             - "{{ index $.Values "global" "levoai_config_override" "onprem-api" "org-id" }}"
             {{- if .Values.scheduled }}
             - "--scheduled"
-            - "{{ .Values.scheduled }}"
+            - "{{ .Values.scheduled }}",
+            {{- end }}
+            {{- if .Values.group }}
+            - "--group"
+            - "{{ .Values.group }}"
             {{- end }}
 
           workingDir: /home/levo/work
