@@ -33,8 +33,9 @@ spec:
       serviceAccountName: {{ include "satellite.serviceAccountName" . }}
       securityContext:
         {{- toYaml .Values.podSecurityContext | nindent 8 }}
-      {{- if .Values.global.useRabbitmq }}
+      {{- if or .Values.global.useRabbitmq .Values.global.useKafka }}
       initContainers:
+        {{- if .Values.global.useRabbitmq }}
         - name: wait-for-rabbitmq
           image: {{ default .Values.image.registry .Values.global.imageRegistry }}/{{ .Values.global.busyboxImage }}
           env:
@@ -49,6 +50,17 @@ spec:
                   name: levoai-rabbitmq-auth
                   key: rabbitmq-password
           command: [ 'sh', '-c', 'until wget -qO- http://$RABBITMQ_USERNAME:$RABBITMQ_PASSWORD@levoai-rabbitmq:15672/api/health/checks/virtual-hosts &> /dev/null; do echo waiting for rabbitmq; sleep 2; done;' ]
+        {{- end }}
+        {{- if .Values.global.useKafka }}
+        - name: wait-for-kafka-and-create-topics
+          image: "{{ default .Values.image.registry .Values.global.imageRegistry }}/{{ .Values.image.repository }}:{{ default .Chart.AppVersion .Values.image.tag }}"
+          command: ['python', '-OO']
+          args:
+            - /opt/levoai/e7s/src/python/levoai_e7s/kafka_utils/kafka_topic_manager.py
+          envFrom:
+            - configMapRef:
+                name: "{{ template "satellite.fullname" . }}-env"
+        {{- end }}
       {{- end }}
       containers:
         - name: {{ .Chart.Name }}

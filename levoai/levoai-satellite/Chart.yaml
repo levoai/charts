@@ -1,20 +1,24 @@
 apiVersion: v2
-appVersion: 1.2.755
+appVersion: 1.2.756
 dependencies:
 - condition: global.useRabbitmq
   name: rabbitmq
   repository: file://dependencies/rabbitmq
   version: 12.4.2
+- condition: global.useKafka
+  name: kafka
+  repository: file://dependencies/kafka
+  version: 23.0.5
 - name: satellite
   repository: file://dependencies/satellite
-  version: 1.2.755
+  version: 1.2.756
 - name: tagger
   repository: file://dependencies/tagger
-  version: 1.2.755
+  version: 1.2.756
 - condition: global.levoai_config_override.api_rule_evaluation.enabled
   name: levoai-ion
   repository: file://dependencies/ion
-  version: 1.2.755
+  version: 1.2.756
 - name: levoai-collector
   repository: '@levoai-private'
   version: 0.24.3
@@ -34,4 +38,4 @@ description: The Levoai Satellite Service, which receives observations from the 
   filters et al.
 name: levoai-satellite
 type: application
-version: 1.2.755
+version: 1.2.756
