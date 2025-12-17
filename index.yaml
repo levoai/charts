@@ -1362,6 +1362,15 @@ entries:
     version: 1.0.0
   levoai-pcap-sensor:
   - apiVersion: v2
+    appVersion: 0.3.2
+    created: "2025-12-17T06:48:07.483469828Z"
+    description: The Levo PCAP Sensor
+    digest: be276e70e039dfbbb87d432be3465af1e8d45bf2f5b5d2b82e1ddd1c2898ec37
+    name: levoai-pcap-sensor
+    urls:
+    - https://github.com/levoai/charts/releases/download/levoai-pcap-sensor-0.3.2/levoai-pcap-sensor-0.3.2.tgz
+    version: 0.3.2
+  - apiVersion: v2
     appVersion: 0.3.0
     created: "2025-12-09T10:47:55.853962076Z"
     description: The Levo PCAP Sensor
@@ -9532,4 +9541,4 @@ entries:
     urls:
     - https://github.com/levoai/charts/releases/download/testrunner-2.0.3/testrunner-2.0.3.tgz
     version: 2.0.3
-generated: "2025-12-17T06:01:15.171638614Z"
+generated: "2025-12-17T06:48:07.48426827Z"
