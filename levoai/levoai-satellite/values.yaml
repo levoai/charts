@@ -156,18 +156,9 @@ kafka:
     type: ClusterIP
     ports:
       client: 9092
-  # Persistence
   persistence:
     enabled: true
-    size: 8Gi
-  # Resource limits
-  resources:
-    limits:
-      # cpu: 500m
-      memory: 4Gi
-    requests:
-      # cpu: 100m
-      memory: 2Gi
+    size: 32Gi
 satellite:
   fullnameOverride: "levoai-satellite"
   env: []
