@@ -136,6 +136,8 @@ config:
         protocols:
           http:
             endpoint: 0.0.0.0:4323
+      agentgateway_extproc:
+        endpoint: 0.0.0.0:9002
       aws_cloudfront:
         protocols:
           http:
@@ -158,6 +160,16 @@ config:
         send_batch_size: 20
         send_batch_max_size: 50
         timeout: 5s
+        # batch data by organization-id
+        metadata_keys:
+          - x-levo-organization-id
+      batch/metrics:
+        send_batch_size: 1000
+        send_batch_max_size: 5000
+        timeout: 2s
+        # batch data by organization-id
+        metadata_keys:
+          - x-levo-organization-id
       memory_limiter:
         check_interval: 1s
         limit_percentage: 60
@@ -172,9 +184,26 @@ config:
         endpoint: http://levoai-satellite:9999
         # Python Flask server in Levo's Satellite doesn't support gzip so don't enable any compression here.
         compression: none
+        sending_queue:
+          enabled: true
+          num_consumers: 10
+          queue_size: 5000
+        retry_on_failure:
+          enabled: true
+          initial_interval: 5s
+          max_interval: 30s
+          max_elapsed_time: 300s
+        timeout: 30s
       otlphttp:
         endpoint: http://levoai-satellite:9999
         compression: none
+        sending_queue:
+          enabled: true
+          num_consumers: 20
+          queue_size: 10000
+        retry_on_failure:
+          enabled: false
+        timeout: 10s
 
     service:
       pipelines:
@@ -188,7 +217,7 @@ config:
           exporters: [debug, levoai_satellite]
         metrics:
           receivers: [otlp]
-          processors: [memory_limiter, batch]
+          processors: [memory_limiter, batch, batch/metrics]
           exporters: [debug, otlphttp]
         logs:
           receivers: [otlp]

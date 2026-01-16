@@ -1,7 +1,7 @@
 apiVersion: v2
-appVersion: 0.24.3
+appVersion: 0.26.2
 description: Collector service provided by Levo.ai that collects API trace data from
   the sensors, processes them and sends to Levo's SaaS.
 name: levoai-collector
 type: application
-version: 0.24.3
+version: 0.26.2

@@ -82,3 +82,13 @@ otel:
     OTEL_TRACES_EXPORTER: otlp
     OTEL_LOGS_EXPORTER: otlp
     OTEL_EXPORTER_OTLP_PROTOCOL: grpc
+
+# Configuration for mounting NER models from a separate Docker image
+# When enabled, models are copied from the models image to a shared volume
+# When disabled (default), models are loaded from the satellite image
+modelsImage:
+  enabled: false
+  registry: docker.io
+  repository: levoai/ner-models
+  tag: latest
+  pullPolicy: IfNotPresent

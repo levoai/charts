@@ -31,9 +31,10 @@ spec:
         {{- toYaml . | nindent 8 }}
       {{- end }}
       serviceAccountName: {{ include "tagger.serviceAccountName" . }}
+      
       securityContext:
         {{- toYaml .Values.podSecurityContext | nindent 8 }}
-      {{- if or .Values.global.useRabbitmq .Values.global.useKafka }}
+      {{- if or .Values.global.useRabbitmq .Values.global.useKafka  .Values.modelsImage.enabled}}
       initContainers:
         {{- if .Values.global.useRabbitmq }}
         - name: wait-for-rabbitmq
@@ -54,14 +55,33 @@ spec:
         {{- if .Values.global.useKafka }}
         - name: wait-for-kafka-and-create-topics
           image: "{{ default .Values.image.registry .Values.global.imageRegistry }}/{{ .Values.image.repository }}:{{ default .Chart.AppVersion .Values.image.tag }}"
-          command: ['python', '-OO']
+          command: ['python']
           args:
             - /opt/levoai/e7s/src/python/levoai_e7s/kafka_utils/kafka_topic_manager.py
           envFrom:
             - configMapRef:
                 name: "{{ template "tagger.fullname" . }}-env"
         {{- end }}
+
+        {{- if .Values.modelsImage.enabled }}
+        - name: copy-models
+          image: "{{ default .Values.image.registry .Values.global.imageRegistry }}/{{ .Values.modelsImage.repository }}:{{ .Values.modelsImage.tag }}"
+          imagePullPolicy: {{ .Values.modelsImage.pullPolicy }}
+          command: ["sh", "-c"]
+          args:
+            - |
+              set -e
+              echo "Copying models..."
+              ls -lah /models
+              mkdir -p /opt/models/ner
+              cp -r /models/* /opt/models/ner/
+              echo "Models copied successfully"
+          volumeMounts:
+            - name: models-volume
+              mountPath: /opt/models/ner
+        {{- end }}
       {{- end }}
+
       containers:
         - name: {{ .Chart.Name }}
           securityContext:
@@ -73,7 +93,6 @@ spec:
             - opentelemetry-instrument
           {{- end}}
             - python
-            - "-OO"
             - /opt/levoai/e7s/src/python/levoai_e7s/tag_server.py
           {{- if .Values.livenessProbeEnabled }}
           livenessProbe:
@@ -122,6 +141,19 @@ spec:
             {{- end }}
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
+
+          {{- if .Values.modelsImage.enabled }}
+          volumeMounts:
+            - name: models-volume
+              mountPath: /opt/models/ner
+          {{- end }}
+
+      {{- if .Values.modelsImage.enabled }}
+      volumes:
+        - name: models-volume
+          emptyDir: {}
+      {{- end }}
+
       {{- with .Values.global.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}

@@ -13,3 +13,4 @@ data:
   LEVOAI_LOG_LEVEL: {{ .Values.global.levoai.log_level }}
   LEVOAI_CONF_OVERRIDES: '{{ mustToJson .Values.global.levoai_config_override }}'
   PI_DETECTOR_DATA_DIR: {{ .Values.global.levoai.pi_detector_data_dir }}
+  LEVOAI_MODELS_IMAGE_ENABLED: '{{ .Values.modelsImage.enabled }}'
