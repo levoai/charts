@@ -130,8 +130,10 @@ config:
           grpc:
             endpoint: 0.0.0.0:4317
             max_recv_msg_size_mib: 16
+            include_metadata: true
           http:
             endpoint: 0.0.0.0:4318
+            include_metadata: true
       f5_ltm_logs:
         protocols:
           http:
@@ -218,7 +220,7 @@ config:
         metrics:
           receivers: [otlp]
           processors: [memory_limiter, batch, batch/metrics]
-          exporters: [debug, otlphttp]
+          exporters: [debug, levoai_satellite]
         logs:
           receivers: [otlp]
           processors: [memory_limiter, batch]

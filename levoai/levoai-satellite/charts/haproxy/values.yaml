@@ -78,10 +78,10 @@ service:
   ## @param service.ports [array] List of haproxy service ports
   ##
   ports:
-    - name: http
+    - name: grpc
       protocol: TCP
       port: 80
-      targetPort: http
+      targetPort: grpc
   ## @param service.clusterIP haproxy service Cluster IP
   ## e.g.:
   ## clusterIP: None
@@ -528,7 +528,7 @@ configuration: |
 ## @param containerPorts [array] List of container ports to enable in the haproxy container
 ##
 containerPorts:
-  - name: http
+  - name: grpc
     containerPort: 8080
 ## @param existingConfigmap configmap with HAProxy configuration
 ##

@@ -106,12 +106,12 @@ By default, HAProxy is deployed with a sample, non-functional, configuration. Yo
 
   ```yaml
   service:
-    - name: http
+    - name: grpc
       port: 80 # We use port 80 in the service
-      targetPort: http
+      targetPort: grpc
 
   containerPorts:
-    - name: http
+    - name: grpc
       containerPort: 8080
   ```
 
