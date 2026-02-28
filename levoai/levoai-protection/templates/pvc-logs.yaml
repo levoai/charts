@@ -1,0 +1,14 @@
+{{- if and (not .Values.logs.emptyDir) .Values.logs.pvc.enabled }}
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ include "protection.name" . }}-logs
+spec:
+  accessModes: ["ReadWriteOnce"]
+  resources:
+    requests:
+      storage: {{ .Values.logs.pvc.size }}
+  {{- if .Values.logs.pvc.storageClassName }}
+  storageClassName: {{ .Values.logs.pvc.storageClassName }}
+  {{- end }}
+{{- end }}

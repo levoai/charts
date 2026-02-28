@@ -1,0 +1,135 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "protection.name" . }}
+  labels:
+    app.kubernetes.io/name: {{ include "protection.name" . }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: {{ include "protection.name" . }}
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: {{ include "protection.name" . }}
+      annotations:
+        checksum/nginx: {{ include (print $.Template.BasePath "/configmap-nginx.yaml") . | sha256sum }}
+        checksum/modsec: {{ include (print $.Template.BasePath "/configmap-modsec.yaml") . | sha256sum }}
+        checksum/lua: {{ include (print $.Template.BasePath "/configmap-lua.yaml") . | sha256sum }}
+        checksum/runtime: {{ include (print $.Template.BasePath "/configmap-runtime.yaml") . | sha256sum }}
+        {{- if and (not .Values.levoaiAuthKey.existingSecretName) .Values.levoaiAuthKey.value }}
+        checksum/auth-secret: {{ include (print $.Template.BasePath "/secret-auth.yaml") . | sha256sum }}
+        {{- end }}
+        {{- if .Values.confD.enabled }}
+        checksum/confd: {{ include (print $.Template.BasePath "/configmap-confd.yaml") . | sha256sum }}
+        {{- end }}
+    spec:
+      {{- if .Values.serviceAccount.create }}
+      serviceAccountName: "{{ .Values.serviceAccount.name | default (include "protection.serviceAccountName" .) }}"
+      {{- end }}
+      containers:
+        - name: levoai-protection
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          securityContext: {{- toYaml .Values.securityContext | nindent 12 }}
+          ports:
+            - name: http
+              containerPort: {{ .Values.service.portHttp }}
+            - name: admin
+              containerPort: {{ .Values.service.portAdmin }}
+            {{- if .Values.tls.enabled }}
+            - name: https
+              containerPort: {{ .Values.service.portHttps }}
+            {{- end }}
+          {{- $envVars := dict }}
+          {{- if .Values.extraEnv }}
+          {{- $envVars = merge $envVars .Values.extraEnv }}
+          {{- end }}
+          {{- $authSecretName := "" }}
+          {{- if .Values.levoaiAuthKey.existingSecretName }}
+          {{- $authSecretName = .Values.levoaiAuthKey.existingSecretName }}
+          {{- else if .Values.levoaiAuthKey.value }}
+          {{- $authSecretName = printf "%s-auth" (include "protection.name" .) }}
+          {{- end }}
+          {{- if or $authSecretName $envVars }}
+          env:
+            {{- if $authSecretName }}
+            - name: LEVOAI_AUTH_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: {{ $authSecretName | quote }}
+                  key: refresh-token
+            {{- end }}
+            {{- range $key, $value := $envVars }}
+            - name: {{ $key }}
+              value: {{ $value | quote }}
+            {{- end }}
+          {{- end }}
+          envFrom:
+            - configMapRef:
+                name: {{ include "protection.name" . | printf "%s-runtime" | quote }}
+          volumeMounts:
+            - name: nginx-conf
+              mountPath: /usr/local/openresty/nginx/conf/nginx.conf
+              subPath: nginx.conf
+            - name: modsec-conf
+              mountPath: /etc/nginx/custom-rules.conf
+              subPath: custom-rules.conf
+            - name: lua-scripts
+              mountPath: /etc/nginx/lua
+            {{- if .Values.confD.enabled }}
+            - name: confd
+              mountPath: /etc/nginx/conf.d
+            {{- end }}
+            - name: logs
+              mountPath: /var/log
+            {{- if .Values.tls.enabled }}
+            - name: tls
+              mountPath: /etc/nginx/tls
+            {{- end }}
+          readinessProbe:
+            httpGet:
+              path: /api/health
+              scheme: HTTP
+              port: 8080
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /api/health
+              scheme: HTTP
+              port: 8080
+            initialDelaySeconds: 15
+            periodSeconds: 20
+          resources: {{- toYaml .Values.resources | nindent 12 }}
+      volumes:
+        - name: nginx-conf
+          configMap:
+            name: {{ include "protection.name" . }}-nginx
+        - name: modsec-conf
+          configMap:
+            name: {{ include "protection.name" . }}-modsec
+        - name: lua-scripts
+          configMap:
+            name: {{ include "protection.name" . }}-lua
+            defaultMode: 0444
+        {{- if .Values.confD.enabled }}
+        - name: confd
+          configMap:
+            name: {{ include "protection.name" . }}-confd
+        {{- end }}
+        - name: logs
+          {{- if .Values.logs.emptyDir }}
+          emptyDir: {}
+          {{- else if .Values.logs.pvc.enabled }}
+          persistentVolumeClaim:
+            claimName: {{ include "protection.name" . }}-logs
+          {{- else }}
+          emptyDir: {}
+          {{- end }}
+        {{- if .Values.tls.enabled }}
+        - name: tls
+          secret:
+            secretName: {{ if .Values.tls.existingSecretName }}{{ .Values.tls.existingSecretName }}{{ else }}{{ include "protection.name" . }}-tls{{ end }}
+        {{- end }}

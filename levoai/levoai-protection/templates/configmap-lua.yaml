@@ -1,0 +1,10 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "protection.name" . }}-lua
+data:
+  block_ua.lua: |
+    local ua = ngx.var.http_user_agent or ""
+    if ua:match("ahrefs") then
+      ngx.exit(403)
+    end
