@@ -1,0 +1,85 @@
+image:
+  repository: docker.io/levoai/protection
+  # [I7] Keep in sync with appVersion in Chart.yaml
+  tag: "0.7.2"
+  pullPolicy: IfNotPresent
+replicaCount: 2
+serviceAccount:
+  create: false
+  name: "levoai-protection-sa"
+  annotations: {}
+podAnnotations: {}
+resources:
+  limits:
+    cpu: "1"
+    memory: "1Gi"
+  requests:
+    cpu: "500m"
+    memory: "512Mi"
+nodeSelector: {}
+tolerations: []
+affinity: {}
+# Expose NGINX service
+service:
+  type: ClusterIP
+  portHttp: 80
+  portHttps: 443
+  portAdmin: 8080
+  annotations: {}
+ingress:
+  enabled: false
+  className: ""
+  annotations: {}
+  hosts:
+    - host: protection.levo.ai
+      paths:
+        - path: /
+          pathType: Prefix
+  tls: [] # e.g., [{ hosts: ["protection.levo.ai"], secretName: levoai-protection-tls }]
+# TLS
+tls:
+  enabled: false
+  # If enabled, provide an existing secret with keys:
+  #   tls.crt, tls.key
+  existingSecretName: ""
+# Extra conf.d snippets (optional)
+confD:
+  enabled: true
+  files:
+    example.conf: |
+      # Example backend override
+      # server { listen 80; server_name app1; location / {  proxy_pass http://example.com; }}
+podSecurityContext:
+  runAsNonRoot: true
+  runAsUser: 65534
+  fsGroup: 65534
+securityContext:
+  privileged: false
+  allowPrivilegeEscalation: false
+  readOnlyRootFilesystem: false
+  capabilities:
+    drop: ["ALL"]
+    add: ["NET_BIND_SERVICE"]
+# Volume for logs (emptyDir or PVC)
+logs:
+  emptyDir: false
+  pvc:
+    enabled: false
+    storageClassName: "default"
+    size: 100Mi
+# Autoscaling (disabled by default)
+autoscaling:
+  enabled: false
+  minReplicas: 2
+  maxReplicas: 10
+  targetCPUUtilizationPercentage: 70
+runtimeEnv:
+  LEVOAI_ENV: ""
+  LEVOAI_BASE_URL: "https://api.levo.ai"
+  LEVOAI_ORG_ID: ""
+  FINDINGS_MAX_BATCH_SIZE: "5"
+  CONFIG_REFRESH_INTERVAL_MINUTES: "5"
+levoaiAuthKey:
+  existingSecretName: ""
+  value: ""
+extraEnv: {}
