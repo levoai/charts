@@ -1505,6 +1505,17 @@ entries:
     urls:
     - https://github.com/levoai/charts/releases/download/levoai-pcap-sensor-0.0.5/levoai-pcap-sensor-0.0.5.tgz
     version: 0.0.5
+  levoai-protection:
+  - apiVersion: v2
+    appVersion: 0.7.2
+    created: "2026-02-28T13:36:05.408230094Z"
+    description: Levo.ai protection Module
+    digest: e11ffa996c24e1ee7ed6c968ddf9f3f0bf37dc1dcb39ed82dee2878dd024b26b
+    name: levoai-protection
+    type: application
+    urls:
+    - https://github.com/levoai/charts/releases/download/levoai-protection-0.7.2/levoai-protection-0.7.2.tgz
+    version: 0.7.2
   levoai-satellite:
   - apiVersion: v2
     appVersion: 1.5.1
@@ -9965,4 +9976,4 @@ entries:
     urls:
     - https://github.com/levoai/charts/releases/download/testrunner-2.0.3/testrunner-2.0.3.tgz
     version: 2.0.3
-generated: "2026-02-26T05:22:54.529505805Z"
+generated: "2026-02-28T13:36:05.408899254Z"
