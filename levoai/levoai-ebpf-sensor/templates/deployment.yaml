@@ -23,6 +23,14 @@ spec:
       {{- if .Values.sensor.nodeSelector }}
       nodeSelector: {{- toYaml .Values.sensor.nodeSelector | nindent 8 }}
       {{- end }}
+      {{- if .Values.sensor.hostNetwork }}
+      hostNetwork: true
+      {{- end }}
+      {{- if .Values.sensor.dnsPolicy }}
+      dnsPolicy: {{ .Values.sensor.dnsPolicy }}
+      {{- else if .Values.sensor.hostNetwork }}
+      dnsPolicy: ClusterFirstWithHostNet
+      {{- end }}
       containers:
         - name: levoai-sensor
           image: {{ .Values.sensor.imageRepo }}:{{ .Values.sensor.imageTag }}
@@ -43,16 +51,26 @@ spec:
               valueFrom:
                 fieldRef:
                   fieldPath: spec.nodeName
+            {{- if .Values.sensor.containerResources }}
+            {{- if .Values.sensor.containerResources.limits }}
+            {{- if .Values.sensor.containerResources.limits.memory }}
             - name: MEMORY_LIMIT
               valueFrom:
                 resourceFieldRef:
                   containerName: levoai-sensor
+                  divisor: "1"
                   resource: limits.memory
+            {{- end }}
+            {{- if .Values.sensor.containerResources.limits.cpu }}
             - name: CPU_LIMIT
               valueFrom:
                 resourceFieldRef:
                   containerName: levoai-sensor
+                  divisor: "1"
                   resource: limits.cpu
+            {{- end }}
+            {{- end }}
+            {{- end }}
           # Overrides docker image's entrypoint.
           command:
             - /sbin/init_lite

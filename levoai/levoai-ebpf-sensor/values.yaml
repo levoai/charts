@@ -1,6 +1,6 @@
 sensor:
   imageRepo: docker.io/levoai/ebpf_sensor
-  imageTag: 0.50.1
+  imageTag: 0.50.2
   binary:
     - /opt/levo/sbin/levo-ebpf-sensor
   serviceAccount:
@@ -56,6 +56,8 @@ sensor:
       operator: Exists
       effect: NoSchedule
   nodeSelector: {}
+  hostNetwork: false
+  dnsPolicy: ""
   podAnnotations: {}
   containerResources:
     requests:
