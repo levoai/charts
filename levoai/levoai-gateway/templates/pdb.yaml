@@ -1,0 +1,26 @@
+{{- if and .Values.podDisruptionBudget .Values.podDisruptionBudget.enabled }}
+{{- $controllerEnabled := eq (include "aigateway.controller.enabled" .) "true" }}
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: {{ include "aigateway.fullname" . }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "aigateway.labels" . | nindent 4 }}
+spec:
+  {{- if .Values.podDisruptionBudget.minAvailable }}
+  minAvailable: {{ .Values.podDisruptionBudget.minAvailable }}
+  {{- else if .Values.podDisruptionBudget.maxUnavailable }}
+  maxUnavailable: {{ .Values.podDisruptionBudget.maxUnavailable }}
+  {{- else }}
+  minAvailable: 1
+  {{- end }}
+  selector:
+    matchLabels:
+      {{- include "aigateway.selectorLabels" . | nindent 6 }}
+      {{- if $controllerEnabled }}
+      app.kubernetes.io/component: controller
+      {{- else }}
+      app.kubernetes.io/component: proxy
+      {{- end }}
+{{- end }}

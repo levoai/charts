@@ -1,0 +1,64 @@
+{{- $controllerEnabled := eq (include "aigateway.controller.enabled" .) "true" }}
+{{- if $controllerEnabled }}
+# =============================================================================
+# DEPRECATED: Controller Service
+# =============================================================================
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "aigateway.fullname" . }}-controller
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "aigateway.labels" . | nindent 4 }}
+    app.kubernetes.io/component: controller
+spec:
+  type: {{ .Values.controller.service.type }}
+  ports:
+    - port: {{ .Values.controller.service.ports.agwGrpc }}
+      targetPort: grpc-xds-agw
+      protocol: TCP
+      name: grpc-xds-agw
+    - port: {{ .Values.controller.service.ports.health }}
+      targetPort: health
+      protocol: TCP
+      name: health
+    - port: {{ .Values.controller.service.ports.metrics }}
+      targetPort: metrics
+      protocol: TCP
+      name: metrics
+  selector:
+    {{- include "aigateway.selectorLabels" . | nindent 4 }}
+    app.kubernetes.io/component: controller
+---
+{{- end }}
+{{- if not $controllerEnabled }}
+# =============================================================================
+# Standalone Data Plane Service
+# =============================================================================
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "aigateway.fullname" . }}-proxy
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "aigateway.labels" . | nindent 4 }}
+    app.kubernetes.io/component: proxy
+spec:
+  type: {{ include "aigateway.dataPlane.service.type" . }}
+  ports:
+    - port: {{ include "aigateway.dataPlane.service.port" . }}
+      targetPort: http
+      protocol: TCP
+      name: http
+    - port: 15000
+      targetPort: admin
+      protocol: TCP
+      name: admin
+    - port: 9092
+      targetPort: metrics
+      protocol: TCP
+      name: metrics
+  selector:
+    {{- include "aigateway.selectorLabels" . | nindent 4 }}
+    app.kubernetes.io/component: proxy
+{{- end }}

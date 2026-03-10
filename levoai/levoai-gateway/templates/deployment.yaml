@@ -1,0 +1,223 @@
+{{- /* Validate that at least one config source is enabled in standalone mode */ -}}
+{{- /* Skip validation if config is not defined (backwards compatibility with existing deployments) */ -}}
+{{- $saasEnabled := eq (include "aigateway.config.saas.enabled" .) "true" }}
+{{- $configMapEnabled := eq (include "aigateway.config.configMap.enabled" .) "true" }}
+{{- $controllerEnabled := eq (include "aigateway.controller.enabled" .) "true" }}
+{{- if and (not $controllerEnabled) (not $saasEnabled) (not $configMapEnabled) }}
+{{- fail "ERROR: No configuration source enabled. In standalone mode (controller.enabled=false), you must enable either config.saas.enabled=true or config.configMap.enabled=true" }}
+{{- end }}
+
+{{- if $controllerEnabled }}
+# =============================================================================
+# DEPRECATED: Controller (kgateway) Deployment
+# =============================================================================
+# This controller deployment is deprecated. Use standalone mode instead.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "aigateway.fullname" . }}-controller
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "aigateway.labels" . | nindent 4 }}
+    app.kubernetes.io/component: controller
+spec:
+  replicas: {{ .Values.controller.replicaCount }}
+  selector:
+    matchLabels:
+      {{- include "aigateway.selectorLabels" . | nindent 6 }}
+      app.kubernetes.io/component: controller
+  template:
+    metadata:
+      labels:
+        {{- include "aigateway.selectorLabels" . | nindent 8 }}
+        app.kubernetes.io/component: controller
+    spec:
+      serviceAccountName: {{ include "aigateway.serviceAccountName" . }}
+      containers:
+        - name: controller
+          image: "{{ .Values.controller.image.registry }}/{{ .Values.controller.image.repository }}:{{ .Values.controller.image.tag }}"
+          imagePullPolicy: {{ .Values.controller.image.pullPolicy }}
+          env:
+            - name: KGW_LOG_LEVEL
+              value: {{ .Values.controller.logLevel | quote }}
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+---
+{{- end }}
+{{- if not $controllerEnabled }}
+# =============================================================================
+# Standalone Data Plane Deployment
+# =============================================================================
+{{- $modelsEnabled := eq (include "aigateway.models.enabled" .) "true" }}
+{{- $modelsPersistenceEnabled := eq (include "aigateway.models.persistence.enabled" .) "true" }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "aigateway.fullname" . }}-proxy
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "aigateway.labels" . | nindent 4 }}
+    app.kubernetes.io/component: proxy
+  {{- with .Values.deploymentAnnotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  {{- if not (and .Values.autoscaling .Values.autoscaling.enabled) }}
+  replicas: {{ include "aigateway.dataPlane.replicaCount" . }}
+  {{- end }}
+  selector:
+    matchLabels:
+      {{- include "aigateway.selectorLabels" . | nindent 6 }}
+      app.kubernetes.io/component: proxy
+  template:
+    metadata:
+      annotations:
+        {{- if $configMapEnabled }}
+        checksum/config: {{ include (print $.Template.BasePath "/configmap.yaml") . | sha256sum | trunc 63 }}
+        {{- end }}
+        {{- with .Values.podAnnotations }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+      labels:
+        {{- include "aigateway.selectorLabels" . | nindent 8 }}
+        app.kubernetes.io/component: proxy
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ include "aigateway.serviceAccountName" . }}
+      {{- if .Values.priorityClassName }}
+      priorityClassName: {{ .Values.priorityClassName }}
+      {{- end }}
+      terminationGracePeriodSeconds: {{ .Values.terminationGracePeriodSeconds | default 60 }}
+      {{- with .Values.podSecurityContext }}
+      securityContext:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- if and $modelsEnabled $modelsPersistenceEnabled }}
+      initContainers:
+        - name: models-loader
+          image: {{ include "aigateway.models.initContainer.image" . }}
+          imagePullPolicy: {{ include "aigateway.models.initContainer.imagePullPolicy" . }}
+          command:
+            - sh
+            - -c
+            - |
+              if [ ! -f {{ include "aigateway.models.mountPath" . }}/.initialized ]; then
+                echo "Copying models to PVC..."
+                cp -r /models/* {{ include "aigateway.models.mountPath" . }}/
+                touch {{ include "aigateway.models.mountPath" . }}/.initialized
+                echo "Models copied successfully"
+              else
+                echo "Models already initialized, skipping"
+              fi
+          volumeMounts:
+            - name: models
+              mountPath: {{ include "aigateway.models.mountPath" . }}
+          resources:
+            {{- if and .Values.models .Values.models.initContainer .Values.models.initContainer.resources }}
+            {{- toYaml .Values.models.initContainer.resources | nindent 12 }}
+            {{- else }}
+            requests:
+              cpu: "500m"
+              memory: "1Gi"
+            limits:
+              cpu: "1"
+              memory: "2Gi"
+            {{- end }}
+      {{- end }}
+      containers:
+        - name: proxy
+          {{- with .Values.securityContext }}
+          securityContext:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          image: {{ include "aigateway.dataPlane.image" . | quote }}
+          imagePullPolicy: {{ include "aigateway.dataPlane.image.pullPolicy" . }}
+          ports:
+            - containerPort: {{ include "aigateway.dataPlane.service.port" . }}
+              name: http
+              protocol: TCP
+            - containerPort: 15000
+              name: admin
+              protocol: TCP
+            - containerPort: 9092
+              name: metrics
+              protocol: TCP
+          env:
+            {{- if $saasEnabled }}
+            - name: LEVOAI_BASE_URL
+              value: {{ include "aigateway.config.saas.url" . | quote }}
+            - name: LEVO_ENVIRONMENT_ID
+              value: {{ include "aigateway.config.saas.environmentId" . | quote }}
+            - name: LEVOAI_AUTH_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "aigateway.fullname" . }}-saas
+                  key: refresh-token
+            - name: SAAS_POLL_INTERVAL
+              value: {{ include "aigateway.config.saas.pollInterval" . | quote }}
+            {{- $alertWebhookUrl := include "aigateway.config.saas.alertWebhookUrl" . }}
+            {{- if $alertWebhookUrl }}
+            - name: ALERT_WEBHOOK_URL
+              value: {{ $alertWebhookUrl | quote }}
+            {{- end }}
+            {{- end }}
+            {{- if $configMapEnabled }}
+            - name: LOCAL_CONFIG_PATH
+              value: "/etc/agentgateway/config.yaml"
+            {{- end }}
+            {{- if $modelsEnabled }}
+            - name: MODELS_PATH
+              value: {{ include "aigateway.models.mountPath" . | quote }}
+            {{- end }}
+            # Admin server: readyz, config dumps, /v1/scan/input, /v1/scan/output (see dataPlane.adminAddr).
+            - name: ADMIN_ADDR
+              value: {{ include "aigateway.dataPlane.adminAddr" . | quote }}
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+          volumeMounts:
+            {{- if $configMapEnabled }}
+            - name: config
+              mountPath: /etc/agentgateway
+              readOnly: true
+            {{- end }}
+            {{- if $modelsEnabled }}
+            - name: models
+              mountPath: {{ include "aigateway.models.mountPath" . }}
+              readOnly: true
+            {{- end }}
+      volumes:
+        {{- if $configMapEnabled }}
+        - name: config
+          configMap:
+            name: {{ include "aigateway.config.configMap.name" . }}
+        {{- end }}
+        {{- if $modelsEnabled }}
+        - name: models
+          {{- if $modelsPersistenceEnabled }}
+          persistentVolumeClaim:
+            claimName: {{ include "aigateway.models.pvcName" . }}
+          {{- else }}
+          emptyDir: {}
+          {{- end }}
+        {{- end }}
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.topologySpreadConstraints }}
+      topologySpreadConstraints:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+{{- end }}
