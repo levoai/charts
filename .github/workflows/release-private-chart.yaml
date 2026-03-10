@@ -52,13 +52,20 @@ jobs:
           version: v3.4.0
 
       - name: Download Private Chart
+        env:
+          CHART_NAME: ${{ inputs.name }}
+          CHART_VERSION: ${{ inputs.version }}
         run: |
           helm plugin install https://github.com/hayorov/helm-gcs.git --version 0.4.1 || echo "Helm plugin already exists."
           helm repo add levoai-private ${{ secrets.HELM_GCS_REPOSITORY }} || echo "Helm repo already exists"
           helm repo update
           mkdir -p .cr-release-packages
           cd .cr-release-packages
-          helm pull levoai-private/${{ inputs.name }} --version "${{ inputs.version }}"
+          if [ -n "$CHART_VERSION" ]; then
+            helm pull "levoai-private/$CHART_NAME" --version "$CHART_VERSION"
+          else
+            helm pull "levoai-private/$CHART_NAME"
+          fi
 
       - name: Check for existing tags
         run: |
