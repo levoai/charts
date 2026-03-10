@@ -1,0 +1,20 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "vigil.name" . }}
+  labels:
+    app: {{ include "vigil.name" . }}
+    release: {{ .Release.Name }}
+  {{- with .Values.service.annotations }}
+    annotations:
+      {{- toYaml . | nindent 6 }}
+  {{- end }}
+spec:
+  type: {{ .Values.service.type }}
+  ports:
+    - port: {{ .Values.service.port }}
+      targetPort: http
+      protocol: TCP
+      name: http
+  selector:
+    app: {{ include "vigil.name" . }}

@@ -1,0 +1,181 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "vigil.name" . }}
+  labels:
+    app: {{ include "vigil.name" . }}
+    release: {{ .Release.Name }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      app: {{ include "vigil.name" . }}
+  template:
+    metadata:
+      annotations:
+        checksum/config: "{{ include "calculateConfigChecksum" . }}"
+        {{- with .Values.podAnnotations }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+      labels:
+        app: {{ include "vigil.name" . }}
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      {{- $secretMounts := list }}
+      {{- if .Values.secretMounts }}
+      {{- $secretMounts = concat $secretMounts .Values.secretMounts }}
+      {{- end }}
+      {{- if hasKey .Values "global" }}
+      {{- if hasKey .Values.global "levo" }}
+      {{- if hasKey .Values.global.levo "secretMounts" }}
+      {{- $secretMounts = concat $secretMounts .Values.global.levo.secretMounts }}
+      {{- end }}
+      {{- end }}
+      {{- end }}
+      {{- $configMapMounts := list }}
+      {{- if .Values.configMapMounts }}
+      {{- $configMapMounts = concat $configMapMounts .Values.configMapMounts }}
+      {{- end }}
+      {{- if hasKey .Values "global" }}
+      {{- if hasKey .Values.global "levo" }}
+      {{- if hasKey .Values.global.levo "configMapMounts" }}
+      {{- $configMapMounts = concat $configMapMounts .Values.global.levo.configMapMounts }}
+      {{- end }}
+      {{- end }}
+      {{- end }}
+      {{- if or $secretMounts $configMapMounts (eq .Values.useConfigMap true) }}
+      volumes:
+      {{- if eq .Values.useConfigMap true }}
+      - name: config
+        configMap:
+          name: {{ include "vigil.name" . }}-config
+      {{- end }}
+      {{- range $configMapMounts }}
+      - name: {{ .name }}
+        configMap:
+          name: {{ .configMapName }}
+          {{- if .items }}
+          items:
+          {{- range .items }}
+          - key: {{ .key }}
+            path: {{ .path }}
+          {{- end }}
+          {{- end }}
+          {{- if .defaultMode }}
+          defaultMode: {{ .defaultMode }}
+          {{- end }}
+      {{- end }}
+      {{- range $secretMounts }}
+      - name: {{ .name }}
+        secret:
+          secretName: {{ .secretName }}
+          {{- if .items }}
+          items:
+          {{- range .items }}
+          - key: {{ .key }}
+            path: {{ .path }}
+          {{- end }}
+          {{- end }}
+          {{- if .defaultMode }}
+          defaultMode: {{ .defaultMode }}
+          {{- end }}
+      {{- end }}
+      {{- end }}
+      containers:
+      - name: {{ include "vigil.name" . }}
+        securityContext:
+          {{- toYaml .Values.containerSecurityContext | nindent 12 }}
+        image: "{{ .Values.image.registry }}/{{ .Values.image.repo }}/{{ .Values.image.name }}:{{ default .Chart.AppVersion .Values.image.tagOverride }}"
+        imagePullPolicy: {{ .Values.image.pullPolicy }}
+        args:
+          - "--config"
+          - "/app/config/vigil.yaml"
+        {{- $envVars := dict }}
+        {{- if hasKey .Values "global" }}
+        {{- if hasKey .Values.global "levo" }}
+        {{- if hasKey .Values.global.levo "env" }}
+        {{- $envVars = merge $envVars .Values.global.levo.env }}
+        {{- end }}
+        {{- end }}
+        {{- end }}
+        {{- if .Values.extraEnv }}
+        {{- $envVars = merge $envVars .Values.extraEnv }}
+        {{- end }}
+        env:
+        - name: RUST_LOG
+          value: {{ default "info" (.Values.config.vigil.observability.log_level) | quote }}
+        {{- if $envVars }}
+        {{- range $key, $value := $envVars }}
+        - name: {{ $key }}
+          value: {{ $value | quote }}
+        {{- end }}
+        {{- end }}
+        {{- if .Values.extraEnvVars }}
+        {{- toYaml .Values.extraEnvVars | nindent 8 }}
+        {{- end }}
+        {{- if or .Values.extraEnvVarsCM .Values.extraEnvVarsSecret }}
+        envFrom:
+          {{- if .Values.extraEnvVarsCM }}
+          - configMapRef:
+              name: {{ tpl .Values.extraEnvVarsCM . | quote }}
+          {{- end }}
+          {{- if .Values.extraEnvVarsSecret }}
+          - secretRef:
+              name: {{ tpl .Values.extraEnvVarsSecret . | quote }}
+          {{- end }}
+        {{- end }}
+        ports:
+        - name: http
+          containerPort: {{ .Values.service.port }}
+          protocol: TCP
+        {{- if or $secretMounts $configMapMounts (eq .Values.useConfigMap true) }}
+        volumeMounts:
+        {{- if eq .Values.useConfigMap true }}
+        - name: config
+          mountPath: /app/config
+          readOnly: true
+        {{- end }}
+        {{- range $configMapMounts }}
+        - name: {{ .name }}
+          mountPath: {{ .mountPath }}
+          {{- if .subPath }}
+          subPath: {{ .subPath }}
+          {{- end }}
+          readOnly: true
+        {{- end }}
+        {{- range $secretMounts }}
+        - name: {{ .name }}
+          mountPath: {{ .mountPath }}
+          {{- if .subPath }}
+          subPath: {{ .subPath }}
+          {{- end }}
+          readOnly: true
+        {{- end }}
+        {{- end }}
+        {{- if .Values.livenessProbe.enabled }}
+        livenessProbe:
+          {{- toYaml (omit .Values.livenessProbe "enabled") | nindent 10 }}
+        {{- end }}
+        {{- if .Values.readinessProbe.enabled }}
+        readinessProbe:
+          {{- toYaml (omit .Values.readinessProbe "enabled") | nindent 10 }}
+        {{- end }}
+        resources:
+          {{- toYaml .Values.resources | nindent 10 }}
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
