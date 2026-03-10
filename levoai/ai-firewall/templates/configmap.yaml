@@ -1,0 +1,22 @@
+{{- if .Values.useConfigMap }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Chart.Name }}-config
+  labels:
+    app: {{ .Chart.Name }}
+    release: {{ .Release.Name }}
+data:
+  vigil.yaml: |
+{{- if .Values.config.vigil }}
+{{- $config := .Values.config.vigil }}
+{{- if .Values.tenants }}
+{{- $_ := set $config "tenants" .Values.tenants }}
+{{- end }}
+{{- toYaml $config | nindent 4 }}
+{{- else }}
+    # Vigil AI Firewall Configuration
+    # Using default configuration from container image
+    # Override by providing config.vigil in your values file
+{{- end }}
+{{- end }}
