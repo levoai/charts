@@ -1404,6 +1404,17 @@ entries:
     urls:
     - https://github.com/levoai/charts/releases/download/levoai-ebpf-sensor-0.6.6-pr.40/levoai-ebpf-sensor-0.6.6-pr.40.tgz
     version: 0.6.6-pr.40
+  levoai-firewall:
+  - apiVersion: v2
+    appVersion: 0.1.8
+    created: "2026-03-10T18:48:29.476996557Z"
+    description: AI-native firewall for protecting LLM applications
+    digest: 8a336e3137d7219b6ce5031156d4c506c36bac7df2d629a107fdcf9d8fdfd3af
+    name: levoai-firewall
+    type: application
+    urls:
+    - https://github.com/levoai/charts/releases/download/levoai-firewall-0.1.8/levoai-firewall-0.1.8.tgz
+    version: 0.1.8
   levoai-log-parser:
   - apiVersion: v1
     appVersion: 1.0.0
@@ -10028,4 +10039,4 @@ entries:
     urls:
     - https://github.com/levoai/charts/releases/download/testrunner-2.0.3/testrunner-2.0.3.tgz
     version: 2.0.3
-generated: "2026-03-10T17:31:35.34135517Z"
+generated: "2026-03-10T18:48:29.477730816Z"
