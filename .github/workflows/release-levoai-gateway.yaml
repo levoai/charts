@@ -1,10 +1,10 @@
-name: Release AI Firewall Chart
+name: Release AI Gateway Chart
 
 on:
   workflow_dispatch:
     inputs:
       version:
-        description: Private Chart Version (e.g. 0.1.5); omit to pull latest
+        description: Private Chart Version (e.g. 2.2.0); omit to pull latest
         required: false
         type: string
 
@@ -12,6 +12,6 @@ jobs:
   release:
     uses: ./.github/workflows/release-private-chart.yaml
     with:
-      name: ai-firewall
+      name: levoai-gateway
       version: ${{ inputs.version }}
     secrets: inherit
