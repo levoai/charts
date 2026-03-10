@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
     inputs:
       name:
-        description: name of the chart (e.g. `levoai/levoai-ebpf-sensor`)
+        description: name of the chart (e.g. `levoai-gateway`)
         required: true
         type: string
       version:
@@ -40,6 +40,15 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.LEVOBOT_TOKEN }}
 
+      - name: Validate chart name
+        env:
+          CHART_NAME: ${{ inputs.name }}
+        run: |
+          if ! echo "$CHART_NAME" | grep -qE '^[a-z0-9][a-z0-9-]*$'; then
+            echo "Error: chart name '$CHART_NAME' is invalid. Must match ^[a-z0-9][a-z0-9-]*$"
+            exit 1
+          fi
+
       - uses: 'google-github-actions/auth@v2'
         with:
           credentials_json: ${{ secrets.GCS_SA_KEY }}
@@ -74,7 +83,7 @@ jobs:
             echo "Found tags:"
             git tag --list | tail -n 5
           else
-            echo "⚠️ No tags exist in this repo"
+            echo "No tags exist in this repo"
           fi
 
       - name: Release Chart
@@ -82,7 +91,6 @@ jobs:
         uses: helm/chart-releaser-action@v1.5.0
         with:
           skip_packaging: true
-          #skip_existing: true
         env:
           CR_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
         continue-on-error: true
@@ -94,7 +102,7 @@ jobs:
 
           if [ "${{ steps.release_step.outcome }}" == "failure" ]; then
             if gh release view "$TAG" >/dev/null 2>&1; then
-              echo "Release $TAG already existed - that's why it 'failed'"
+              echo "Release $TAG already existed - that is why it failed"
             else
               echo "Release $TAG truly failed to create"
               exit 1
@@ -109,10 +117,30 @@ jobs:
         env:
           CHART_NAME: ${{ inputs.name }}
         run: |
-          # We're doing this for easy auditability
           rm -rf "levoai/$CHART_NAME"
           tar xzf .cr-release-packages/*.tgz -C levoai/
           git add "levoai/$CHART_NAME"
           git commit -sm "Update $CHART_NAME to latest released version"
-          git pull --rebase origin main
-          git push origin main
+          max_attempts=3
+          attempt=1
+          while [ "$attempt" -le "$max_attempts" ]; do
+            echo "Sync attempt $attempt of $max_attempts..."
+            git fetch origin main
+            if git rebase origin/main; then
+              if git push origin HEAD:main; then
+                echo "Successfully pushed on attempt $attempt."
+                break
+              else
+                echo "Push failed on attempt $attempt."
+              fi
+            else
+              echo "Rebase failed on attempt $attempt."
+              git rebase --abort || true
+            fi
+            if [ "$attempt" -eq "$max_attempts" ]; then
+              echo "Failed to push after $max_attempts attempts."
+              exit 1
+            fi
+            attempt=$((attempt + 1))
+            sleep 5
+          done
