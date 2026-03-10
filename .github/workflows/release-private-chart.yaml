@@ -58,7 +58,11 @@ jobs:
           helm repo update
           mkdir -p .cr-release-packages
           cd .cr-release-packages
-          helm pull levoai-private/${{ inputs.name }} --version "${{ inputs.version }}"
+          VERSION_FLAG=""
+          if [ -n "${{ inputs.version }}" ]; then
+            VERSION_FLAG="--version ${{ inputs.version }}"
+          fi
+          helm pull levoai-private/${{ inputs.name }} $VERSION_FLAG
 
       - name: Check for existing tags
         run: |
