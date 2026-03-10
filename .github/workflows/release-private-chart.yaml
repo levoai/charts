@@ -120,6 +120,10 @@ jobs:
           rm -rf "levoai/$CHART_NAME"
           tar xzf .cr-release-packages/*.tgz -C levoai/
           git add "levoai/$CHART_NAME"
+          if git diff --cached --quiet; then
+            echo "No changes to commit for $CHART_NAME; skipping."
+            exit 0
+          fi
           git commit -sm "Update $CHART_NAME to latest released version"
           max_attempts=3
           attempt=1
