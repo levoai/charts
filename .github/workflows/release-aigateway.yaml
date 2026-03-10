@@ -4,8 +4,8 @@ on:
   workflow_dispatch:
     inputs:
       version:
-        description: Private Chart Version
-        required: false
+        description: Private Chart Version (required, e.g. 2.2.0)
+        required: true
         type: string
 
 jobs:
