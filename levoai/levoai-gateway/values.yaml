@@ -341,16 +341,17 @@ models:
 
   persistence:
     # -- Use PersistentVolumeClaim for models (recommended for production).
-    enabled: false
+    enabled: true
     # -- Use an existing PVC. If not set, a new PVC will be created.
     existingClaim: ""
-    # -- Storage class for the PVC. Use ReadOnlyMany-capable storage.
+    # -- Storage class for the PVC. Default ReadWriteOnce works with most providers (EBS, GKE disk, etc.).
+    # For multi-replica deployments across nodes, use a ReadOnlyMany-capable storage class (e.g. EFS, Azure Files).
     storageClass: ""
     # -- Size of the PVC (models are ~4GB).
     size: 10Gi
     # -- Access modes for the PVC.
     accessModes:
-      - ReadOnlyMany
+      - ReadWriteOnce
 
   # -- Init container configuration.
   initContainer:

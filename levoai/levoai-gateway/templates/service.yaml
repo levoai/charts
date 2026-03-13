@@ -38,7 +38,7 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: {{ include "aigateway.fullname" . }}-proxy
+  name: {{ include "aigateway.fullname" . }}
   namespace: {{ .Release.Namespace }}
   labels:
     {{- include "aigateway.labels" . | nindent 4 }}

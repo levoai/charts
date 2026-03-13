@@ -453,7 +453,7 @@ Deployment name helper - returns correct name based on mode
 {{- if eq (include "aigateway.controller.enabled" .) "true" }}
 {{- printf "%s-controller" (include "aigateway.fullname" .) }}
 {{- else }}
-{{- printf "%s-proxy" (include "aigateway.fullname" .) }}
+{{- include "aigateway.fullname" . }}
 {{- end }}
 {{- end }}
 

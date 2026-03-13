@@ -53,7 +53,7 @@ spec:
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ include "aigateway.fullname" . }}-proxy
+  name: {{ include "aigateway.deploymentName" . }}
   namespace: {{ .Release.Namespace }}
   labels:
     {{- include "aigateway.labels" . | nindent 4 }}
