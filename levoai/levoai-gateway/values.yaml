@@ -359,10 +359,11 @@ models:
       registry: "docker.io"
       # -- Repository for the models image.
       repository: "levoai/ai-guardrails-models"
-      # -- Tag for the models image. Defaults to Chart.AppVersion if not set.
+      # -- Tag for the models image. Defaults to latest if not set.
       tag: ""
-    # -- Pull policy. IfNotPresent is recommended when using pinned tags.
-    imagePullPolicy: IfNotPresent
+    # -- Pull policy. Always is recommended when using the default :latest tag.
+    # Override to IfNotPresent if you pin a specific tag for reproducible installs.
+    imagePullPolicy: Always
     resources:
       requests:
         cpu: "500m"

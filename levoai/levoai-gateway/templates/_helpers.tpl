@@ -393,15 +393,15 @@ Models helpers
 {{- end }}
 {{- $registry := $img.registry | default "docker.io" }}
 {{- $repository := $img.repository | default "levoai/ai-guardrails-models" }}
-{{- $tag := $img.tag | default .Chart.AppVersion }}
+{{- $tag := $img.tag | default "latest" }}
 {{- printf "%s/%s:%s" $registry $repository $tag }}
 {{- end }}
 
 {{- define "aigateway.models.initContainer.imagePullPolicy" -}}
 {{- if and .Values.models .Values.models.initContainer -}}
-{{- .Values.models.initContainer.imagePullPolicy | default "IfNotPresent" }}
+{{- .Values.models.initContainer.imagePullPolicy | default "Always" }}
 {{- else -}}
-{{- "IfNotPresent" }}
+{{- "Always" }}
 {{- end }}
 {{- end }}
 
