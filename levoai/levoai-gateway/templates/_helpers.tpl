@@ -404,7 +404,7 @@ Models helpers
 {{- .Values.models.initContainer.imagePullPolicy | default "IfNotPresent" }}
 {{- else -}}
 {{- "IfNotPresent" }}
-{{- end }}
+{{- end -}}
 {{- end }}
 
 {{- define "aigateway.models.loaderJob.imagePullPolicy" -}}
