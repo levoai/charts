@@ -48,7 +48,7 @@ spec:
       containers:
         - name: models-loader
           image: {{ include "aigateway.models.initContainer.image" . }}
-          imagePullPolicy: {{ include "aigateway.models.initContainer.imagePullPolicy" . }}
+          imagePullPolicy: {{ include "aigateway.models.loaderJob.imagePullPolicy" . }}
           {{- with .Values.securityContext }}
           securityContext:
             {{- toYaml . | nindent 12 }}

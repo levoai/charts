@@ -361,9 +361,10 @@ models:
       repository: "levoai/ai-guardrails-models"
       # -- Tag for the models image. Defaults to latest if not set.
       tag: ""
-    # -- Pull policy. Always is recommended when using the default :latest tag.
-    # Override to IfNotPresent if you pin a specific tag for reproducible installs.
-    imagePullPolicy: Always
+    # -- Pull policy for the per-pod init container (checks .initialized marker; skips copy if present).
+    # IfNotPresent avoids re-pulling a ~GB image on every pod restart since the node cache is sufficient.
+    # The loader Job uses its own pull policy (models.loaderJob.imagePullPolicy) to fetch fresh models.
+    imagePullPolicy: IfNotPresent
     resources:
       requests:
         cpu: "500m"
@@ -374,6 +375,8 @@ models:
 
   # -- Models loader job configuration.
   loaderJob:
+    # -- Pull policy for the models loader Job. Always ensures upgrades fetch the latest models image.
+    imagePullPolicy: Always
     # -- Time to keep completed job (seconds).
     ttlSecondsAfterFinished: 3600
     # -- Maximum retries on failure.

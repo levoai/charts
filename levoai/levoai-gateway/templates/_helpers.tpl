@@ -401,10 +401,18 @@ Models helpers
 
 {{- define "aigateway.models.initContainer.imagePullPolicy" -}}
 {{- if and .Values.models .Values.models.initContainer -}}
-{{- .Values.models.initContainer.imagePullPolicy | default "Always" }}
+{{- .Values.models.initContainer.imagePullPolicy | default "IfNotPresent" }}
+{{- else -}}
+{{- "IfNotPresent" }}
+{{- end }}
+{{- end }}
+
+{{- define "aigateway.models.loaderJob.imagePullPolicy" -}}
+{{- if and .Values.models .Values.models.loaderJob -}}
+{{- .Values.models.loaderJob.imagePullPolicy | default "Always" }}
 {{- else -}}
 {{- "Always" }}
-{{- end }}
+{{- end -}}
 {{- end }}
 
 {{- define "aigateway.models.loaderJob.ttlSecondsAfterFinished" -}}
