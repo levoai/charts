@@ -387,27 +387,32 @@ Models helpers
 {{- end }}
 
 {{- define "aigateway.models.initContainer.image" -}}
-{{- if .Values.models }}
-{{- if .Values.models.initContainer }}
-{{- .Values.models.initContainer.image | default "ghcr.io/levoai/llm-bastion-models:latest" }}
+{{- if and .Values.models .Values.models.initContainer .Values.models.initContainer.image }}
+  {{- if kindIs "string" .Values.models.initContainer.image }}
+    {{- .Values.models.initContainer.image }}
+  {{- else }}
+    {{- $img := .Values.models.initContainer.image }}
+    {{- printf "%s/%s:%s" ($img.registry | default "docker.io") ($img.repository | default "levoai/ai-guardrails-models") ($img.tag | default "latest") }}
+  {{- end }}
 {{- else }}
-{{- "ghcr.io/levoai/llm-bastion-models:latest" }}
-{{- end }}
-{{- else }}
-{{- "ghcr.io/levoai/llm-bastion-models:latest" }}
+  {{- "docker.io/levoai/ai-guardrails-models:latest" }}
 {{- end }}
 {{- end }}
 
 {{- define "aigateway.models.initContainer.imagePullPolicy" -}}
-{{- if .Values.models }}
-{{- if .Values.models.initContainer }}
-{{- .Values.models.initContainer.imagePullPolicy | default "Always" }}
-{{- else }}
-{{- "Always" }}
+{{- if and .Values.models .Values.models.initContainer -}}
+{{- .Values.models.initContainer.imagePullPolicy | default "IfNotPresent" }}
+{{- else -}}
+{{- "IfNotPresent" }}
 {{- end }}
-{{- else }}
-{{- "Always" }}
 {{- end }}
+
+{{- define "aigateway.models.loaderJob.imagePullPolicy" -}}
+{{- if and .Values.models .Values.models.loaderJob -}}
+{{- .Values.models.loaderJob.imagePullPolicy | default "Always" }}
+{{- else -}}
+{{- "Always" }}
+{{- end -}}
 {{- end }}
 
 {{- define "aigateway.models.loaderJob.ttlSecondsAfterFinished" -}}

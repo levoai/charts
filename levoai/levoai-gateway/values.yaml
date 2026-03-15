@@ -355,8 +355,17 @@ models:
 
   # -- Init container configuration.
   initContainer:
-    image: ghcr.io/levoai/llm-bastion-models:latest
-    imagePullPolicy: Always
+    image:
+      # -- Registry for the models image.
+      registry: "docker.io"
+      # -- Repository for the models image.
+      repository: "levoai/ai-guardrails-models"
+      # -- Tag for the models image. Defaults to latest if not set.
+      tag: ""
+    # -- Pull policy for the per-pod init container (checks .initialized marker; skips copy if present).
+    # IfNotPresent avoids re-pulling a ~GB image on every pod restart since the node cache is sufficient.
+    # The loader Job uses its own pull policy (models.loaderJob.imagePullPolicy) to fetch fresh models.
+    imagePullPolicy: IfNotPresent
     resources:
       requests:
         cpu: "500m"
@@ -367,6 +376,8 @@ models:
 
   # -- Models loader job configuration.
   loaderJob:
+    # -- Pull policy for the models loader Job. Always ensures upgrades fetch the latest models image.
+    imagePullPolicy: Always
     # -- Time to keep completed job (seconds).
     ttlSecondsAfterFinished: 3600
     # -- Maximum retries on failure.
