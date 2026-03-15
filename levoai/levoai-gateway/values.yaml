@@ -354,8 +354,15 @@ models:
 
   # -- Init container configuration.
   initContainer:
-    image: ghcr.io/levoai/llm-bastion-models:latest
-    imagePullPolicy: Always
+    image:
+      # -- Registry for the models image.
+      registry: "docker.io"
+      # -- Repository for the models image.
+      repository: "levoai/ai-guardrails-models"
+      # -- Tag for the models image. Defaults to Chart.AppVersion if not set.
+      tag: ""
+    # -- Pull policy. IfNotPresent is recommended when using pinned tags.
+    imagePullPolicy: IfNotPresent
     resources:
       requests:
         cpu: "500m"

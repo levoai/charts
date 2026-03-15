@@ -387,26 +387,21 @@ Models helpers
 {{- end }}
 
 {{- define "aigateway.models.initContainer.image" -}}
-{{- if .Values.models }}
-{{- if .Values.models.initContainer }}
-{{- .Values.models.initContainer.image | default "ghcr.io/levoai/llm-bastion-models:latest" }}
-{{- else }}
-{{- "ghcr.io/levoai/llm-bastion-models:latest" }}
+{{- $img := dict }}
+{{- if and .Values.models .Values.models.initContainer .Values.models.initContainer.image }}
+{{- $img = .Values.models.initContainer.image }}
 {{- end }}
-{{- else }}
-{{- "ghcr.io/levoai/llm-bastion-models:latest" }}
-{{- end }}
+{{- $registry := $img.registry | default "docker.io" }}
+{{- $repository := $img.repository | default "levoai/ai-guardrails-models" }}
+{{- $tag := $img.tag | default .Chart.AppVersion }}
+{{- printf "%s/%s:%s" $registry $repository $tag }}
 {{- end }}
 
 {{- define "aigateway.models.initContainer.imagePullPolicy" -}}
-{{- if .Values.models }}
-{{- if .Values.models.initContainer }}
-{{- .Values.models.initContainer.imagePullPolicy | default "Always" }}
-{{- else }}
-{{- "Always" }}
-{{- end }}
-{{- else }}
-{{- "Always" }}
+{{- if and .Values.models .Values.models.initContainer -}}
+{{- .Values.models.initContainer.imagePullPolicy | default "IfNotPresent" }}
+{{- else -}}
+{{- "IfNotPresent" }}
 {{- end }}
 {{- end }}
 
