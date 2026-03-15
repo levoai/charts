@@ -387,6 +387,14 @@
             "activeDeadlineSeconds": {
               "type": "integer",
               "minimum": 0
+            },
+            "imagePullPolicy": {
+              "type": "string",
+              "enum": [
+                "Always",
+                "IfNotPresent",
+                "Never"
+              ]
             }
           }
         }
