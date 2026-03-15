@@ -387,14 +387,16 @@ Models helpers
 {{- end }}
 
 {{- define "aigateway.models.initContainer.image" -}}
-{{- $img := dict }}
 {{- if and .Values.models .Values.models.initContainer .Values.models.initContainer.image }}
-{{- $img = .Values.models.initContainer.image }}
+  {{- if kindIs "string" .Values.models.initContainer.image }}
+    {{- .Values.models.initContainer.image }}
+  {{- else }}
+    {{- $img := .Values.models.initContainer.image }}
+    {{- printf "%s/%s:%s" ($img.registry | default "docker.io") ($img.repository | default "levoai/ai-guardrails-models") ($img.tag | default "latest") }}
+  {{- end }}
+{{- else }}
+  {{- "docker.io/levoai/ai-guardrails-models:latest" }}
 {{- end }}
-{{- $registry := $img.registry | default "docker.io" }}
-{{- $repository := $img.repository | default "levoai/ai-guardrails-models" }}
-{{- $tag := $img.tag | default "latest" }}
-{{- printf "%s/%s:%s" $registry $repository $tag }}
 {{- end }}
 
 {{- define "aigateway.models.initContainer.imagePullPolicy" -}}
