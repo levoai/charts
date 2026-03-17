@@ -1,0 +1,129 @@
+# Example global configuration
+#global:
+#  levo:
+#    secretMounts:
+#      - name: global-tls-cert
+#        secretName: global-tls
+#        mountPath: /app/global-certs
+#        items:
+#          - key: tls.crt
+#            path: tls.crt
+#          - key: tls.key
+#            path: tls.key
+#    env:
+#      SPRING_APPLICATION_JSON: |-
+#        {
+#          "javax": {
+#            "net": {
+#              "ssl": {
+#                "trustStore": "/var/certs/truststore.jks",
+#                "trustStorePassword": "changeit"
+#              }
+#            }
+#          }
+#        }
+
+global:
+  levo:
+    secretMounts: []
+    configMapMounts: []
+    env: {}
+
+replicaCount: 3
+
+image:
+  registry: docker.io
+  repo: levoai
+  name: levoai-shadownet
+  pullPolicy: IfNotPresent
+  tagOverride: ""
+
+imagePullSecrets: []
+
+  # We usually recommend not to specify default resources and to leave this as a conscious
+  # choice for the user. This also increases chances charts run on environments with little
+  # resources, such as Minikube. If you do want to specify resources, uncomment the following
+  # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
+  # limits:
+  #   cpu: 100m
+  #   memory: 128Mi
+  # requests:
+  #   cpu: 100m
+  #   memory: 128Mi
+
+levoBaseUrl: "https://api.levo.ai"
+key: ""
+orgId: ""
+group: ""  # Optional: worker group name for workload segmentation
+scheduled: false  # Set to true for scheduled worker deployment (appends _scheduled to queue)
+
+resources:
+  requests:
+    cpu: 500m
+    memory: 1Gi
+  limits:
+    cpu: 2000m
+    memory: 2Gi
+
+autoscaling:
+  enabled: false
+
+podSecurityContext: {}
+containerSecurityContext: {}
+
+# Browser (Playwright/Chromium) settings
+# These are required for headless Chrome to work properly in containers
+browser:
+  # Size of /dev/shm (shared memory) - Chrome needs this for rendering
+  shmSize: 1Gi
+  # Size of /tmp tmpfs - Playwright uses this for artifacts
+  tmpSize: 512Mi
+nodeSelector: {}
+tolerations: []
+affinity: {}
+podAnnotations:
+  sidecar.istio.io/inject: "false"
+
+extraEnv: {}
+
+extraEnvVars: []
+
+extraEnvVarsCM: []
+
+extraEnvVarsSecret: []
+
+# Example secretMounts configuration
+#secretMounts:
+#  - name: config-secret
+#    secretName: my-app-config
+#    mountPath: /app/config
+#    defaultMode: 256  # Optional: 0400 in decimal
+#    items:  # Optional: if you want to mount specific keys
+#      - key: config.json
+#        path: config.json
+#      - key: credentials
+#        path: credentials.txt
+#
+#  - name: tls-cert
+#    secretName: my-app-tls
+#    mountPath: /app/certs
+#    items:
+#      - key: tls.crt
+#        path: tls.crt
+#      - key: tls.key
+#        path: tls.key
+
+secretMounts: []
+
+# Example configMapMounts configuration
+#configMapMounts:
+#  - name: config-map
+#    configMapName: my-app-config
+#    mountPath: /app/config
+#    subPath: config.json
+#    defaultMode: 256  # Optional: 0400 in decimal
+#    items:  # Optional: if you want to mount specific keys
+#      - key: config.json
+#        path: config.json
+
+configMapMounts: []
