@@ -1,0 +1,55 @@
+{{- if and .Values.networkPolicy .Values.networkPolicy.enabled }}
+{{- $controllerEnabled := eq (include "aigateway.controller.enabled" .) "true" }}
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: {{ include "aigateway.fullname" . }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "aigateway.labels" . | nindent 4 }}
+spec:
+  podSelector:
+    matchLabels:
+      {{- include "aigateway.selectorLabels" . | nindent 6 }}
+      {{- if $controllerEnabled }}
+      app.kubernetes.io/component: controller
+      {{- else }}
+      app.kubernetes.io/component: proxy
+      {{- end }}
+  policyTypes:
+    {{- if or .Values.networkPolicy.ingress (not .Values.networkPolicy.egress) }}
+    - Ingress
+    {{- end }}
+    {{- if .Values.networkPolicy.egress }}
+    - Egress
+    {{- end }}
+  {{- if .Values.networkPolicy.ingress }}
+  ingress:
+    {{- toYaml .Values.networkPolicy.ingress | nindent 4 }}
+  {{- else }}
+  # Default: Allow ingress from all pods in the same namespace
+  ingress:
+    - from:
+        - podSelector: {}
+      ports:
+        {{- if $controllerEnabled }}
+        - port: {{ .Values.controller.service.ports.agwGrpc }}
+          protocol: TCP
+        - port: {{ .Values.controller.service.ports.health }}
+          protocol: TCP
+        - port: {{ .Values.controller.service.ports.metrics }}
+          protocol: TCP
+        {{- else }}
+        - port: {{ include "aigateway.dataPlane.service.port" . }}
+          protocol: TCP
+        - port: 15000
+          protocol: TCP
+        - port: 9092
+          protocol: TCP
+        {{- end }}
+  {{- end }}
+  {{- if .Values.networkPolicy.egress }}
+  egress:
+    {{- toYaml .Values.networkPolicy.egress | nindent 4 }}
+  {{- end }}
+{{- end }}

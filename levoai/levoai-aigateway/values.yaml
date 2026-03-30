@@ -1,0 +1,462 @@
+# =============================================================================
+# AI Gateway Helm Chart Values
+# =============================================================================
+# Production-ready defaults for Fortune 500 deployments
+# =============================================================================
+
+# -- Global image pull policy and tag defaults (used where individual images do not override).
+image:
+  # -- Default image registry.
+  registry: "docker.io"
+  # -- Default image pull policy.
+  pullPolicy: IfNotPresent
+  # -- Default image tag (uses Chart.AppVersion if not set).
+  tag: ""
+
+# -- Set a list of image pull secrets for Kubernetes to use when pulling container images.
+imagePullSecrets: []
+# Example:
+# imagePullSecrets:
+#   - name: ghcr-registry-secret
+
+# -- Add a name to the default Helm base release name.
+nameOverride: ""
+
+# -- Override the full name of resources created by the Helm chart.
+fullnameOverride: ""
+
+# =============================================================================
+# Service Account Configuration
+# =============================================================================
+serviceAccount:
+  # -- Specify whether a service account should be created.
+  create: true
+  # -- Add annotations to the service account (e.g., for IAM roles).
+  annotations: {}
+  # -- Set the name of the service account to use.
+  name: ""
+
+# =============================================================================
+# Pod Configuration
+# =============================================================================
+
+# -- Add annotations to the deployment.
+deploymentAnnotations: {}
+
+# -- Add annotations to the pods.
+podAnnotations:
+  prometheus.io/scrape: "true"
+  prometheus.io/port: "9092"
+  prometheus.io/path: "/metrics"
+
+# -- Set the pod-level security context.
+# Recommended for production (uncomment):
+podSecurityContext: {}
+# podSecurityContext:
+#   runAsNonRoot: true
+#   runAsUser: 1000
+#   runAsGroup: 1000
+#   fsGroup: 1000
+#   seccompProfile:
+#     type: RuntimeDefault
+
+# -- Set the container-level security context.
+# Recommended for production (uncomment):
+securityContext: {}
+# securityContext:
+#   allowPrivilegeEscalation: false
+#   readOnlyRootFilesystem: true
+#   runAsNonRoot: true
+#   runAsUser: 1000
+#   capabilities:
+#     drop:
+#       - ALL
+
+# -- Configure resource requests and limits (REQUIRED for production).
+# These are sensible defaults - adjust based on your workload.
+resources:
+  requests:
+    cpu: "250m"
+    memory: "512Mi"
+  limits:
+    cpu: "1000m"
+    memory: "1Gi"
+
+# -- Set node selector labels for pod scheduling.
+nodeSelector: {}
+# Example:
+# nodeSelector:
+#   kubernetes.io/arch: amd64
+
+# -- Set tolerations for pod scheduling.
+tolerations: []
+
+# -- Set affinity rules for pod scheduling.
+# Default enables pod anti-affinity for HA.
+affinity: {}
+# Recommended for production (uncomment):
+# affinity:
+#   podAntiAffinity:
+#     preferredDuringSchedulingIgnoredDuringExecution:
+#       - weight: 100
+#         podAffinityTerm:
+#           labelSelector:
+#             matchLabels:
+#               app.kubernetes.io/name: aigateway
+#           topologyKey: kubernetes.io/hostname
+
+# -- Topology spread constraints for multi-zone HA.
+topologySpreadConstraints: []
+# Recommended for production (uncomment):
+# topologySpreadConstraints:
+#   - maxSkew: 1
+#     topologyKey: topology.kubernetes.io/zone
+#     whenUnsatisfiable: ScheduleAnyway
+#     labelSelector:
+#       matchLabels:
+#         app.kubernetes.io/name: aigateway
+
+# -- Priority class name for the pods.
+priorityClassName: ""
+# For critical workloads, use: system-cluster-critical
+
+# -- Termination grace period in seconds.
+terminationGracePeriodSeconds: 60
+
+# =============================================================================
+# Pod Disruption Budget (PDB)
+# =============================================================================
+podDisruptionBudget:
+  # -- Enable PDB for high availability.
+  enabled: true
+  # -- Minimum available pods during disruption.
+  minAvailable: 1
+  # -- Maximum unavailable pods during disruption (alternative to minAvailable).
+  # maxUnavailable: 1
+
+# =============================================================================
+# Horizontal Pod Autoscaler (HPA)
+# =============================================================================
+autoscaling:
+  # -- Enable horizontal pod autoscaling.
+  enabled: false
+  # -- Minimum number of replicas.
+  minReplicas: 2
+  # -- Maximum number of replicas.
+  maxReplicas: 10
+  # -- Target CPU utilization percentage.
+  targetCPUUtilizationPercentage: 70
+  # -- Target memory utilization percentage (optional).
+  targetMemoryUtilizationPercentage: 80
+  # -- Custom metrics for scaling (optional).
+  customMetrics: []
+
+# =============================================================================
+# Controller (Control Plane) Configuration - DEPRECATED
+# =============================================================================
+# Controller Configuration (DEPRECATED)
+# =============================================================================
+# NOTE: Controller (kgateway) is deprecated. Use standalone mode with
+# config.saas.enabled=true or config.configMap.enabled=true instead.
+#
+# UPGRADE NOTICE:
+# - Previous chart versions enabled the controller by default.
+# - From this version onward, the default is controller.enabled=false (standalone mode).
+# - If you currently rely on the controller/CRD-based workflow, you MUST set:
+#       controller:
+#         enabled: true
+#   to preserve existing behavior, or migrate to standalone mode before upgrading.
+controller:
+  # -- Enable controller deployment (deprecated, set to false for standalone mode).
+  enabled: false
+  # -- Set the number of controller pod replicas.
+  replicaCount: 1
+  # -- Set the log level for the controller.
+  logLevel: info
+
+  # -- Configure the controller container image (kgateway Go binary).
+  image:
+    # -- Set the image registry for the controller.
+    registry: "docker.io"
+    # -- Set the image repository for the controller (kgateway Go binary).
+    repository: levoai/agentgateway-controller
+    # -- Set the image pull policy for the controller.
+    pullPolicy: IfNotPresent
+    # -- Set the image tag for the controller.
+    tag: "v2.3.0-main"
+
+  # -- Configure the controller service.
+  service:
+    # -- Set the service type for the controller.
+    type: ClusterIP
+    # -- Set the service ports.
+    ports:
+      agwGrpc: 9978
+      health: 9093
+      metrics: 9092
+
+  # -- Add extra environment variables to the controller container.
+  extraEnv: {}
+  # Example:
+  # extraEnv:
+  #   LOG_FORMAT: json
+
+  # -- Configure TLS settings for the xDS gRPC servers.
+  xds:
+    tls:
+      # -- Enable TLS encryption for xDS communication.
+      enabled: false
+      # -- Secret name containing TLS certificates.
+      secretName: aigateway-xds-cert
+
+  # -- Configure liveness probe.
+  livenessProbe:
+    enabled: true
+    httpGet:
+      path: /healthz
+      port: health
+    initialDelaySeconds: 30
+    periodSeconds: 10
+    timeoutSeconds: 5
+    failureThreshold: 3
+
+  # -- Configure readiness probe.
+  readinessProbe:
+    enabled: true
+    httpGet:
+      path: /readyz
+      port: health
+    initialDelaySeconds: 1
+    periodSeconds: 10
+    timeoutSeconds: 5
+    failureThreshold: 3
+
+  # -- Configure startup probe.
+  startupProbe:
+    enabled: true
+    httpGet:
+      path: /readyz
+      port: health
+    initialDelaySeconds: 0
+    periodSeconds: 1
+    failureThreshold: 120
+
+  # -- Configure lifecycle hooks for graceful shutdown.
+  lifecycle:
+    preStop:
+      exec:
+        command:
+          - /bin/sh
+          - -c
+          - "sleep 10"
+
+  # -- Rollout strategy configuration.
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+
+# =============================================================================
+# Data Plane Configuration
+# =============================================================================
+# These settings control what image the control plane uses when auto-deploying data plane pods.
+# The data plane is the aigateway Rust binary that handles actual traffic.
+dataPlane:
+  # -- Set the number of data plane pod replicas (used in standalone mode).
+  replicaCount: 1
+
+  # -- Admin server bind address (ADMIN_ADDR). Must be 0.0.0.0:15000 for the Scan API
+  # (/v1/scan/input, /v1/scan/output) and other admin endpoints to be reachable via the
+  # Service on port 15000. Use 127.0.0.1:15000 only if you do not expose the admin port.
+  adminAddr: "0.0.0.0:15000"
+
+  image:
+    # -- Set the image registry for the data plane.
+    registry: "docker.io"
+    # -- Set the image repository for the data plane (aigateway Rust binary).
+    repository: "levoai/ai-gateway"
+    # -- Set the image tag for the data plane (uses Chart.AppVersion if not set).
+    tag: ""
+    # -- Set the image pull policy for the data plane.
+    pullPolicy: IfNotPresent
+
+  # -- Configure the data plane service.
+  service:
+    # -- Set the service type.
+    type: LoadBalancer
+    # -- Set the service port.
+    port: 8080
+
+# =============================================================================
+# Configuration Source
+# =============================================================================
+# Choose between SaaS (primary) or ConfigMap (fallback) configuration.
+# IMPORTANT: At least one must be enabled when controller.enabled=false.
+config:
+  # -- Levo telemetry configuration.
+  # These values are written to every OTLP span as resource attributes so the
+  # Levo satellite can route traffic to the correct organisation and environment.
+  levo:
+    # -- Levo Satellite / collector URL (LEVOAI_SATELLITE_URL).
+    # Set to the OTLP HTTP endpoint of the levoai-collector, e.g. http://levoai-collector:4325.
+    satelliteUrl: ""
+    # -- Levo organisation ID (LEVOAI_ORG_ID). Required for satellite routing.
+    orgId: ""
+    # -- Deployment environment name, e.g. "production", "staging" (LEVOAI_ENV_NAME).
+    envName: ""
+
+  # -- SaaS control plane configuration (primary, recommended).
+  # Proxy polls Levo platform for routes, backends, and policies.
+  # Enabled by default - provide environmentId and refreshToken.
+  saas:
+    # -- Enable SaaS control plane (recommended for production).
+    enabled: true
+    # -- Levo platform URL (use api.dev.levo.ai for dev/spec-building clusters).
+    url: "https://api.dev.levo.ai"
+    # -- Environment ID from Levo platform (required).
+    environmentId: ""
+    # -- Refresh token for authentication (set via --set or external secret).
+    refreshToken: ""
+    # -- Configuration polling interval.
+    pollInterval: "60s"
+    # -- Alert webhook URL for sending guardrail alerts to Levo platform.
+    alertWebhookUrl: ""
+
+  # -- ConfigMap configuration (fallback for local/airgapped deployments).
+  configMap:
+    # -- Enable ConfigMap-based configuration.
+    enabled: false
+    # -- Name of the ConfigMap containing config.yaml.
+    name: "agentgateway-config"
+    # -- Create the ConfigMap from inline data.
+    create: false
+    # -- Inline configuration data (used if create: true).
+    data: |
+      binds:
+        - port: 8080
+          protocol: HTTP
+          listeners:
+            - name: http
+              routes: []
+
+# =============================================================================
+# ML Models Configuration (Guardrails)
+# =============================================================================
+# Configure ML models storage for guardrails scanners.
+# For production, use persistence.enabled=true (PVC is automatically populated by a Job).
+models:
+  # -- Enable guardrails ML models support.
+  enabled: true
+  # -- Path where models are mounted in the container.
+  mountPath: /opt/models
+
+  persistence:
+    # -- Use PersistentVolumeClaim for models (recommended for production).
+    enabled: true
+    # -- Use an existing PVC. If not set, a new PVC will be created.
+    existingClaim: ""
+    # -- Storage class for the PVC. For rolling updates, use a ReadWriteMany-capable class
+    # (e.g. EFS, Azure Files) and set accessModes to [ReadWriteMany]. The default ReadWriteOnce
+    # works with most providers but requires Recreate strategy to avoid volume deadlocks.
+    storageClass: ""
+    # -- Size of the PVC (models are ~4GB).
+    size: 10Gi
+    # -- Access modes for the PVC. ReadWriteMany avoids rolling update deadlocks where the
+    # new pod cannot mount the volume while the old pod still holds it. Requires a
+    # ReadWriteMany-capable storageClass (e.g. EFS, Azure Files, NFS).
+    accessModes:
+      - ReadWriteMany
+
+  # -- Init container configuration.
+  initContainer:
+    image:
+      # -- Registry for the models image.
+      registry: "docker.io"
+      # -- Repository for the models image.
+      repository: "levoai/ai-guardrails-models"
+      # -- Tag for the models image. Defaults to latest if not set.
+      tag: ""
+    # -- Pull policy for the per-pod init container (checks .initialized marker; skips copy if present).
+    # IfNotPresent avoids re-pulling a ~GB image on every pod restart since the node cache is sufficient.
+    # The loader Job uses its own pull policy (models.loaderJob.imagePullPolicy) to fetch fresh models.
+    imagePullPolicy: IfNotPresent
+    resources:
+      requests:
+        cpu: "500m"
+        memory: "1Gi"
+      limits:
+        cpu: "1"
+        memory: "2Gi"
+
+  # -- Models loader job configuration.
+  loaderJob:
+    # -- Pull policy for the models loader Job. Always ensures upgrades fetch the latest models image.
+    imagePullPolicy: Always
+    # -- Time to keep completed job (seconds).
+    ttlSecondsAfterFinished: 3600
+    # -- Maximum retries on failure.
+    backoffLimit: 3
+    # -- Maximum time for job to complete (seconds).
+    activeDeadlineSeconds: 1800
+
+# =============================================================================
+# Inference Extension
+# =============================================================================
+inferenceExtension:
+  # -- Enable Inference Extension support.
+  enabled: false
+
+# =============================================================================
+# Discovery Configuration
+# =============================================================================
+# -- List of namespace selectors for config discovery.
+discoveryNamespaceSelectors: []
+# Example:
+# discoveryNamespaceSelectors:
+#   - matchLabels:
+#       aigateway-enabled: "true"
+
+# -- Map of GatewayClass names to GatewayParameters references.
+gatewayClassParametersRefs: {}
+
+# =============================================================================
+# Monitoring Configuration
+# =============================================================================
+serviceMonitor:
+  # -- Enable ServiceMonitor for Prometheus Operator.
+  enabled: false
+  # -- ServiceMonitor namespace (defaults to release namespace).
+  namespace: ""
+  # -- Additional labels for the ServiceMonitor.
+  labels: {}
+  # -- Scrape interval.
+  interval: 30s
+  # -- Scrape timeout.
+  scrapeTimeout: 10s
+  # -- Honor labels from the target.
+  honorLabels: false
+  # -- Metric relabeling rules.
+  metricRelabelings: []
+  # -- Target relabeling rules.
+  relabelings: []
+
+# =============================================================================
+# Network Policy
+# =============================================================================
+networkPolicy:
+  # -- Enable network policy.
+  enabled: false
+  # -- Ingress rules.
+  ingress: []
+  # -- Egress rules.
+  egress: []
+  # Example for restrictive policy:
+  # ingress:
+  #   - from:
+  #       - namespaceSelector:
+  #           matchLabels:
+  #             name: istio-system
+  #     ports:
+  #       - port: 9978
+  #         protocol: TCP

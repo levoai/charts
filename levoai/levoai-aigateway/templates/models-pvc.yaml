@@ -1,0 +1,22 @@
+{{- $modelsEnabled := eq (include "aigateway.models.enabled" .) "true" }}
+{{- $modelsPersistenceEnabled := eq (include "aigateway.models.persistence.enabled" .) "true" }}
+{{- $existingClaim := include "aigateway.models.persistence.existingClaim" . }}
+{{- if and $modelsEnabled $modelsPersistenceEnabled (not $existingClaim) }}
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ include "aigateway.models.pvcName" . }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "aigateway.labels" . | nindent 4 }}
+spec:
+  accessModes:
+    {{ include "aigateway.models.persistence.accessModes" . | nindent 4 }}
+  {{- $storageClass := include "aigateway.models.persistence.storageClass" . }}
+  {{- if $storageClass }}
+  storageClassName: {{ $storageClass }}
+  {{- end }}
+  resources:
+    requests:
+      storage: {{ include "aigateway.models.persistence.size" . }}
+{{- end }}

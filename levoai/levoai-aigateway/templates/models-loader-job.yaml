@@ -1,0 +1,124 @@
+{{- $modelsEnabled := eq (include "aigateway.models.enabled" .) "true" }}
+{{- $modelsPersistenceEnabled := eq (include "aigateway.models.persistence.enabled" .) "true" }}
+{{- if and $modelsEnabled $modelsPersistenceEnabled }}
+{{- /*
+This Job populates the PVC with models from the models image.
+It runs once on install/upgrade and copies models to the PVC.
+After completion, pods can mount the PVC directly without the slow init container.
+
+Model updates are automatic: the job computes a content hash of the source models
+and compares it to the hash stored on the PVC. If they differ, models are re-copied.
+This means pushing a new image to the same tag (e.g., :latest) will trigger an update.
+
+To force re-copy models (e.g., if PVC is corrupted), delete the marker file:
+  kubectl exec -it <pod-with-pvc> -- rm /opt/models/.models-content-hash
+Then upgrade the release.
+*/}}
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ include "aigateway.fullname" . }}-models-loader
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "aigateway.labels" . | nindent 4 }}
+    app.kubernetes.io/component: models-loader
+  annotations:
+    "helm.sh/hook": post-install,post-upgrade
+    "helm.sh/hook-weight": "-5"
+    "helm.sh/hook-delete-policy": before-hook-creation
+spec:
+  ttlSecondsAfterFinished: {{ include "aigateway.models.loaderJob.ttlSecondsAfterFinished" . }}
+  backoffLimit: {{ include "aigateway.models.loaderJob.backoffLimit" . }}
+  activeDeadlineSeconds: {{ include "aigateway.models.loaderJob.activeDeadlineSeconds" . }}
+  template:
+    metadata:
+      labels:
+        {{- include "aigateway.selectorLabels" . | nindent 8 }}
+        app.kubernetes.io/component: models-loader
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.podSecurityContext }}
+      securityContext:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      restartPolicy: OnFailure
+      containers:
+        - name: models-loader
+          image: {{ include "aigateway.models.initContainer.image" . }}
+          imagePullPolicy: {{ include "aigateway.models.loaderJob.imagePullPolicy" . }}
+          {{- with .Values.securityContext }}
+          securityContext:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          resources:
+            {{- if and .Values.models .Values.models.initContainer .Values.models.initContainer.resources }}
+            {{- toYaml .Values.models.initContainer.resources | nindent 12 }}
+            {{- else }}
+            requests:
+              cpu: "500m"
+              memory: "1Gi"
+            limits:
+              cpu: "1"
+              memory: "2Gi"
+            {{- end }}
+          command:
+            - /bin/sh
+            - -c
+            - |
+              set -e
+              MOUNT_PATH="{{ include "aigateway.models.mountPath" . }}"
+              MARKER_FILE="${MOUNT_PATH}/.models-content-hash"
+
+              # Compute content hash of source models (hash of all file sizes and names)
+              # This detects when image content changes, even with same tag like :latest
+              echo "Computing content hash of source models..."
+              SOURCE_HASH=$(find /models -type f -exec ls -la {} \; 2>/dev/null | sort | sha256sum | cut -c1-16)
+              echo "Source models hash: ${SOURCE_HASH}"
+
+              # Check if PVC already has models with same hash
+              if [ -f "${MARKER_FILE}" ]; then
+                EXISTING_HASH=$(cat "${MARKER_FILE}")
+                echo "Existing models hash: ${EXISTING_HASH}"
+                if [ "${SOURCE_HASH}" = "${EXISTING_HASH}" ]; then
+                  echo "Models are up to date, skipping copy."
+                  exit 0
+                fi
+                echo "Models hash mismatch - updating models..."
+              else
+                echo "No existing models found - copying models..."
+              fi
+
+              # Copy models to PVC
+              echo "Copying models to PVC..."
+              if cp -r /models/. "${MOUNT_PATH}/"; then
+                # Store the content hash
+                echo "${SOURCE_HASH}" > "${MARKER_FILE}"
+                echo "Models loaded successfully!"
+                ls -la "${MOUNT_PATH}/"
+              else
+                echo "Failed to copy models to PVC" >&2
+                exit 1
+              fi
+          volumeMounts:
+            - name: models
+              mountPath: {{ include "aigateway.models.mountPath" . }}
+      volumes:
+        - name: models
+          persistentVolumeClaim:
+            claimName: {{ include "aigateway.models.pvcName" . }}
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+{{- end }}
