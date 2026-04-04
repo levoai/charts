@@ -140,12 +140,6 @@ spec:
             - containerPort: {{ include "aigateway.dataPlane.service.port" . }}
               name: http
               protocol: TCP
-            - containerPort: 15000
-              name: admin
-              protocol: TCP
-            - containerPort: 9092
-              name: metrics
-              protocol: TCP
           env:
             {{- if $saasEnabled }}
             - name: LEVOAI_BASE_URL
@@ -181,19 +175,14 @@ spec:
             - name: LEVOAI_ENV_NAME
               value: {{ .Values.config.levo.envName | quote }}
             {{- end }}
-            {{- if .Values.config.levo.orgId }}
-            - name: LEVOAI_ORG_ID
-              value: {{ .Values.config.levo.orgId | quote }}
-            {{- end }}
-            {{- if .Values.config.levo.envName }}
-            - name: LEVOAI_ENV_NAME
-              value: {{ .Values.config.levo.envName | quote }}
-            {{- end }}
             {{- if .Values.config.levo.satelliteUrl }}
             - name: LEVOAI_SATELLITE_URL
               value: {{ .Values.config.levo.satelliteUrl | quote }}
             {{- end }}
-            # Admin server: readyz, config dumps, /v1/scan/input, /v1/scan/output (see dataPlane.adminAddr).
+            # Forward proxy: transparently proxy all outbound traffic (not just registered routes).
+            - name: FORWARD_PROXY_ENABLED
+              value: {{ dig "dataPlane" "forwardProxy" "enabled" true (.Values | toJson | fromJson) | quote }}
+            # Admin server: readyz, config dumps, graceful shutdown (see dataPlane.adminAddr).
             - name: ADMIN_ADDR
               value: {{ include "aigateway.dataPlane.adminAddr" . | quote }}
           resources:

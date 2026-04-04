@@ -50,14 +50,6 @@ spec:
       targetPort: http
       protocol: TCP
       name: http
-    - port: 15000
-      targetPort: admin
-      protocol: TCP
-      name: admin
-    - port: 9092
-      targetPort: metrics
-      protocol: TCP
-      name: metrics
   selector:
     {{- include "aigateway.selectorLabels" . | nindent 4 }}
     app.kubernetes.io/component: proxy

@@ -44,10 +44,7 @@ serviceAccount:
 deploymentAnnotations: {}
 
 # -- Add annotations to the pods.
-podAnnotations:
-  prometheus.io/scrape: "true"
-  prometheus.io/port: "9092"
-  prometheus.io/path: "/metrics"
+podAnnotations: {}
 
 # -- Set the pod-level security context.
 # Recommended for production (uncomment):
@@ -76,11 +73,11 @@ securityContext: {}
 # These are sensible defaults - adjust based on your workload.
 resources:
   requests:
-    cpu: "250m"
-    memory: "512Mi"
+    cpu: "500m"
+    memory: "2Gi"
   limits:
     cpu: "1000m"
-    memory: "1Gi"
+    memory: "4Gi"
 
 # -- Set node selector labels for pod scheduling.
 nodeSelector: {}
@@ -266,9 +263,17 @@ dataPlane:
   # -- Set the number of data plane pod replicas (used in standalone mode).
   replicaCount: 1
 
-  # -- Admin server bind address (ADMIN_ADDR). Must be 0.0.0.0:15000 for the Scan API
-  # (/v1/scan/input, /v1/scan/output) and other admin endpoints to be reachable via the
-  # Service on port 15000. Use 127.0.0.1:15000 only if you do not expose the admin port.
+  # -- Forward proxy configuration.
+  forwardProxy:
+    # -- Enable forward proxy mode. When true, the gateway transparently forwards
+    # all outbound traffic (not just registered routes). Gateway-level policies
+    # (classification, governance, inspection) apply to all forwarded traffic.
+    enabled: true
+
+  # -- Admin server bind address (ADMIN_ADDR). Used internally for health checks
+  # (/healthz/ready), config dumps, and graceful shutdown (/quitquitquit).
+  # This port is not exposed via the Service — set to 0.0.0.0:15000 so that
+  # Kubernetes readiness probes can reach it from within the cluster.
   adminAddr: "0.0.0.0:15000"
 
   image:
@@ -284,7 +289,7 @@ dataPlane:
   # -- Configure the data plane service.
   service:
     # -- Set the service type.
-    type: LoadBalancer
+    type: ClusterIP
     # -- Set the service port.
     port: 8080
 
@@ -387,7 +392,7 @@ models:
         memory: "1Gi"
       limits:
         cpu: "1"
-        memory: "2Gi"
+        memory: "4Gi"
 
   # -- Models loader job configuration.
   loaderJob:
