@@ -12,6 +12,6 @@ jobs:
   release:
     uses: ./.github/workflows/release-private-chart.yaml
     with:
-      name: aigateway-sidecar-injector
+      name: levoai-sidecar-injector
       version: ${{ inputs.version }}
     secrets: inherit
