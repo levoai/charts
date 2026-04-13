@@ -65,6 +65,37 @@ entries:
       artifacthub.io/category: security
       artifacthub.io/license: Apache-2.0
     apiVersion: v2
+    appVersion: 0.13.5
+    created: "2026-04-13T06:27:02.872944152Z"
+    description: A Helm chart for the AI Gateway - an intelligent proxy for AI/LLM
+      traffic with guardrails
+    digest: a043015e1fcde6a2ce47160865fcfc650716357cecddc255e28ea036d4754e0d
+    home: https://github.com/levoai/aigateway
+    keywords:
+    - ai
+    - llm
+    - gateway
+    - proxy
+    - guardrails
+    - security
+    - anthropic
+    - openai
+    kubeVersion: '>=1.25.0-0'
+    maintainers:
+    - email: support@levo.ai
+      name: Levo AI
+      url: https://levo.ai
+    name: levoai-aigateway
+    sources:
+    - https://github.com/levoai/aigateway
+    type: application
+    urls:
+    - https://github.com/levoai/charts/releases/download/levoai-aigateway-0.13.5/levoai-aigateway-0.13.5.tgz
+    version: 0.13.5
+  - annotations:
+      artifacthub.io/category: security
+      artifacthub.io/license: Apache-2.0
+    apiVersion: v2
     appVersion: 0.13.4-20260408.a10ad42
     created: "2026-04-08T15:24:07.543214774Z"
     description: A Helm chart for the AI Gateway - an intelligent proxy for AI/LLM
@@ -10504,4 +10535,4 @@ entries:
     urls:
     - https://github.com/levoai/charts/releases/download/testrunner-2.0.3/testrunner-2.0.3.tgz
     version: 2.0.3
-generated: "2026-04-08T15:25:05.693991962Z"
+generated: "2026-04-13T06:27:02.873669247Z"
