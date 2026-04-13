@@ -2,7 +2,7 @@ annotations:
   artifacthub.io/category: security
   artifacthub.io/license: Apache-2.0
 apiVersion: v2
-appVersion: 0.13.4-20260408.a10ad42
+appVersion: 0.13.5
 description: A Helm chart for the AI Gateway - an intelligent proxy for AI/LLM traffic
   with guardrails
 home: https://github.com/levoai/aigateway
@@ -24,4 +24,4 @@ name: levoai-aigateway
 sources:
 - https://github.com/levoai/aigateway
 type: application
-version: 0.13.4
+version: 0.13.5
