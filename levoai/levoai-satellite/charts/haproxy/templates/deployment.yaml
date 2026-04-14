@@ -169,8 +169,11 @@ spec:
           {{- end }}
           {{- end }}
           volumeMounts:
+            {{- if or .Values.existingConfigmap .Values.createConfigmap }}
             - name: haproxy-conf
-              mountPath: /bitnami/haproxy/conf
+              mountPath: /levo/haproxy-override.cfg
+              subPath: haproxy.cfg
+            {{- end }}
             - name: empty-dir
               mountPath: /tmp
               subPath: tmp-dir
@@ -183,11 +186,13 @@ spec:
         {{- include "common.tplvalues.render" ( dict "value" .Values.sidecars "context" $) | nindent 8 }}
         {{- end }}
       volumes:
-        - name: empty-dir
-          emptyDir: {}
+        {{- if or .Values.existingConfigmap .Values.createConfigmap }}
         - name: haproxy-conf
           configMap:
-            name: {{ include "haproxy.configMapName"  . }}
+            name: {{ include "haproxy.configMapName" . }}
+        {{- end }}
+        - name: empty-dir
+          emptyDir: {}
         - name: levo
           emptyDir: {}
         {{- if .Values.extraVolumes }}

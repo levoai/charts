@@ -508,6 +508,10 @@ nodeAffinityPreset:
   ##   - e2e-az2
   ##
   values: []
+## @param createConfigmap Create configmap with HAProxy configuration
+## Set to true only if you want to override the default config in the image
+##
+createConfigmap: false
 ## @param configuration [string] haproxy configuration
 ## Taken from haproxytech/haproxy chart: https://github.com/haproxytech/helm-charts/tree/main/haproxy
 ##

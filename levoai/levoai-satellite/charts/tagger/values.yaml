@@ -87,7 +87,7 @@ otel:
 # When enabled, models are copied from the models image to a shared volume
 # When disabled (default), models are loaded from the satellite image
 modelsImage:
-  enabled: false
+  enabled: true
   registry: docker.io
   repository: levoai/ner-models
   tag: latest
