@@ -1,6 +1,6 @@
 apiVersion: v2
-appVersion: 1.3.64
+appVersion: 1.3.69
 description: Levo.ai ShadowNet DAST Scanner
 name: levoai-shadownet
 type: application
-version: 1.3.64
+version: 1.3.69
