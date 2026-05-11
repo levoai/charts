@@ -58,6 +58,31 @@ global:
       - "kube-probe/"
       - "Prometheus/"
       - "Blackbox Exporter/"
+      # Decryption pipeline — uncomment and fill in to enable
+      # enable_decryption_pipeline: true
+      # decryption_pipeline:
+      #   enabled: true
+      #   upstreams:
+      #     "api.bank.com:443":                          # must match upstreamId above
+      #       script_path: /opt/levoai/decrypt/script.py
+      #       key_path: /opt/levoai/keys/private.pem
+      #       timeout_seconds: 10
+      #       decrypt_headers: false
+      #       requirements_path: /opt/levoai/decrypt/requirements.txt
+  decryptionPipeline:
+    enabled: false
+    # Host:port that must match the captured traffic's :authority / Host header.
+    # NOTE: this value is NOT auto-wired into templates; you must also set the
+    # matching key in global.levoai_config_override.decryption_pipeline.upstreams.
+    upstreamId: ""
+    # Inline Python decryption script (multiline string)
+    script: ""
+    # pip requirements for the script (multiline string, e.g. "python-jose[cryptography]==3.3.0")
+    requirements: ""
+    # Pre-existing K8s Secret holding the RSA private key PEM
+    existingKeySecret:
+      name: ""
+      key: "private.pem"
   nodeSelector: {}
   tolerations: []
   podAnnotations: {}

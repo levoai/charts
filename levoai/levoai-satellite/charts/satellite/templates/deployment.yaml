@@ -33,6 +33,8 @@ spec:
       serviceAccountName: {{ include "satellite.serviceAccountName" . }}
       securityContext:
         {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      {{- $dp := .Values.global.decryptionPipeline | default dict }}
+      {{- $dpEnabled := $dp.enabled | default false }}
       {{- if or .Values.global.useRabbitmq .Values.global.useKafka }}
       initContainers:
         {{- if .Values.global.useRabbitmq }}
@@ -129,6 +131,15 @@ spec:
                   name: levoai-rabbitmq-auth
                   key: rabbitmq-password
             {{- end }}
+          {{- if $dpEnabled }}
+          volumeMounts:
+            - name: decrypt-script
+              mountPath: /opt/levoai/decrypt
+              readOnly: true
+            - name: decrypt-key
+              mountPath: /opt/levoai/keys
+              readOnly: true
+          {{- end }}
           livenessProbe:
             httpGet:
               path: /_status
@@ -160,4 +171,18 @@ spec:
       {{- with .Values.global.tolerations }}
       tolerations:
         {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- if $dpEnabled }}
+      volumes:
+        - name: decrypt-script
+          configMap:
+            name: "{{ template "satellite.fullname" . }}-decrypt"
+            defaultMode: 0550
+        - name: decrypt-key
+          secret:
+            secretName: {{ required "global.decryptionPipeline.existingKeySecret.name is required when decryptionPipeline.enabled is true" $dp.existingKeySecret.name | quote }}
+            defaultMode: 0440
+            items:
+              - key: {{ $dp.existingKeySecret.key | default "private.pem" | quote }}
+                path: "private.pem"
       {{- end }}

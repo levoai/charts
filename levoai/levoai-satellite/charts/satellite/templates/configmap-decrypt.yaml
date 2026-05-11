@@ -1,0 +1,15 @@
+{{- $dp := .Values.global.decryptionPipeline | default dict }}
+{{- if $dp.enabled }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: "{{ template "satellite.fullname" . }}-decrypt"
+  labels:
+    app: {{ template "satellite.name" . }}
+    {{- include "satellite.labels" . | nindent 4 }}
+data:
+  script.py: |
+{{ $dp.script | default "" | indent 4 }}
+  requirements.txt: |
+{{ $dp.requirements | default "" | indent 4 }}
+{{- end }}

@@ -33,7 +33,7 @@ podAnnotations: {}
 podSecurityContext:
   runAsNonRoot: true
   runAsUser: 1001
-  # fsGroup: 2000
+  fsGroup: 1001
 
 securityContext: {}
   # capabilities:
