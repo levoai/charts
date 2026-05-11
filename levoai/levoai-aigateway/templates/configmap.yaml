@@ -1,6 +1,10 @@
 {{- $configMapEnabled := eq (include "aigateway.config.configMap.enabled" .) "true" }}
 {{- $configMapCreate := eq (include "aigateway.config.configMap.create" .) "true" }}
 {{- if and $configMapEnabled $configMapCreate }}
+{{- $gi := .Values.config.guardrailIngest }}
+{{- $oi := .Values.config.observabilityIngest }}
+{{- $hasGI := and $gi $gi.endpoint }}
+{{- $hasOI := and $oi $oi.endpoint }}
 apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -10,5 +14,29 @@ metadata:
     {{- include "aigateway.labels" . | nindent 4 }}
 data:
   config.yaml: |
+{{- if or $hasGI $hasOI }}
+    {{- /* Merge ingest fields into user-supplied configMap.data by parsing its
+           YAML, adding guardrailIngest/observabilityIngest to any existing
+           top-level `config:` map (or creating one), then re-emitting. Prevents
+           duplicate top-level `config:` keys when operator data already has one. */ -}}
+    {{- $parsed := fromYaml (.Values.config.configMap.data | default "") }}
+    {{- if not $parsed }}{{- $parsed = dict }}{{- end }}
+    {{- $cfg := index $parsed "config" | default dict }}
+    {{- if $hasGI }}
+      {{- $_ := set $cfg "guardrailIngest" (dict
+            "endpoint" $gi.endpoint
+            "batchSize" (int ($gi.batchSize | default 10))
+            "flushInterval" ($gi.flushInterval | default "5s")) }}
+    {{- end }}
+    {{- if $hasOI }}
+      {{- $_ := set $cfg "observabilityIngest" (dict
+            "endpoint" $oi.endpoint
+            "batchSize" (int ($oi.batchSize | default 10))
+            "flushInterval" ($oi.flushInterval | default "5s")) }}
+    {{- end }}
+    {{- $_ := set $parsed "config" $cfg }}
+{{ $parsed | toYaml | indent 4 }}
+{{- else }}
 {{ .Values.config.configMap.data | indent 4 }}
+{{- end }}
 {{- end }}

@@ -304,7 +304,13 @@ config:
   # Levo satellite can route traffic to the correct organisation and environment.
   levo:
     # -- Levo Satellite / collector URL (LEVOAI_SATELLITE_URL).
-    # Set to the OTLP HTTP endpoint of the levoai-collector, e.g. http://levoai-collector:4325.
+    # Set to the standard OTLP HTTP endpoint of the levoai-collector on port 4318.
+    # The collector forwards traces through levoai_merge → levoai_satellite for API spec building.
+    # Example: http://levoai-collector.levoai.svc.cluster.local:4318
+    # IMPORTANT: port 4318 is HTTP/protobuf; also set `tracing.otlpProtocol: http` in the
+    # effective gateway config, since the gateway defaults to OTLP gRPC (port 4317).
+    # Note: only takes effect when tracing is enabled in the effective gateway config
+    # (e.g. via SaaS-delivered config or a config file/ConfigMap with a `tracing:` block).
     satelliteUrl: ""
     # -- Levo organisation ID (LEVOAI_ORG_ID). Required for satellite routing.
     orgId: ""
@@ -327,6 +333,37 @@ config:
     pollInterval: "60s"
     # -- Alert webhook URL for sending guardrail alerts to Levo platform.
     alertWebhookUrl: ""
+
+  # -- Guardrail alert ingest: deliver block/finding events via gRPC to the Levo SaaS API.
+  # Leave endpoint empty to disable.
+  #
+  # Scope: only rendered into the generated config.yaml when
+  # config.configMap.enabled=true AND config.configMap.create=true. In pure
+  # SaaS/xDS mode (configMap disabled), setting this has no effect — configure
+  # ingest via the ConfigMap/file path instead.
+  #
+  # Runtime prerequisite: SaaS must be configured and saas.environmentId
+  # (or the LEVO_ENVIRONMENT_ID env var) must be set. If missing, ingest is
+  # disabled at runtime with a log warning (see crates/agentgateway/src/app.rs).
+  guardrailIngest:
+    # -- gRPC endpoint, e.g. "api.levo.ai:443". https:// is prepended automatically if omitted.
+    endpoint: ""
+    # -- Maximum number of events to batch before flushing.
+    batchSize: 10
+    # -- Maximum time to wait before flushing a partial batch.
+    flushInterval: "5s"
+
+  # -- Observability ingest: deliver every request + response + token counts via gRPC to the Levo satellite.
+  # Enables full prompt/completion visibility in the Levo dashboard. Leave endpoint empty to disable.
+  #
+  # Same scope and runtime prerequisite as guardrailIngest above.
+  observabilityIngest:
+    # -- gRPC endpoint, e.g. "satellite.levo.ai:443". https:// is prepended automatically if omitted.
+    endpoint: ""
+    # -- Maximum number of events to batch before flushing.
+    batchSize: 10
+    # -- Maximum time to wait before flushing a partial batch.
+    flushInterval: "5s"
 
   # -- ConfigMap configuration (fallback for local/airgapped deployments).
   configMap:
