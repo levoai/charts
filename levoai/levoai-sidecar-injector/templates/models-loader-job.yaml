@@ -1,0 +1,144 @@
+{{- $modelsEnabled := eq (include "sidecar-injector.models.enabled" .) "true" }}
+{{- $modelsPersistenceEnabled := eq (include "sidecar-injector.models.persistence.enabled" .) "true" }}
+{{- $existingClaim := include "sidecar-injector.models.persistence.existingClaim" . }}
+{{- if and $modelsEnabled $modelsPersistenceEnabled (not $existingClaim) }}
+{{- /*
+This Job populates the PVC with models from the models image.
+It runs once on install/upgrade and copies models to the PVC.
+After completion, all sidecar pods can mount the PVC directly.
+
+Model updates are automatic: the job computes a content hash of the source models
+and compares it to the hash stored on the PVC. If they differ, models are re-copied.
+
+To force re-copy models (e.g., if PVC is corrupted), delete the marker file:
+  kubectl exec -it <pod-with-pvc> -- rm /opt/models/.models-content-hash
+Then upgrade the release.
+*/}}
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ include "sidecar-injector.fullname" . }}-models-loader
+  namespace: {{ .Release.Namespace }}
+  labels:
+    helm.sh/chart: {{ include "sidecar-injector.chart" . }}
+    app.kubernetes.io/name: {{ include "sidecar-injector.name" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/component: models-loader
+    {{- if .Chart.AppVersion }}
+    app.kubernetes.io/version: {{ .Chart.AppVersion | quote }}
+    {{- end }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+  annotations:
+    "helm.sh/hook": post-install,post-upgrade
+    "helm.sh/hook-weight": "-5"
+    "helm.sh/hook-delete-policy": before-hook-creation
+spec:
+  ttlSecondsAfterFinished: {{ include "sidecar-injector.models.loaderJob.ttlSecondsAfterFinished" . }}
+  backoffLimit: {{ include "sidecar-injector.models.loaderJob.backoffLimit" . }}
+  activeDeadlineSeconds: {{ include "sidecar-injector.models.loaderJob.activeDeadlineSeconds" . }}
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: {{ include "sidecar-injector.name" . }}
+        app.kubernetes.io/instance: {{ .Release.Name }}
+        app.kubernetes.io/component: models-loader
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      restartPolicy: OnFailure
+      # Override chart-wide podSecurityContext: the loader must write to the PVC,
+      # which requires root (the source models image owns files as root) and
+      # fsGroup 0 so the volume is group-writable across provisioners.
+      securityContext:
+        runAsNonRoot: false
+        runAsUser: 0
+        runAsGroup: 0
+        fsGroup: 0
+      containers:
+        - name: models-loader
+          image: {{ include "sidecar-injector.models.initContainer.image" . }}
+          imagePullPolicy: {{ include "sidecar-injector.models.loaderJob.imagePullPolicy" . }}
+          securityContext:
+            runAsUser: 0
+            runAsGroup: 0
+            readOnlyRootFilesystem: false
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
+          resources:
+            {{- if and .Values.models .Values.models.initContainer .Values.models.initContainer.resources }}
+            {{- toYaml .Values.models.initContainer.resources | nindent 12 }}
+            {{- else }}
+            requests:
+              cpu: "500m"
+              memory: "1Gi"
+            limits:
+              cpu: "1"
+              memory: "2Gi"
+            {{- end }}
+          command:
+            - /bin/sh
+            - -c
+            - |
+              # `pipefail` is not POSIX; enable it only if the shell supports it
+              # (bash and modern BusyBox ash do; Debian's dash does not).
+              set -eu
+              if (set -o pipefail) 2>/dev/null; then
+                set -o pipefail
+              fi
+              MOUNT_PATH="{{ include "sidecar-injector.models.mountPath" . }}"
+              MARKER_FILE="${MOUNT_PATH}/.models-content-hash"
+
+              # Compute content hash of source model files (actual bytes, not metadata).
+              echo "Computing content hash of source models..."
+              SOURCE_HASH=$(find /models -type f -print0 2>/dev/null | sort -z | xargs -0 sha256sum | sha256sum | cut -c1-16)
+              echo "Source models hash: ${SOURCE_HASH}"
+
+              # Check if PVC already has models with same hash
+              if [ -f "${MARKER_FILE}" ]; then
+                EXISTING_HASH=$(cat "${MARKER_FILE}")
+                echo "Existing models hash: ${EXISTING_HASH}"
+                if [ "${SOURCE_HASH}" = "${EXISTING_HASH}" ]; then
+                  echo "Models are up to date, skipping copy."
+                  exit 0
+                fi
+                echo "Models hash mismatch - updating models..."
+              else
+                echo "No existing models found - copying models..."
+              fi
+
+              # Sync models to PVC — clear old contents first so removed source
+              # files do not remain stale on the persistent volume.
+              echo "Syncing models to PVC..."
+              find "${MOUNT_PATH}" -mindepth 1 -maxdepth 1 ! -name 'lost+found' ! -name '.models-content-hash' -exec rm -rf {} +
+              if cp -r /models/. "${MOUNT_PATH}/"; then
+                echo "${SOURCE_HASH}" > "${MARKER_FILE}"
+                echo "Models loaded successfully!"
+                ls -la "${MOUNT_PATH}/"
+              else
+                echo "Failed to sync models to PVC" >&2
+                exit 1
+              fi
+          volumeMounts:
+            - name: models
+              mountPath: {{ include "sidecar-injector.models.mountPath" . }}
+      volumes:
+        - name: models
+          persistentVolumeClaim:
+            claimName: {{ include "sidecar-injector.models.pvcName" . }}
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+{{- end }}

@@ -1,0 +1,22 @@
+{{- $modelsEnabled := eq (include "sidecar-injector.models.enabled" .) "true" }}
+{{- $modelsPersistenceEnabled := eq (include "sidecar-injector.models.persistence.enabled" .) "true" }}
+{{- $existingClaim := include "sidecar-injector.models.persistence.existingClaim" . }}
+{{- if and $modelsEnabled $modelsPersistenceEnabled (not $existingClaim) }}
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ include "sidecar-injector.models.pvcName" . }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "sidecar-injector.labels" . | nindent 4 }}
+spec:
+  accessModes:
+    {{ include "sidecar-injector.models.persistence.accessModes" . | nindent 4 }}
+  {{- $storageClass := include "sidecar-injector.models.persistence.storageClass" . }}
+  {{- if $storageClass }}
+  storageClassName: {{ $storageClass }}
+  {{- end }}
+  resources:
+    requests:
+      storage: {{ include "sidecar-injector.models.persistence.size" . }}
+{{- end }}

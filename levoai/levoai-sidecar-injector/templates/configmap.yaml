@@ -58,5 +58,13 @@ data:
       {{- range .Values.webhook.excludedNamespaces }}
       - {{ . | quote }}
       {{- end }}
+    {{- $modelsEnabled := and .Values.models .Values.models.enabled }}
+    {{- $modelsPersistenceEnabled := and .Values.models .Values.models.persistence .Values.models.persistence.enabled }}
+    {{- $injectorModelsEnabled := and $modelsEnabled $modelsPersistenceEnabled }}
+    models:
+      enabled: {{ $injectorModelsEnabled }}
+      {{- if $injectorModelsEnabled }}
+      pvcName: {{ include "sidecar-injector.models.pvcName" . | quote }}
+      {{- end }}
     webhookPort: {{ .Values.webhook.port }}
     healthPort: 8080

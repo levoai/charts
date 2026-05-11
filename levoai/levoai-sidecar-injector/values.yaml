@@ -66,10 +66,10 @@ sidecar:
   resources:
     requests:
       cpu: 100m
-      memory: 128Mi
-    limits:
-      cpu: 500m
       memory: 512Mi
+    limits:
+      cpu: "1"
+      memory: 4Gi
   ports:
     # -- Port for transparent interception.
     transparent: 15001
@@ -124,6 +124,55 @@ defaultInterceptPorts: "443"
 defaultExcludePorts: ""
 # -- Default CIDRs to exclude from interception.
 defaultExcludeCIDRs: ""
+
+# =============================================================================
+# ML Models Configuration (Guardrails)
+# =============================================================================
+# Pre-downloaded ML models for guardrail scanners (PromptInjection, Toxicity, etc.).
+# A PVC is created and populated by a loader Job on install/upgrade.
+# All sidecar pods share the same PVC — no per-pod model downloads.
+models:
+  # -- Enable ML model support for sidecar guardrails.
+  enabled: true
+  # -- Fixed path where models are mounted in the sidecar container.
+  # -- This value must remain /opt/models (hardcoded in the injector).
+  mountPath: /opt/models
+
+  persistence:
+    # -- Use PersistentVolumeClaim for models (recommended for production).
+    enabled: true
+    # -- Use an existing PVC. If not set, a new PVC will be created.
+    existingClaim: ""
+    # -- Storage class for the PVC. Use a ReadWriteMany-capable class
+    # (e.g. EFS, Azure Files, NFS) for rolling updates.
+    storageClass: ""
+    # -- Size of the PVC (models are ~7GB).
+    size: 10Gi
+    # -- Access modes for the PVC. ReadWriteMany avoids rolling update deadlocks.
+    accessModes:
+      - ReadWriteMany
+
+  # -- Source image for the loader Job that populates the PVC.
+  # (`imagePullPolicy` for the loader Job lives under `loaderJob` below.)
+  initContainer:
+    image:
+      registry: "docker.io"
+      repository: "levoai/ai-guardrails-models"
+      tag: ""
+    resources:
+      requests:
+        cpu: "500m"
+        memory: "1Gi"
+      limits:
+        cpu: "1"
+        memory: "4Gi"
+
+  # -- Models loader Job (runs on install/upgrade to populate PVC).
+  loaderJob:
+    imagePullPolicy: Always
+    ttlSecondsAfterFinished: 3600
+    backoffLimit: 3
+    activeDeadlineSeconds: 1800
 
 # =============================================================================
 # Injector Resources
