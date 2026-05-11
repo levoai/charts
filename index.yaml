@@ -10328,6 +10328,16 @@ entries:
     version: 0.2.73
   levoai-shadownet:
   - apiVersion: v2
+    appVersion: 1.3.93
+    created: "2026-05-11T17:31:08.807254279Z"
+    description: Levo.ai ShadowNet DAST Scanner
+    digest: ae053c76db080b5376afc6b8e8795ae6195575ff18389d28a130ef41ffc2e6cd
+    name: levoai-shadownet
+    type: application
+    urls:
+    - https://github.com/levoai/charts/releases/download/levoai-shadownet-1.3.93/levoai-shadownet-1.3.93.tgz
+    version: 1.3.93
+  - apiVersion: v2
     appVersion: 1.3.92
     created: "2026-05-07T07:30:57.043995064Z"
     description: Levo.ai ShadowNet DAST Scanner
@@ -10903,4 +10913,4 @@ entries:
     urls:
     - https://github.com/levoai/charts/releases/download/testrunner-2.0.3/testrunner-2.0.3.tgz
     version: 2.0.3
-generated: "2026-05-11T11:27:52.756769812Z"
+generated: "2026-05-11T17:31:08.807927084Z"
