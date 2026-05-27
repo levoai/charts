@@ -74,6 +74,20 @@ tolerations: []
 
 affinity: {}
 
+# hostAliases: equivalent of `curl --resolve` at the Pod level. Each entry adds a line
+# to /etc/hosts for all containers in the Pod, so any target whose DNS is not resolvable
+# in-cluster (e.g., split-horizon DNS, private endpoints) can still be reached by
+# hostname. The hostname is required on the request — connecting by IP instead of the
+# DNS name can cause SNI/hostname mismatch, and TLS validation will typically fail if
+# the certificate SAN/CN is issued for the hostname rather than the IP. Default: none.
+#
+# Example:
+# hostAliases:
+#   - ip: "10.0.0.5"
+#     hostnames:
+#       - "api.internal.example.com"
+hostAliases: []
+
 podLabels: {}
 
 podAnnotations: {}
