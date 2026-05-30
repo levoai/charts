@@ -10,6 +10,10 @@ spec:
 {{- if not .Values.autoscaling.enabled }}
   replicas: {{ .Values.replicaCount }}
 {{- end }}
+{{- with .Values.strategy }}
+  strategy:
+    {{- toYaml . | nindent 4 }}
+{{- end }}
   selector:
     matchLabels:
       {{- include "tagger.selectorLabels" . | nindent 6 }}
@@ -31,7 +35,9 @@ spec:
         {{- toYaml . | nindent 8 }}
       {{- end }}
       serviceAccountName: {{ include "tagger.serviceAccountName" . }}
-      
+      {{- if .Values.priorityClassName }}
+      priorityClassName: {{ .Values.priorityClassName | quote }}
+      {{- end }}
       securityContext:
         {{- toYaml .Values.podSecurityContext | nindent 8 }}
       {{- if or .Values.global.useRabbitmq .Values.global.useKafka  .Values.modelsImage.enabled}}

@@ -69,6 +69,25 @@ tolerations: []
 
 affinity: {}
 
+# Deployment update strategy. When empty (default), Kubernetes uses its built-in
+# RollingUpdate defaults (maxSurge=25%, maxUnavailable=25%). Operators on
+# capacity-constrained clusters can override to avoid +1 capacity during rollouts.
+# Example (no surge — tolerates brief downtime, but reuses the existing pod's slot):
+#   strategy:
+#     type: RollingUpdate
+#     rollingUpdate:
+#       maxSurge: 0
+#       maxUnavailable: 1
+# Or for an outright replace:
+#   strategy:
+#     type: Recreate
+strategy: {}
+
+# priorityClassName lets operators schedule tagger pods with higher priority so
+# they can preempt lower-priority workloads when the cluster is at capacity.
+# The PriorityClass must be created out-of-band.
+priorityClassName: ""
+
 livenessProbeEnabled: false
 
 env: []
