@@ -108,6 +108,16 @@ spec:
               ]
           workingDir: /home/levo/work
           env:
+            {{- if .Values.identity }}
+            # Each replica needs a distinct identity; the pod name from the
+            # Downward API is appended to the configured identity prefix.
+            - name: POD_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
+            - name: LEVO_TESTRUNNER_IDENTITY
+              value: "{{ .Values.identity }}-$(POD_NAME)"
+            {{- end }}
             - name: LOCAL_USER_ID
               value: "{{ .Values.localUserId }}"
             - name: LOCAL_GROUP_ID

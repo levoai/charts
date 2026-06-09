@@ -44,6 +44,14 @@ key: ""
 orgId: ""
 scheduled: False
 group: ""
+
+# identity: optional prefix for the testrunner's Temporal worker/client
+# identity (passed to temporalio.client.Client.connect(identity=...)).
+# Each replica MUST have a distinct identity, so the pod name (injected via the
+# Downward API) is appended automatically: "<identity>-<pod-name>".
+# When left empty, the CLI derives a per-replica identity from the pod
+# hostname, process id, version and group.
+identity: ""
 localUserId: "1000" # Replace with your actual user ID
 localGroupId: "1000" # Replace with your actual group ID
 configstorePath: "/home/levo/.config/configstore"
