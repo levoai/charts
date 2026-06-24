@@ -115,6 +115,11 @@ spec:
           - configMapRef:
               name: "{{ template "tagger.fullname" . }}-env"
           env:
+            # Server/node hostname (not the container/pod name) for component health id.
+            - name: LEVOAI_NODE_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: spec.nodeName
             {{- if .Values.env }}
               {{- toYaml .Values.env | nindent 12 }}
             {{- end }}
