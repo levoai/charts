@@ -349,6 +349,15 @@ entries:
     version: 0.1.0
   levoai-ebpf-sensor:
   - apiVersion: v2
+    appVersion: 0.51.0
+    created: "2026-06-26T07:01:38.22266902Z"
+    description: The Levo eBPF Sensor
+    digest: 47d1659ffc90c0cc149e7ebfebaf79e578c62bbcc59488495fa37dd46ab36287
+    name: levoai-ebpf-sensor
+    urls:
+    - https://github.com/levoai/charts/releases/download/levoai-ebpf-sensor-0.51.0/levoai-ebpf-sensor-0.51.0.tgz
+    version: 0.51.0
+  - apiVersion: v2
     appVersion: 0.50.8
     created: "2026-06-08T13:35:26.290276751Z"
     description: The Levo eBPF Sensor
@@ -11296,4 +11305,4 @@ entries:
     urls:
     - https://github.com/levoai/charts/releases/download/testrunner-2.0.3/testrunner-2.0.3.tgz
     version: 2.0.3
-generated: "2026-06-25T18:33:49.913282438Z"
+generated: "2026-06-26T07:01:38.223382691Z"
