@@ -45,6 +45,26 @@ orgId: ""
 scheduled: False
 group: ""
 
+# mode: runner mode. "onprem" (default when empty) self-registers in the runner
+# registry and polls a per-runner command queue (requires `workspace`). "cloud"
+# does NOT register and polls the shared cloud command queue instead — use this
+# for shared/cloud runner deployments.
+mode: ""
+
+# workspace: workspace id sent on on-prem registration (the platform requires
+# org + workspace context). Required for on-prem registration; ignored for cloud.
+workspace: ""
+
+# cluster: which cluster this runner is deployed in (e.g. "visa-cluster-a").
+# Used as the runner registry's cluster label + the picker display name. The
+# runner id itself is auto-generated (a uuid) — the operator supplies no id.
+# Defaults (when empty) to the pod namespace, else "default".
+cluster: ""
+
+# runnerLabels: optional comma-separated k=v registry labels for the picker,
+# e.g. "region=us-east,tier=gold".
+runnerLabels: ""
+
 # identity: optional prefix for the testrunner's Temporal worker/client
 # identity (passed to temporalio.client.Client.connect(identity=...)).
 # Each replica MUST have a distinct identity, so the pod name (injected via the

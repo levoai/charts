@@ -108,13 +108,46 @@ spec:
               ]
           workingDir: /home/levo/work
           env:
-            {{- if .Values.identity }}
-            # Each replica needs a distinct identity; the pod name from the
-            # Downward API is appended to the configured identity prefix.
+            # Pod facts from the Downward API. The runner self-registers under an
+            # auto-generated UUID and reports these as registry metadata + a
+            # human-friendly display name (pod_name · cluster · pod_ip). The
+            # operator supplies NO runner id.
             - name: POD_NAME
               valueFrom:
                 fieldRef:
                   fieldPath: metadata.name
+            - name: POD_IP
+              valueFrom:
+                fieldRef:
+                  fieldPath: status.podIP
+            - name: POD_NAMESPACE
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.namespace
+            {{- if .Values.cluster }}
+            - name: LEVO_RUNNER_CLUSTER
+              value: "{{ .Values.cluster }}"
+            {{- end }}
+            {{- if .Values.runnerLabels }}
+            - name: LEVO_RUNNER_LABELS
+              value: "{{ .Values.runnerLabels }}"
+            {{- end }}
+            {{- if .Values.mode }}
+            # Runner mode: "onprem" (self-register + per-runner command queue;
+            # needs `workspace`) or "cloud" (no registration; shared cloud command
+            # queue). Empty -> the CLI default (onprem).
+            - name: LEVO_RUNNER_MODE
+              value: "{{ .Values.mode }}"
+            {{- end }}
+            {{- if .Values.workspace }}
+            # Workspace id sent on on-prem registration (the platform requires
+            # org + workspace context). Ignored in cloud mode.
+            - name: LEVOAI_WORKSPACE_ID
+              value: "{{ .Values.workspace }}"
+            {{- end }}
+            {{- if .Values.identity }}
+            # Optional Temporal worker-identity prefix (distinct from the registry
+            # runner id); the pod name is appended so each replica is distinct.
             - name: LEVO_TESTRUNNER_IDENTITY
               value: "{{ .Values.identity }}-$(POD_NAME)"
             {{- end }}
