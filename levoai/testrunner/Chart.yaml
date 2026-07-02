@@ -1,6 +1,6 @@
 apiVersion: v2
-appVersion: 2.14.32
+appVersion: 2.14.34
 description: A Helm chart for Kubernetes
 name: testrunner
 type: application
-version: 2.14.32
+version: 2.14.34
