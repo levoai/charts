@@ -70,14 +70,24 @@ securityContext: {}
 #       - ALL
 
 # -- Configure resource requests and limits (REQUIRED for production).
-# These are sensible defaults - adjust based on your workload.
+# Memory headroom rationale: at steady state the proxy holds all enabled
+# ML scanner ONNX sessions in `Lazy<Arc<OnceCell<...>>>` slots that never
+# evict. Empirical measurement on spec-building-e2e (2026-05-28, all 12
+# scanners enabled, after PR #141 warmup): peak RSS during sequential
+# warmup hits ~5+ GiB, and 4 GiB was insufficient even with
+# `LLM_BASTION_WARMUP_CONCURRENCY=1` — the pod OOM-crashlooped because
+# previously-loaded models stay resident while new ones load. 8 GiB
+# leaves ~2-3 GiB headroom over the all-scanners-loaded baseline and
+# accommodates request body buffering + scan tensors.
+# Requests bumped to 4 GiB so the scheduler reserves enough for the
+# steady-state working set.
 resources:
   requests:
     cpu: "500m"
-    memory: "2Gi"
+    memory: "4Gi"
   limits:
     cpu: "1000m"
-    memory: "4Gi"
+    memory: "8Gi"
 
 # -- Set node selector labels for pod scheduling.
 nodeSelector: {}
@@ -293,6 +303,27 @@ dataPlane:
     # -- Set the service port.
     port: 8080
 
+  # -- Extra environment variables to add to the data plane container.
+  extraEnv: []
+  # Example:
+  # extraEnv:
+  #   - name: MY_VAR
+  #     value: "my-value"
+  #   - name: SECRET_VAR
+  #     valueFrom:
+  #       secretKeyRef:
+  #         name: my-secret
+  #         key: my-key
+
+  # -- List of sources to populate env vars in the data plane container.
+  envFrom: []
+  # Example:
+  # envFrom:
+  #   - secretRef:
+  #       name: aws-bedrock-creds
+  #   - configMapRef:
+  #       name: my-config
+
 # =============================================================================
 # Configuration Source
 # =============================================================================
@@ -331,6 +362,10 @@ config:
     refreshToken: ""
     # -- Configuration polling interval.
     pollInterval: "60s"
+    # -- Minimum number of policies expected in a policy snapshot (SAAS_MIN_POLICIES).
+    # Snapshots with fewer policies are rejected as suspicious and the gateway
+    # keeps its last-known-good policy engine. 0 disables the check.
+    minPolicies: 0
     # -- Alert webhook URL for sending guardrail alerts to Levo platform.
     alertWebhookUrl: ""
 
@@ -353,18 +388,6 @@ config:
     # -- Maximum time to wait before flushing a partial batch.
     flushInterval: "5s"
 
-  # -- Observability ingest: deliver every request + response + token counts via gRPC to the Levo satellite.
-  # Enables full prompt/completion visibility in the Levo dashboard. Leave endpoint empty to disable.
-  #
-  # Same scope and runtime prerequisite as guardrailIngest above.
-  observabilityIngest:
-    # -- gRPC endpoint, e.g. "satellite.levo.ai:443". https:// is prepended automatically if omitted.
-    endpoint: ""
-    # -- Maximum number of events to batch before flushing.
-    batchSize: 10
-    # -- Maximum time to wait before flushing a partial batch.
-    flushInterval: "5s"
-
   # -- ConfigMap configuration (fallback for local/airgapped deployments).
   configMap:
     # -- Enable ConfigMap-based configuration.
@@ -375,12 +398,7 @@ config:
     create: false
     # -- Inline configuration data (used if create: true).
     data: |
-      binds:
-        - port: 8080
-          protocol: HTTP
-          listeners:
-            - name: http
-              routes: []
+      binds: []
 
 # =============================================================================
 # ML Models Configuration (Guardrails)

@@ -27,10 +27,15 @@ spec:
   resources:
     requests:
       cpu: "500m"
-      memory: "2Gi"
+      # 4 GiB matches the steady-state working set of all enabled ML
+      # scanner ONNX sessions (see helm/aigateway/values.yaml comment).
+      memory: "4Gi"
     limits:
       cpu: "2"
-      memory: "4Gi"
+      # 8 GiB leaves headroom for warmup peak + request body scanning.
+      # Previously 4 GiB OOM-crashlooped on spec-building-e2e after the
+      # PR #141 startup warmup was introduced (CU-86b9xgpex).
+      memory: "8Gi"
 
   deployment:
     spec:
@@ -63,10 +68,15 @@ spec:
   resources:
     requests:
       cpu: "500m"
-      memory: "2Gi"
+      # 4 GiB matches the steady-state working set of all enabled ML
+      # scanner ONNX sessions (see helm/aigateway/values.yaml comment).
+      memory: "4Gi"
     limits:
       cpu: "2"
-      memory: "4Gi"
+      # 8 GiB leaves headroom for warmup peak + request body scanning.
+      # Previously 4 GiB OOM-crashlooped on spec-building-e2e after the
+      # PR #141 startup warmup was introduced (CU-86b9xgpex).
+      memory: "8Gi"
 
   deployment:
     spec:

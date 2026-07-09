@@ -153,6 +153,10 @@ spec:
                   key: refresh-token
             - name: SAAS_POLL_INTERVAL
               value: {{ include "aigateway.config.saas.pollInterval" . | quote }}
+            {{- if .Values.config.saas.minPolicies }}
+            - name: SAAS_MIN_POLICIES
+              value: {{ .Values.config.saas.minPolicies | quote }}
+            {{- end }}
             {{- $alertWebhookUrl := include "aigateway.config.saas.alertWebhookUrl" . }}
             {{- if $alertWebhookUrl }}
             - name: ALERT_WEBHOOK_URL
@@ -185,6 +189,13 @@ spec:
             # Admin server: readyz, config dumps, graceful shutdown (see dataPlane.adminAddr).
             - name: ADMIN_ADDR
               value: {{ include "aigateway.dataPlane.adminAddr" . | quote }}
+            {{- with .Values.dataPlane.extraEnv }}
+            {{- toYaml . | nindent 12 }}
+            {{- end }}
+          {{- with .Values.dataPlane.envFrom }}
+          envFrom:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
           volumeMounts:
