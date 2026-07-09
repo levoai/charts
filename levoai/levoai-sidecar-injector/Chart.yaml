@@ -2,7 +2,7 @@ annotations:
   artifacthub.io/category: security
   artifacthub.io/license: Apache-2.0
 apiVersion: v2
-appVersion: 0.13.7-20260607.35a8bfe
+appVersion: 0.13.7
 description: A Helm chart for the Levo AI Gateway Sidecar Injector — MutatingAdmissionWebhook
   that automatically injects the AI Gateway sidecar into targeted pods
 home: https://github.com/levoai/aigateway
