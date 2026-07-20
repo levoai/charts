@@ -133,15 +133,18 @@ spec:
               value: "{{ .Values.runnerLabels }}"
             {{- end }}
             {{- if .Values.mode }}
-            # Runner mode: "onprem" (self-register + per-runner command queue;
-            # needs `workspace`) or "cloud" (no registration; shared cloud command
-            # queue). Empty -> the CLI default (onprem).
+            # Runner mode: "onprem" (self-register + per-runner command queue) or
+            # "cloud" (no registration; shared cloud command queue). Empty -> the
+            # CLI default (onprem). The workspace is resolved automatically from the
+            # auth key + org on registration, so no workspace value is needed.
             - name: LEVO_RUNNER_MODE
               value: "{{ .Values.mode }}"
             {{- end }}
             {{- if .Values.workspace }}
-            # Workspace id sent on on-prem registration (the platform requires
-            # org + workspace context). Ignored in cloud mode.
+            # Optional/advanced: explicit workspace id for on-prem registration.
+            # Normally left empty — the runner auto-resolves the org's single
+            # workspace from the auth key + org. Set this only to override that
+            # (kept for backward compatibility). Ignored in cloud mode.
             - name: LEVOAI_WORKSPACE_ID
               value: "{{ .Values.workspace }}"
             {{- end }}

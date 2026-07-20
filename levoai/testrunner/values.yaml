@@ -46,13 +46,16 @@ scheduled: False
 group: ""
 
 # mode: runner mode. "onprem" (default when empty) self-registers in the runner
-# registry and polls a per-runner command queue (requires `workspace`). "cloud"
-# does NOT register and polls the shared cloud command queue instead — use this
-# for shared/cloud runner deployments.
+# registry and polls a per-runner command queue. "cloud" does NOT register and
+# polls the shared cloud command queue instead — use this for shared/cloud runner
+# deployments. The workspace is resolved automatically from the auth key + org on
+# registration, so no workspace value is needed.
 mode: ""
 
-# workspace: workspace id sent on on-prem registration (the platform requires
-# org + workspace context). Required for on-prem registration; ignored for cloud.
+# workspace: OPTIONAL/advanced override for the on-prem registration workspace id.
+# Leave empty (default) to auto-resolve the org's single workspace from the auth
+# key + org. Set only to override that (kept for backward compatibility); ignored
+# for cloud mode.
 workspace: ""
 
 # cluster: which cluster this runner is deployed in (e.g. "visa-cluster-a").
