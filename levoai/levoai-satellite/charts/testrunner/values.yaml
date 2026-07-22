@@ -44,6 +44,37 @@ key: ""
 orgId: ""
 scheduled: False
 group: ""
+
+# mode: runner mode. "onprem" (default when empty) self-registers in the runner
+# registry and polls a per-runner command queue. "cloud" does NOT register and
+# polls the shared cloud command queue instead — use this for shared/cloud runner
+# deployments. The workspace is resolved automatically from the auth key + org on
+# registration, so no workspace value is needed.
+mode: ""
+
+# workspace: OPTIONAL/advanced override for the on-prem registration workspace id.
+# Leave empty (default) to auto-resolve the org's single workspace from the auth
+# key + org. Set only to override that (kept for backward compatibility); ignored
+# for cloud mode.
+workspace: ""
+
+# cluster: which cluster this runner is deployed in (e.g. "visa-cluster-a").
+# Used as the runner registry's cluster label + the picker display name. The
+# runner id itself is auto-generated (a uuid) — the operator supplies no id.
+# Defaults (when empty) to the pod namespace, else "default".
+cluster: ""
+
+# runnerLabels: optional comma-separated k=v registry labels for the picker,
+# e.g. "region=us-east,tier=gold".
+runnerLabels: ""
+
+# identity: optional prefix for the testrunner's Temporal worker/client
+# identity (passed to temporalio.client.Client.connect(identity=...)).
+# Each replica MUST have a distinct identity, so the pod name (injected via the
+# Downward API) is appended automatically: "<identity>-<pod-name>".
+# When left empty, the CLI derives a per-replica identity from the pod
+# hostname, process id, version and group.
+identity: ""
 localUserId: "1000" # Replace with your actual user ID
 localGroupId: "1000" # Replace with your actual group ID
 configstorePath: "/home/levo/.config/configstore"
@@ -73,6 +104,20 @@ nodeSelector: {}
 tolerations: []
 
 affinity: {}
+
+# hostAliases: equivalent of `curl --resolve` at the Pod level. Each entry adds a line
+# to /etc/hosts for all containers in the Pod, so any target whose DNS is not resolvable
+# in-cluster (e.g., split-horizon DNS, private endpoints) can still be reached by
+# hostname. The hostname is required on the request — connecting by IP instead of the
+# DNS name can cause SNI/hostname mismatch, and TLS validation will typically fail if
+# the certificate SAN/CN is issued for the hostname rather than the IP. Default: none.
+#
+# Example:
+# hostAliases:
+#   - ip: "10.0.0.5"
+#     hostnames:
+#       - "api.internal.example.com"
+hostAliases: []
 
 podLabels: {}
 
