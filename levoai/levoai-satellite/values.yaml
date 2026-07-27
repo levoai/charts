@@ -34,6 +34,13 @@ global:
     rabbitmq:
       host: levoai-rabbitmq
       use_ssl: false
+      # Max messages buffered per RabbitMQ queue (x-max-length). Applies to every
+      # queue (traces, spans, findings, ...). Only used when a queue's type is
+      # rabbitmq. NOTE: x-max-length is fixed at queue-declare time -- to resize an
+      # already-running deployment you must delete the existing queues (rabbitmqctl
+      # delete_queue ...) so they are re-declared, else RabbitMQ returns 406
+      # PRECONDITION_FAILED.
+      max_queue_size: 100000
     kafka:
       bootstrap_servers: levoai-kafka:9092
     onprem-api:
@@ -110,15 +117,51 @@ rabbitmq:
   persistence:
     enabled: true
     size: 32Gi
+  # RabbitMQ container resources -- intentionally UNSET by default to stay
+  # backward-compatible on upgrade (existing releases had no chart-level limit;
+  # imposing one would newly cap them and risk OOMKilled/earlier blocking under the
+  # same traffic). Setting a memory limit is OPT-IN and RECOMMENDED: it adds cgroup
+  # OOM protection AND becomes the single source of truth for the memory watermark
+  # (exposed via the Downward API as LEVOAI_RABBITMQ_MEM_LIMIT_BYTES and passed to
+  # RabbitMQ as total_memory_available_override_value, so the watermark is a fraction
+  # of the limit, not host/node RAM). Until you set it, only the disk safeguards and
+  # per-queue byte cap apply, and the watermark stays relative to node memory (same
+  # as before this change). To enable container-aware memory protection, uncomment:
+  #   resources:
+  #     limits:
+  #       memory: 1Gi      # size per the storage guide; watermark auto-tracks this
+  #     requests:
+  #       memory: 512Mi
+  resources: {}
+  # NOTE: extraConfiguration is NOT rendered into rabbitmq.conf here because
+  # `configuration:` (below) is overridden to a single line, which replaces the
+  # bitnami default template that would otherwise append extraConfiguration. The
+  # alarm knobs (disk_free_limit, vm_memory_high_watermark) are therefore applied
+  # via -rabbit args in RABBITMQ_SERVER_ADDITIONAL_ERL_ARGS instead (that path is
+  # honored by the official image, matching the docker-compose deployment).
   extraConfiguration: |-
     heartbeat = 600
-    disk_free_limit.absolute = 500MB
     tcp_listen_options.keepalive = true
     tcp_listen_options.nodelay = true
     tcp_listen_options.send_timeout = 120000
   extraEnvVars:
+    # Pod memory limit in bytes (single source of truth = resources.limits.memory
+    # above). Consumed by total_memory_available_override_value below and by the
+    # postStart hook. Must precede RABBITMQ_SERVER_ADDITIONAL_ERL_ARGS so the k8s
+    # $(VAR) reference resolves.
+    - name: LEVOAI_RABBITMQ_MEM_LIMIT_BYTES
+      valueFrom:
+        resourceFieldRef:
+          containerName: rabbitmq
+          resource: limits.memory
+    # Per-queue byte cap installed as a broker policy by the postStart hook.
+    - name: LEVOAI_RABBITMQ_MAX_QUEUE_SIZE_BYTES
+      value: "4294967296"
+    # disk_free_limit (bytes) + vm_memory_high_watermark (fraction of the container
+    # limit via the override) size the disk/memory alarms so RabbitMQ blocks
+    # publishers predictably instead of filling the PVC or getting OOM-killed.
     - name: RABBITMQ_SERVER_ADDITIONAL_ERL_ARGS
-      value: "-rabbit consumer_timeout 600000"
+      value: "-rabbit consumer_timeout 600000 -rabbit disk_free_limit 536870912 -rabbit vm_memory_high_watermark 0.7 -rabbit total_memory_available_override_value $(LEVOAI_RABBITMQ_MEM_LIMIT_BYTES)"
     - name: RABBITMQ_ENABLED_PLUGINS_FILE
       value: "/bitnami/rabbitmq/mnesia/enabled_plugins"
     - name: RABBITMQ_DEFAULT_USER
@@ -148,6 +191,45 @@ rabbitmq:
   configurationExistingSecret: ""
   configuration: |-
     loopback_users.guest = false
+  # Install the per-queue byte-cap policy broker-side once the node is up. Applied
+  # via a policy (not a queue arg) so it also covers already-declared queues without
+  # a 406 PRECONDITION_FAILED on upgrade. Mirrors the docker-compose set_policy.
+  # NOTE: setting lifecycleHooks replaces the bitnami default, so the default preStop
+  # (rabbitmqctl stop_app) is repeated here to preserve graceful shutdown.
+  lifecycleHooks:
+    preStop:
+      exec:
+        command: ["/bin/bash", "-ec", "rabbitmqctl stop_app"]
+    postStart:
+      exec:
+        command:
+          - /bin/bash
+          - -ec
+          - |
+            # Wait for the erlang cookie before invoking rabbitmqctl: this hook can run as
+            # root before the entrypoint has written the cookie, and a premature rabbitmqctl
+            # would create a root-owned .erlang.cookie the rabbitmq user can't read (eacces).
+            until [ -s /var/lib/rabbitmq/.erlang.cookie ] || [ -s /bitnami/rabbitmq/.rabbitmq/.erlang.cookie ]; do sleep 1; done
+            until rabbitmqctl await_startup >/dev/null 2>&1; do sleep 2; done
+            until rabbitmqctl set_operator_policy levoai-storage-limits '.*' "{\"max-length-bytes\":${LEVOAI_RABBITMQ_MAX_QUEUE_SIZE_BYTES:-4294967296},\"overflow\":\"drop-head\"}" --apply-to queues --priority 1; do echo 'levoai: set_operator_policy failed; retrying in 5s'; sleep 5; done
+            echo 'levoai: byte-cap policy installed'
+  # Gate readiness on the broker running AND the byte-cap policy being installed: if
+  # set_policy never succeeds the pod stays NotReady and dependents do not receive
+  # traffic into byte-unbounded queues -- the primary safeguard. Mirrors the
+  # docker-compose healthcheck. NOTE: deliberately NOT gated on check_local_alarms --
+  # a disk/memory alarm is RabbitMQ's intended backpressure (block publishers) while
+  # it stays up and consumers keep draining; marking the pod NotReady on an alarm
+  # would cut off the drain path and turn backpressure into an outage.
+  customReadinessProbe:
+    exec:
+      command:
+        - /bin/bash
+        - -ec
+        - rabbitmq-diagnostics -q check_running && rabbitmqctl -q list_operator_policies | grep -q levoai-storage-limits
+    initialDelaySeconds: 10
+    periodSeconds: 30
+    timeoutSeconds: 20
+    failureThreshold: 3
   auth:
     existingPasswordSecret: levoai-rabbitmq-auth
     existingErlangCookieSecret: levoai-rabbitmq-auth
