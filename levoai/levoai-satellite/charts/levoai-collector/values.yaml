@@ -212,15 +212,15 @@ config:
         traces:
           receivers: [otlp, aws_cloudfront]
           processors: [memory_limiter, levoai_merge, batch]
-          exporters: [debug, levoai_satellite]
+          exporters: [levoai_satellite]
         traces/nomerge:
           receivers: [aws_apigateway, akamai_edgeworker, f5_ltm_logs]
           processors: [memory_limiter, batch]
-          exporters: [debug, levoai_satellite]
+          exporters: [levoai_satellite]
         metrics:
           receivers: [otlp]
           processors: [memory_limiter, batch, batch/metrics]
-          exporters: [debug, levoai_satellite]
+          exporters: [levoai_satellite]
         logs:
           receivers: [otlp]
           processors: [memory_limiter, batch]

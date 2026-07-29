@@ -1,4 +1,12 @@
 {{- include "levoai.validatesecrets" . }}
+{{/*
+  Normalize otel.enabled to a real boolean. A bare `if .Values.otel.enabled` is
+  true for the *string* "false" (non-empty strings are truthy in Go templates),
+  which would keep the opentelemetry-instrument wrapper while rendering
+  OTEL_ENABLED="false" -- i.e. tracing on, flag off. Deriving the guard and the
+  env var from this one variable keeps them from ever disagreeing.
+*/}}
+{{- $otelEnabled := eq (toString .Values.otel.enabled) "true" }}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -68,7 +76,7 @@ spec:
           image: "{{ default .Values.image.registry .Values.global.imageRegistry }}/{{ .Values.image.repository }}:{{ default .Chart.AppVersion .Values.image.tag }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           command:
-          {{- if .Values.otel.enabled }}
+          {{- if $otelEnabled }}
               - opentelemetry-instrument
           {{- end}}
               - python
@@ -92,14 +100,14 @@ spec:
             {{- if .Values.env }}
               {{- toYaml .Values.env | nindent 12 }}
             {{- end }}
-            {{- if .Values.otel.enabled }}
+            {{- if $otelEnabled }}
               {{- range $key, $value := .Values.otel.env }}
             - name: {{ $key }}
               value: {{ $value | quote }}
               {{- end }}
             {{- end }}
             - name: OTEL_ENABLED
-              value: {{ .Values.otel.enabled | quote }}
+              value: {{ $otelEnabled | quote }}
             - name: LEVOAI_AUTH_KEY
               valueFrom:
                 secretKeyRef:
