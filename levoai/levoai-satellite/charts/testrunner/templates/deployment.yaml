@@ -166,7 +166,6 @@ spec:
                 secretKeyRef:
                   name: levoai-satellite
                   key: refresh-token
-
           {{- $envVars := dict }}
           {{- if hasKey .Values "global" }}
           {{- if hasKey .Values.global "levo" }}
@@ -233,4 +232,3 @@ spec:
       hostAliases:
         {{- toYaml . | nindent 8 }}
       {{- end }}
-
