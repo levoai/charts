@@ -162,6 +162,11 @@ spec:
               value: "xterm-256color"
             - name: LEVO_BASE_URL
               value: "{{ .Values.levoBaseUrl }}"
+            {{- if .Values.livenessProbe.enabled }}
+            # Must match livenessProbe.file — the runner writes it, the probe reads it.
+            - name: LEVO_RUNNER_LIVENESS_FILE
+              value: "{{ .Values.livenessProbe.file }}"
+            {{- end }}
           {{- $envVars := dict }}
           {{- if hasKey .Values "global" }}
           {{- if hasKey .Values.global "levo" }}
@@ -209,6 +214,24 @@ spec:
               {{- end }}
               readOnly: true
             {{- end }}
+          {{- end }}
+          {{- if .Values.livenessProbe.enabled }}
+          # Restarts a runner whose Temporal worker has died inside a live
+          # process. The runner refreshes this file only while its run worker is
+          # actually polling, so file AGE is the health signal.
+          livenessProbe:
+            exec:
+              command:
+                - /bin/sh
+                - -c
+                - >-
+                  test -f {{ .Values.livenessProbe.file | quote }} &&
+                  [ $(( $(date +%s) - $(stat -c %Y {{ .Values.livenessProbe.file | quote }}) ))
+                  -lt {{ .Values.livenessProbe.maxAgeSeconds }} ]
+            initialDelaySeconds: {{ .Values.livenessProbe.initialDelaySeconds }}
+            periodSeconds: {{ .Values.livenessProbe.periodSeconds }}
+            timeoutSeconds: {{ .Values.livenessProbe.timeoutSeconds }}
+            failureThreshold: {{ .Values.livenessProbe.failureThreshold }}
           {{- end }}
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
