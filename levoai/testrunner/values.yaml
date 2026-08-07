@@ -29,6 +29,12 @@ global:
     configMapMounts: []
     env: {}
 
+# fullnameOverride: set to run multiple testrunner releases in the same
+# namespace — without it, every release renders the same Deployment name
+# ("testrunner"/"testrunner-scheduled"), so a second install collides.
+# Empty (default) keeps prior behavior, so existing installs aren't renamed.
+fullnameOverride: ""
+
 replicaCount: 3
 
 image:

@@ -1,11 +1,19 @@
 {{/*
-Generate the name of the resource based on the chart name.
+Generate the name of the resource. Defaults to the exact pre-existing behavior
+(chart name, "-scheduled" suffix when scheduled: true) so an upgrade of an
+existing single-instance install with fullnameOverride unset does not rename —
+and therefore does not recreate — its Deployment.
+
+Set fullnameOverride to run more than one testrunner release in the same
+namespace: each concurrent release must use a distinct value, since the
+default name never varies by Helm release name.
 */}}
 {{- define "testrunner.name" -}}
+{{- $base := default .Chart.Name .Values.fullnameOverride -}}
 {{- if .Values.scheduled }}
-  {{- printf "%s-scheduled" .Chart.Name | trunc 63 | trimSuffix "-" -}}
+  {{- printf "%s-scheduled" $base | trunc 63 | trimSuffix "-" -}}
 {{- else -}}
-  {{- printf "%s" .Chart.Name | trunc 63 | trimSuffix "-" -}}
+  {{- $base | trunc 63 | trimSuffix "-" -}}
 {{- end -}}
 {{- end -}}
 
