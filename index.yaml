@@ -11241,6 +11241,37 @@ entries:
       artifacthub.io/category: security
       artifacthub.io/license: Apache-2.0
     apiVersion: v2
+    appVersion: 0.13.8-20260814.0cba130
+    created: "2026-08-14T19:01:13.549960917Z"
+    description: A Helm chart for the Levo AI Gateway Sidecar Injector — MutatingAdmissionWebhook
+      that automatically injects the AI Gateway sidecar into targeted pods
+    digest: d28b279d5985c9feefb83f1bba0458c0816ac899945f5c3450a85334e1c63d07
+    home: https://github.com/levoai/aigateway
+    keywords:
+    - ai
+    - llm
+    - gateway
+    - sidecar
+    - injection
+    - webhook
+    - security
+    - proxy
+    kubeVersion: '>=1.25.0-0'
+    maintainers:
+    - email: support@levo.ai
+      name: Levo AI
+      url: https://levo.ai
+    name: levoai-sidecar-injector
+    sources:
+    - https://github.com/levoai/aigateway
+    type: application
+    urls:
+    - https://github.com/levoai/charts/releases/download/levoai-sidecar-injector-0.13.8/levoai-sidecar-injector-0.13.8.tgz
+    version: 0.13.8
+  - annotations:
+      artifacthub.io/category: security
+      artifacthub.io/license: Apache-2.0
+    apiVersion: v2
     appVersion: 0.13.7-20260607.35a8bfe
     created: "2026-07-09T20:36:07.184514259Z"
     description: A Helm chart for the Levo AI Gateway Sidecar Injector — MutatingAdmissionWebhook
@@ -11933,4 +11964,4 @@ entries:
     urls:
     - https://github.com/levoai/charts/releases/download/testrunner-2.0.3/testrunner-2.0.3.tgz
     version: 2.0.3
-generated: "2026-08-14T19:00:29.252992342Z"
+generated: "2026-08-14T19:01:13.550743447Z"
