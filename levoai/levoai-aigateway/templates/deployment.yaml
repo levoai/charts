@@ -183,6 +183,11 @@ spec:
             - name: LEVOAI_SATELLITE_URL
               value: {{ .Values.config.levo.satelliteUrl | quote }}
             {{- end }}
+            {{- if .Values.config.guardrailFailureMode }}
+            # Deployment-wide guardrail failure posture (independent of SaaS).
+            - name: LEVOAI_GUARDRAIL_FAILURE_MODE
+              value: {{ .Values.config.guardrailFailureMode | quote }}
+            {{- end }}
             # Forward proxy: transparently proxy all outbound traffic (not just registered routes).
             - name: FORWARD_PROXY_ENABLED
               value: {{ dig "dataPlane" "forwardProxy" "enabled" true (.Values | toJson | fromJson) | quote }}

@@ -369,6 +369,13 @@ config:
     # -- Alert webhook URL for sending guardrail alerts to Levo platform.
     alertWebhookUrl: ""
 
+  # -- Guardrail failure posture when an ML scanner cannot decide, i.e. its
+  # model is unavailable or an inference call errors (LEVOAI_GUARDRAIL_FAILURE_MODE).
+  # Deployment-wide and independent of the SaaS control plane (applies to local/XDS
+  # guards too). "fail_open" (default) lets traffic through; "fail_closed" blocks
+  # (ENFORCE) or flags+alerts (MONITOR) instead of silently passing. Empty uses the default.
+  guardrailFailureMode: ""
+
   # -- Guardrail alert ingest: deliver block/finding events via gRPC to the Levo SaaS API.
   # Leave endpoint empty to disable.
   #
