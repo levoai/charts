@@ -30,7 +30,9 @@ spec:
     {{- /*
     # https://helm.sh/docs/howto/charts_tips_and_tricks/#automatically-roll-deployments
     */}}
-    {{- with deepCopy .Values.global.podAnnotations | mustMerge (dict "checksum/config" (include (print $.Template.BasePath "/configmap-env.yaml") . | toString | sha256sum)) }}
+    {{- $global := .Values.global | default dict }}
+    {{- $podAnn := index $global "podAnnotations" | default dict }}
+    {{- with deepCopy $podAnn | mustMerge (dict "checksum/config" (include (print $.Template.BasePath "/configmap-env.yaml") . | toString | sha256sum)) }}
       annotations:
         {{- toYaml . | nindent 8 }}
     {{- end }}

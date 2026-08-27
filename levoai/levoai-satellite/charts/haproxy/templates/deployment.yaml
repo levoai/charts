@@ -32,8 +32,10 @@ spec:
         {{- if not .Values.existingConfigmap }}
         checksum/configmap: {{ include (print $.Template.BasePath "/configmap.yaml") . | sha256sum }}
         {{- end }}
-        {{- if .Values.global.podAnnotations }}
-        {{- include "common.tplvalues.render" (dict "value" .Values.global.podAnnotations "context" $) | nindent 8 }}
+        {{- $global := .Values.global | default dict }}
+        {{- $podAnn := index $global "podAnnotations" | default dict }}
+        {{- if $podAnn }}
+        {{- include "common.tplvalues.render" (dict "value" $podAnn "context" $) | nindent 8 }}
         {{- end }}
       labels: {{- include "common.labels.standard" ( dict "customLabels" $podLabels "context" $ ) | nindent 8 }}
         app.kubernetes.io/component: haproxy
