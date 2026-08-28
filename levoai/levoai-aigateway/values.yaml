@@ -75,7 +75,7 @@ securityContext: {}
 # evict. Empirical measurement on spec-building-e2e (2026-05-28, all 12
 # scanners enabled, after PR #141 warmup): peak RSS during sequential
 # warmup hits ~5+ GiB, and 4 GiB was insufficient even with
-# `LLM_BASTION_WARMUP_CONCURRENCY=1` — the pod OOM-crashlooped because
+# `LEVOAI_GUARDRAILS_WARMUP_CONCURRENCY=1` — the pod OOM-crashlooped because
 # previously-loaded models stay resident while new ones load. 8 GiB
 # leaves ~2-3 GiB headroom over the all-scanners-loaded baseline and
 # accommodates request body buffering + scan tensors.
@@ -362,12 +362,10 @@ config:
     refreshToken: ""
     # -- Configuration polling interval.
     pollInterval: "60s"
-    # -- Minimum number of policies expected in a policy snapshot (SAAS_MIN_POLICIES).
+    # -- Minimum number of policies expected in a policy snapshot (LEVOAI_SAAS_MIN_POLICIES).
     # Snapshots with fewer policies are rejected as suspicious and the gateway
     # keeps its last-known-good policy engine. 0 disables the check.
     minPolicies: 0
-    # -- Alert webhook URL for sending guardrail alerts to Levo platform.
-    alertWebhookUrl: ""
 
   # -- Guardrail failure posture when an ML scanner cannot decide, i.e. its
   # model is unavailable or an inference call errors (LEVOAI_GUARDRAIL_FAILURE_MODE).
@@ -375,6 +373,31 @@ config:
   # guards too). "fail_open" (default) lets traffic through; "fail_closed" blocks
   # (ENFORCE) or flags+alerts (MONITOR) instead of silently passing. Empty uses the default.
   guardrailFailureMode: ""
+
+  # -- Cross-frame streaming scan for text/event-stream (SSE) responses
+  # (LEVOAI_STREAMING_SCAN_* per-field). Lets output guardrails catch findings
+  # that straddle SSE frame boundaries by scanning a sliding window over the
+  # accumulated stream instead of each frame in isolation. Empty uses the
+  # gateway default for that field.
+  streamingScan:
+    # -- Master switch for streaming scan (LEVOAI_STREAMING_SCAN_ENABLED). Default: true.
+    enabled: ""
+    # -- Scan window size in characters (LEVOAI_STREAMING_SCAN_WINDOW_SIZE). Default: 512.
+    windowSizeChars: ""
+    # -- Overlap in characters between consecutive scan windows
+    # (LEVOAI_STREAMING_SCAN_OVERLAP). Must be less than windowSizeChars. Default: 128.
+    # This value bounds cross-frame detection: a payload is guaranteed to land
+    # intact in one scanned window only if it is at most overlapChars + 1 long.
+    overlapChars: ""
+    # -- Max bytes held back before forwarding, bounding added latency
+    # (LEVOAI_STREAMING_SCAN_LOOKAHEAD_BYTES). Default: 2048 (= windowSizeChars x 4,
+    # the worst-case UTF-8 size of one window). A smaller value is raised with a
+    # WARN: it would force-release frames before a window completes, making every
+    # detection after-the-fact instead of preventive.
+    lookaheadBytes: ""
+    # -- Hard per-stream memory cap in bytes
+    # (LEVOAI_STREAMING_SCAN_MAX_ACCUMULATOR_BYTES). Default: 65536.
+    maxAccumulatorBytes: ""
 
   # -- Guardrail alert ingest: deliver block/finding events via gRPC to the Levo SaaS API.
   # Leave endpoint empty to disable.
@@ -385,7 +408,7 @@ config:
   # ingest via the ConfigMap/file path instead.
   #
   # Runtime prerequisite: SaaS must be configured and saas.environmentId
-  # (or the LEVO_ENVIRONMENT_ID env var) must be set. If missing, ingest is
+  # (or the LEVOAI_ENVIRONMENT_ID env var) must be set. If missing, ingest is
   # disabled at runtime with a log warning (see crates/agentgateway/src/app.rs).
   guardrailIngest:
     # -- gRPC endpoint, e.g. "api.levo.ai:443". https:// is prepended automatically if omitted.

@@ -4,7 +4,7 @@
 # Apply this before creating your GatewayClass that references it.
 #
 # Two deployment options:
-#   1. Development: emptyDir + ALLOW_MODEL_DOWNLOAD=true (models download on first request)
+#   1. Development: emptyDir + LEVOAI_ALLOW_MODEL_DOWNLOAD=true (models download on first request)
 #   2. Production: PVC with pre-loaded models (faster startup, recommended)
 #
 # Usage:
@@ -19,9 +19,9 @@ metadata:
   namespace: aigateway-system
 spec:
   env:
-    - name: ALLOW_MODEL_DOWNLOAD
+    - name: LEVOAI_ALLOW_MODEL_DOWNLOAD
       value: "true"
-    - name: MODELS_BASE_PATH
+    - name: LEVOAI_MODELS_BASE_PATH
       value: /opt/models
 
   resources:
@@ -62,7 +62,7 @@ metadata:
   namespace: aigateway-system
 spec:
   env:
-    - name: MODELS_BASE_PATH
+    - name: LEVOAI_MODELS_BASE_PATH
       value: /opt/models
 
   resources:

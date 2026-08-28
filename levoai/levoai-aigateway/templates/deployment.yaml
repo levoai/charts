@@ -144,23 +144,18 @@ spec:
             {{- if $saasEnabled }}
             - name: LEVOAI_BASE_URL
               value: {{ include "aigateway.config.saas.url" . | quote }}
-            - name: LEVO_ENVIRONMENT_ID
+            - name: LEVOAI_ENVIRONMENT_ID
               value: {{ include "aigateway.config.saas.environmentId" . | quote }}
             - name: LEVOAI_AUTH_KEY
               valueFrom:
                 secretKeyRef:
                   name: {{ include "aigateway.fullname" . }}-saas
                   key: refresh-token
-            - name: SAAS_POLL_INTERVAL
+            - name: LEVOAI_SAAS_POLL_INTERVAL
               value: {{ include "aigateway.config.saas.pollInterval" . | quote }}
             {{- if .Values.config.saas.minPolicies }}
-            - name: SAAS_MIN_POLICIES
+            - name: LEVOAI_SAAS_MIN_POLICIES
               value: {{ .Values.config.saas.minPolicies | quote }}
-            {{- end }}
-            {{- $alertWebhookUrl := include "aigateway.config.saas.alertWebhookUrl" . }}
-            {{- if $alertWebhookUrl }}
-            - name: ALERT_WEBHOOK_URL
-              value: {{ $alertWebhookUrl | quote }}
             {{- end }}
             {{- end }}
             {{- if $configMapEnabled }}
@@ -168,7 +163,11 @@ spec:
               value: "/etc/agentgateway/config.yaml"
             {{- end }}
             {{- if $modelsEnabled }}
-            - name: MODELS_PATH
+            # Must be LEVOAI_MODELS_BASE_PATH — that is the name the model resolver
+            # reads (llm-bastion model_manager.rs). A mismatched name is not an
+            # error: the resolver falls back to its /opt/models default and, if
+            # models are not there, silently disables every ML scanner.
+            - name: LEVOAI_MODELS_BASE_PATH
               value: {{ include "aigateway.models.mountPath" . | quote }}
             {{- end }}
             {{- if .Values.config.levo.orgId }}
@@ -188,12 +187,66 @@ spec:
             - name: LEVOAI_GUARDRAIL_FAILURE_MODE
               value: {{ .Values.config.guardrailFailureMode | quote }}
             {{- end }}
+            {{- if ne (.Values.config.streamingScan.enabled | toString) "" }}
+            # Cross-frame streaming scan for text/event-stream (SSE) responses.
+            - name: LEVOAI_STREAMING_SCAN_ENABLED
+              value: {{ .Values.config.streamingScan.enabled | quote }}
+            {{- end }}
+            {{- if .Values.config.streamingScan.windowSizeChars }}
+            - name: LEVOAI_STREAMING_SCAN_WINDOW_SIZE
+              value: {{ .Values.config.streamingScan.windowSizeChars | quote }}
+            {{- end }}
+            {{- if .Values.config.streamingScan.overlapChars }}
+            - name: LEVOAI_STREAMING_SCAN_OVERLAP
+              value: {{ .Values.config.streamingScan.overlapChars | quote }}
+            {{- end }}
+            {{- if .Values.config.streamingScan.lookaheadBytes }}
+            - name: LEVOAI_STREAMING_SCAN_LOOKAHEAD_BYTES
+              value: {{ .Values.config.streamingScan.lookaheadBytes | quote }}
+            {{- end }}
+            {{- if .Values.config.streamingScan.maxAccumulatorBytes }}
+            - name: LEVOAI_STREAMING_SCAN_MAX_ACCUMULATOR_BYTES
+              value: {{ .Values.config.streamingScan.maxAccumulatorBytes | quote }}
+            {{- end }}
             # Forward proxy: transparently proxy all outbound traffic (not just registered routes).
-            - name: FORWARD_PROXY_ENABLED
+            - name: LEVOAI_FORWARD_PROXY_ENABLED
               value: {{ dig "dataPlane" "forwardProxy" "enabled" true (.Values | toJson | fromJson) | quote }}
             # Admin server: readyz, config dumps, graceful shutdown (see dataPlane.adminAddr).
             - name: ADMIN_ADDR
               value: {{ include "aigateway.dataPlane.adminAddr" . | quote }}
+            # --- Transitional: pre-rename spellings ---------------------------
+            # Every LEVOAI_-prefixed name above was introduced after 0.13.7. The
+            # image that reads them is whatever image.tag resolves to — the
+            # chart's appVersion by default, but frequently an older pin — and an
+            # image at or before 0.13.8 reads only the spellings below. Emitting
+            # the new name alone is a silent no-op on such an image: most
+            # damagingly, a non-default models.mountPath would reach the init
+            # container but not the gateway, which then finds no models at its
+            # /opt/models default and disables every ML scanner without
+            # reporting an error.
+            #
+            # The gateway prefers the canonical name when both are set, so a
+            # rename-aware image ignores these and never logs the deprecation
+            # warning. Each entry below mirrors its replacement above exactly.
+            # DELETE THIS BLOCK once the oldest image.tag this chart supports
+            # contains the rename.
+            {{- if $saasEnabled }}
+            - name: LEVO_ENVIRONMENT_ID
+              value: {{ include "aigateway.config.saas.environmentId" . | quote }}
+            - name: SAAS_POLL_INTERVAL
+              value: {{ include "aigateway.config.saas.pollInterval" . | quote }}
+            {{- if .Values.config.saas.minPolicies }}
+            - name: SAAS_MIN_POLICIES
+              value: {{ .Values.config.saas.minPolicies | quote }}
+            {{- end }}
+            {{- end }}
+            {{- if $modelsEnabled }}
+            - name: MODELS_BASE_PATH
+              value: {{ include "aigateway.models.mountPath" . | quote }}
+            {{- end }}
+            - name: FORWARD_PROXY_ENABLED
+              value: {{ dig "dataPlane" "forwardProxy" "enabled" true (.Values | toJson | fromJson) | quote }}
+            # --- end transitional block ---------------------------------------
             {{- with .Values.dataPlane.extraEnv }}
             {{- toYaml . | nindent 12 }}
             {{- end }}

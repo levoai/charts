@@ -252,18 +252,6 @@ Config helpers - SaaS
 {{- end }}
 {{- end }}
 
-{{- define "aigateway.config.saas.alertWebhookUrl" -}}
-{{- if .Values.config }}
-{{- if .Values.config.saas }}
-{{- .Values.config.saas.alertWebhookUrl | default "" }}
-{{- else }}
-{{- "" }}
-{{- end }}
-{{- else }}
-{{- "" }}
-{{- end }}
-{{- end }}
-
 {{/*
 Config helpers - ConfigMap
 */}}
