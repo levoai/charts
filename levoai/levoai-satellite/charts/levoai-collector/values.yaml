@@ -174,8 +174,11 @@ config:
           - x-levo-organization-id
       memory_limiter:
         check_interval: 1s
-        limit_percentage: 60
-        spike_limit_percentage: 20
+        limit_percentage: 90
+        spike_limit_percentage: 5
+        # Default in this distro: drop the batch and return success to the client.
+        # Set true to restore refuse-to-client (gRPC UNAVAILABLE / HTTP 503).
+        # backpressure: true
 
     exporters:
       debug:
