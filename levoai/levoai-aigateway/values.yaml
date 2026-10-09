@@ -79,8 +79,10 @@ securityContext: {}
 # previously-loaded models stay resident while new ones load. 8 GiB
 # leaves ~2-3 GiB headroom over the all-scanners-loaded baseline and
 # accommodates request body buffering + scan tensors.
-# Requests bumped to 4 GiB so the scheduler reserves enough for the
-# steady-state working set.
+#
+# Applies to the controller and to a data plane without ML models
+# (`models.enabled: false`). A data plane with models enabled is sized by
+# `models.resources` instead, unless that is set to `null`.
 resources:
   requests:
     cpu: "500m"
@@ -389,7 +391,7 @@ config:
     # This value bounds cross-frame detection: a payload is guaranteed to land
     # intact in one scanned window only if it is at most overlapChars + 1 long.
     overlapChars: ""
-    # -- Max bytes held back before forwarding, bounding added latency
+    # -- Max bytes of scannable text (not raw frame bytes) held back before forwarding, bounding added latency
     # (LEVOAI_STREAMING_SCAN_LOOKAHEAD_BYTES). Default: 2048 (= windowSizeChars x 4,
     # the worst-case UTF-8 size of one window). A smaller value is raised with a
     # WARN: it would force-release frames before a window completes, making every
@@ -398,6 +400,10 @@ config:
     # -- Hard per-stream memory cap in bytes
     # (LEVOAI_STREAMING_SCAN_MAX_ACCUMULATOR_BYTES). Default: 65536.
     maxAccumulatorBytes: ""
+    # -- Hard per-stream cap in bytes on raw SSE frames (envelope included) held
+    # back before forwarding (LEVOAI_STREAMING_SCAN_MAX_HELD_FRAME_BYTES).
+    # Independent of maxAccumulatorBytes. Default: 65536.
+    maxHeldFrameBytes: ""
 
   # -- Guardrail alert ingest: deliver block/finding events via gRPC to the Levo SaaS API.
   # Leave endpoint empty to disable.
@@ -440,6 +446,41 @@ models:
   enabled: true
   # -- Path where models are mounted in the container.
   mountPath: /opt/models
+
+  # -- Resources for the data plane when models are enabled. Overrides the
+  # top-level `resources` for that container only; set to `null` to use
+  # `resources` instead (`{}` does not work: Helm merges it into these
+  # defaults).
+  # Measured on spec-building-e2e (2026-10-05, 13 scanners): steady state
+  # ~5.6 GiB, ~7.5 GiB while scanning large prompts. With a 4 GiB request the
+  # scheduler kept placing the pod on nodes that could not hold it and the
+  # kubelet evicted it during warmup ("node was low on resource: memory ...
+  # request is 4Gi"), so the request covers the real working set. 1 CPU was
+  # too little for coding-agent traffic: a Claude Code turn carries tens of
+  # thousands of tokens and its scan ran past the client's timeout (85-125 s)
+  # on one core. 4 CPUs is only safe together with `onnx.sessionPoolSize: 1`
+  # below — see the note there.
+  resources:
+    requests:
+      cpu: "500m"
+      memory: "7Gi"
+    limits:
+      cpu: "4"
+      memory: "10Gi"
+
+  # ONNX Runtime tuning for the ML scanners.
+  onnx:
+    # -- ONNX sessions kept per model (LEVOAI_ONNX_SESSION_POOL_SIZE). Each
+    # session is a full copy of the model in memory. Left unset, llm-bastion
+    # uses one per available CPU core (capped at 4), so raising the CPU limit
+    # from 1 to 4 silently quadruples model memory: on spec-building-e2e that
+    # OOM-killed the pod at a 10 GiB limit during warmup. Raise only together
+    # with the memory limit, budgeting sessionPoolSize x total model size.
+    sessionPoolSize: 1
+    # -- Intra-op threads per ONNX session (LEVOAI_GUARDRAILS_ONNX_INTRA_THREADS).
+    # Lets a single scan of a long prompt use more than one core without
+    # adding model copies; costs only a small per-session arena.
+    intraThreads: 2
 
   persistence:
     # -- Use PersistentVolumeClaim for models (recommended for production).

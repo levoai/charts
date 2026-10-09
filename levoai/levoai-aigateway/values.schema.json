@@ -397,6 +397,46 @@
               ]
             }
           }
+        },
+        "onnx": {
+          "type": "object",
+          "properties": {
+            "sessionPoolSize": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "intraThreads": {
+              "type": "integer",
+              "minimum": 1
+            }
+          }
+        },
+        "resources": {
+          "type": "object",
+          "properties": {
+            "requests": {
+              "type": "object",
+              "properties": {
+                "cpu": {
+                  "type": "string"
+                },
+                "memory": {
+                  "type": "string"
+                }
+              }
+            },
+            "limits": {
+              "type": "object",
+              "properties": {
+                "cpu": {
+                  "type": "string"
+                },
+                "memory": {
+                  "type": "string"
+                }
+              }
+            }
+          }
         }
       }
     },

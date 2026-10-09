@@ -169,6 +169,18 @@ spec:
             # models are not there, silently disables every ML scanner.
             - name: LEVOAI_MODELS_BASE_PATH
               value: {{ include "aigateway.models.mountPath" . | quote }}
+            {{- with (.Values.models.onnx | default dict) }}
+            {{- if .sessionPoolSize }}
+            # Sessions per model. Unset, llm-bastion uses one per CPU core, and
+            # each session is a full model copy: see models.onnx in values.yaml.
+            - name: LEVOAI_ONNX_SESSION_POOL_SIZE
+              value: {{ .sessionPoolSize | quote }}
+            {{- end }}
+            {{- if .intraThreads }}
+            - name: LEVOAI_GUARDRAILS_ONNX_INTRA_THREADS
+              value: {{ .intraThreads | quote }}
+            {{- end }}
+            {{- end }}
             {{- end }}
             {{- if .Values.config.levo.orgId }}
             - name: LEVOAI_ORG_ID
@@ -208,6 +220,10 @@ spec:
             - name: LEVOAI_STREAMING_SCAN_MAX_ACCUMULATOR_BYTES
               value: {{ .Values.config.streamingScan.maxAccumulatorBytes | quote }}
             {{- end }}
+            {{- if .Values.config.streamingScan.maxHeldFrameBytes }}
+            - name: LEVOAI_STREAMING_SCAN_MAX_HELD_FRAME_BYTES
+              value: {{ .Values.config.streamingScan.maxHeldFrameBytes | quote }}
+            {{- end }}
             # Forward proxy: transparently proxy all outbound traffic (not just registered routes).
             - name: LEVOAI_FORWARD_PROXY_ENABLED
               value: {{ dig "dataPlane" "forwardProxy" "enabled" true (.Values | toJson | fromJson) | quote }}
@@ -243,6 +259,14 @@ spec:
             {{- if $modelsEnabled }}
             - name: MODELS_BASE_PATH
               value: {{ include "aigateway.models.mountPath" . | quote }}
+            {{- with (.Values.models.onnx | default dict) }}
+            {{- if .intraThreads }}
+            # No legacy spelling for the session-pool size: images that predate
+            # the rename have no session pool.
+            - name: LLM_BASTION_ONNX_INTRA_THREADS
+              value: {{ .intraThreads | quote }}
+            {{- end }}
+            {{- end }}
             {{- end }}
             - name: FORWARD_PROXY_ENABLED
               value: {{ dig "dataPlane" "forwardProxy" "enabled" true (.Values | toJson | fromJson) | quote }}
@@ -254,8 +278,14 @@ spec:
           envFrom:
             {{- toYaml . | nindent 12 }}
           {{- end }}
+          {{- /* With ML models loaded the data plane needs guardrail sizing; the
+                 controller and a model-less data plane keep `resources`. */}}
+          {{- $dataPlaneResources := .Values.resources }}
+          {{- if and $modelsEnabled .Values.models.resources }}
+          {{- $dataPlaneResources = .Values.models.resources }}
+          {{- end }}
           resources:
-            {{- toYaml .Values.resources | nindent 12 }}
+            {{- toYaml $dataPlaneResources | nindent 12 }}
           volumeMounts:
             {{- if $configMapEnabled }}
             - name: config
