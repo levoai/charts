@@ -1,6 +1,6 @@
 sensor:
   imageRepo: docker.io/levoai/ebpf_sensor
-  imageTag: 0.52.0
+  imageTag: 0.53.0
   binary:
     - /opt/levo/sbin/levo-ebpf-sensor
   serviceAccount:
@@ -375,6 +375,11 @@ sensor:
             kind: Node
             name: .*
     # --------------------------------------------------------------------------------------------
+  # Optional labels attached to everything this sensor captures, as "<scope>:<label>" entries.
+  # Scopes: app (applied to the application), ep (applied to the endpoint).
+  # Example: ["app:cluster=prod-eks", "app:payments", "ep:pii"]
+  # Rendered into the LEVO_SENSOR_TAGS environment variable; commas are not allowed inside a tag.
+  tags: []
   levoEnv: "staging"
   satelliteUrl: "levoai-haproxy"
   orgId: ""

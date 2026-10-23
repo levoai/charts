@@ -43,6 +43,10 @@ spec:
             - name: {{ $value.name }}
               value: "{{ $value.value }}"
             {{- end }}
+            {{- with .Values.sensor.tags }}
+            - name: LEVO_SENSOR_TAGS
+              value: {{ join "," . | quote }}
+            {{- end }}
             - name: OUTSIDE_HOSTNAME
               valueFrom:
                 fieldRef:
