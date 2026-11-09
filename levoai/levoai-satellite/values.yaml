@@ -50,6 +50,14 @@ global:
       org-id: "" # org-id is required -- you must use helm --set global.levoai_config_override.onprem-api.org-id=O where O is a Levo.ai organization ID
       url: "https://api.levo.ai"
     tagger_ignore_seen_flows: true
+    # Import lane: gives imported traces (HAR/Postman/...) their own queue and an immediate per-import
+    # analysis in the Tagger. Off by default. Read by BOTH the Satellite (import route falls back to the
+    # normal traces queue when off) and the Tagger (starts the extra consumer when on), and both pods
+    # receive this same global block, so flip it here only -- see values-import-lane.yaml for the staging
+    # overlay (flag on + Tagger memory sizing). Tuning knobs (max_entries, max_concurrent_imports, ...) live
+    # under import_lane.* in e7s conf and are not set here.
+    import_lane:
+      enabled: false
     authentication_inspection: false # defaults to false. if we want to send over auth secrets, we must use helm --set global.levoai_config_override.authentication_inspection=true
     # By default, satellite will log raw traces at debug level. This can be controlled with the following parameter.
     # WARNING: leave this at debug unless you know what you are doing.
@@ -102,7 +110,7 @@ haproxy:
   fullnameOverride: "levoai-haproxy"
   image:
     repository: levoai/haproxy
-    tag: 0.2.15
+    tag: 0.2.16
   service:
     type: ClusterIP # Change to LoadBalancer to expose it
   satelliteAuthnEnabled: false

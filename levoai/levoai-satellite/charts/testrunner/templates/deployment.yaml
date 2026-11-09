@@ -165,7 +165,14 @@ spec:
               valueFrom:
                 secretKeyRef:
                   name: levoai-satellite
+                  key: auth-key
+                  optional: true
+            - name: REFRESH_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: levoai-satellite
                   key: refresh-token
+                  optional: true
           {{- $envVars := dict }}
           {{- if hasKey .Values "global" }}
           {{- if hasKey .Values.global "levo" }}

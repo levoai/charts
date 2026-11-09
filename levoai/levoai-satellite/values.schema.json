@@ -44,6 +44,14 @@
         "levoai_config_override": {
           "type": "object",
           "properties": {
+            "import_lane": {
+              "type": "object",
+              "properties": {
+                "enabled": {
+                  "type": "boolean"
+                }
+              }
+            },
             "traces_log_level": {
               "type": "string",
               "pattern": "^(CRITICAL)|(ERROR)|(WARNING)|(INFO)|(DEBUG)$"

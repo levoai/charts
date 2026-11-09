@@ -1,0 +1,26 @@
+# Overlay that turns the import lane on (staging / opt-in). Use with the chart's own values:
+#   helm upgrade --install levoai ./levoai-satellite -f values-import-lane.yaml ...
+#
+# Queue/topic: nothing to declare here. The import_traces RabbitMQ queue is declared by its first
+# publisher/consumer (x-max-length 20000, reject-publish, import_traces_queue.max_length). With
+# global.useKafka the satellite/tagger/ion init containers run kafka_topic_manager.py, which creates every
+# topic in QUEUE_TYPE_TO_DEFAULT_TOPIC, levoai_import_traces included, before the pods start.
+global:
+  levoai_config_override:
+    import_lane:
+      enabled: true
+
+# The lane adds a fourth Tagger consumer. Its memory is bounded by import_lane.* (defaults):
+#   raw batches held        <= max_total_bytes (256 MiB) / max_total_entries (25000) across all imports
+#   imports analysed at once = max_concurrent_imports (2), each <= max_entries (5000) spans
+# so the extra working set is ~256 MiB raw + 2 x 5000 spans x per-span footprint. The per-span footprint
+# depends on payload size and has NOT been measured; this starting point assumes ~100 KiB/span parsed
+# (~1 GiB) plus ~25% margin on top of the existing Tagger. Tagger.resources is unset in the chart
+# defaults, so no default limit exists to raise -- confirm against container_memory_working_set_bytes
+# during the parity run and adjust before enabling this anywhere else.
+tagger:
+  resources:
+    requests:
+      memory: 2Gi
+    limits:
+      memory: 4Gi
