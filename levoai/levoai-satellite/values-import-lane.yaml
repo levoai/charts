@@ -9,6 +9,9 @@ global:
   levoai_config_override:
     import_lane:
       enabled: true
+      # Per-import stopwatch. The 45 s default is too short for ~300 endpoints (dev: 206-291 s of
+      # analysis plus 30-66 s of start-up), so imports would fall back to the normal queue. CU-86bcwn2f5.
+      hard_deadline_sec: 600
 
 # The lane adds a fourth Tagger consumer. Its memory is bounded by import_lane.* (defaults):
 #   raw batches held        <= max_total_bytes (256 MiB) / max_total_entries (25000) across all imports
