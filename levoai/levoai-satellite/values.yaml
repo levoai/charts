@@ -120,7 +120,7 @@ rabbitmq:
   image:
     registry: "docker.io"
     repository: "rabbitmq"
-    tag: "3.13.7-management-alpine"
+    tag: "4.3.7-management-alpine"
     pullPolicy: "IfNotPresent"
   persistence:
     enabled: true
@@ -169,7 +169,7 @@ rabbitmq:
     # limit via the override) size the disk/memory alarms so RabbitMQ blocks
     # publishers predictably instead of filling the PVC or getting OOM-killed.
     - name: RABBITMQ_SERVER_ADDITIONAL_ERL_ARGS
-      value: "-rabbit consumer_timeout 600000 -rabbit disk_free_limit 536870912 -rabbit vm_memory_high_watermark 0.7 -rabbit total_memory_available_override_value $(LEVOAI_RABBITMQ_MEM_LIMIT_BYTES)"
+      value: "-rabbit consumer_timeout 600000 -rabbit max_message_size 134217728 -rabbit disk_free_limit 536870912 -rabbit vm_memory_high_watermark 0.7 -rabbit total_memory_available_override_value $(LEVOAI_RABBITMQ_MEM_LIMIT_BYTES) -rabbit permit_deprecated_features #{transient_nonexcl_queues=>true}"
     - name: RABBITMQ_ENABLED_PLUGINS_FILE
       value: "/bitnami/rabbitmq/mnesia/enabled_plugins"
     - name: RABBITMQ_DEFAULT_USER
