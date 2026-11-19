@@ -35,6 +35,23 @@ container_resources() {
     END { print r["requests.cpu"], r["requests.memory"], r["limits.cpu"], r["limits.memory"] }'
 }
 
+# "<type> <maxSurge> <maxUnavailable>" of the data plane strategy, or "none".
+dp_strategy() {
+  awk '
+    /^  strategy:/ { s = 1; next }
+    s && !/^    / { exit }
+    s && /^    type:/ { t = $2 }
+    s && /maxSurge:/ { ms = $2 }
+    s && /maxUnavailable:/ { mu = $2 }
+    END { if (t == "") print "none"; else print t, ms, mu }'
+}
+
+# Downward-API fieldPath of env var $1 in the rendered manifest on stdin ("" if absent).
+env_field_path() {
+  awk -v name="$1" '
+    $0 ~ "- name: " name "$" { getline; getline; getline; sub(/^ *fieldPath: */, ""); print; exit }'
+}
+
 check() { # name, expected, actual
   if [[ "$2" == "$3" ]]; then
     echo "ok   $1"
@@ -50,6 +67,8 @@ check "defaults: data plane resources" "500m 7Gi 4 10Gi" "$(container_resources 
 check "defaults: session pool size" "1" "$(env_value LEVOAI_ONNX_SESSION_POOL_SIZE <<<"$out")"
 check "defaults: intra-op threads" "2" "$(env_value LEVOAI_GUARDRAILS_ONNX_INTRA_THREADS <<<"$out")"
 check "defaults: legacy intra-op threads" "2" "$(env_value LLM_BASTION_ONNX_INTRA_THREADS <<<"$out")"
+# Health heartbeat upstream_ip: the node IP, not the pod IP.
+check "defaults: host ip from node" "status.hostIP" "$(env_field_path LEVOAI_HOST_IP <<<"$out")"
 
 # Overrides flow through to every spelling.
 out=$(render --set models.onnx.sessionPoolSize=2 --set models.onnx.intraThreads=3)
@@ -78,6 +97,14 @@ check "models.resources null: data plane resources" "500m 4Gi 1000m 8Gi" "$(cont
 # Controller mode keeps the top-level resources.
 out=$(render --set controller.enabled=true)
 check "controller: resources" "500m 4Gi 1000m 8Gi" "$(container_resources controller <<<"$out")"
+
+# Rollout strategy: a single replica must stop the old pod first. The
+# Kubernetes default (surge 1 / unavailable 0 at one replica) needs room for
+# two 7Gi requests and deadlocked rollouts on spec-building-e2e.
+check "strategy: single replica stops old pod first" "RollingUpdate 0 1" "$(render | dp_strategy)"
+check "strategy: multi-replica keeps k8s default" "none" "$(render --set dataPlane.replicaCount=2 | dp_strategy)"
+check "strategy: autoscaling keeps k8s default" "none" "$(render --set autoscaling.enabled=true | dp_strategy)"
+check "strategy: explicit value wins" "Recreate  " "$(render --set dataPlane.strategy.type=Recreate | dp_strategy)"
 
 # Schema rejects a zero-sized pool and zero threads.
 for bad in models.onnx.sessionPoolSize=0 models.onnx.intraThreads=0; do

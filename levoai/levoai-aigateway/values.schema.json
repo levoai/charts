@@ -294,6 +294,9 @@
               ]
             }
           }
+        },
+        "strategy": {
+          "type": "object"
         }
       }
     },

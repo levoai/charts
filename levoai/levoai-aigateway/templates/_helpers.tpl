@@ -105,6 +105,30 @@ Data Plane helpers
 {{- end }}
 {{- end }}
 
+{{- /*
+Data plane rollout strategy. An explicit dataPlane.strategy wins. Otherwise a
+single replica without autoscaling stops the old pod first (maxSurge 0 /
+maxUnavailable 1): the Kubernetes default rounds to surge-1/unavailable-0 at
+one replica, which needs room for two full memory requests and deadlocks on a
+tight node pool. Multi-replica and HPA-managed data planes keep the default.
+*/}}
+{{- define "aigateway.dataPlane.strategy" -}}
+{{- $explicit := dig "dataPlane" "strategy" dict (.Values | toJson | fromJson) }}
+{{- $autoscaling := and .Values.autoscaling .Values.autoscaling.enabled }}
+{{- $minimumReplicas := include "aigateway.dataPlane.replicaCount" . | int }}
+{{- if $autoscaling }}
+{{- $minimumReplicas = .Values.autoscaling.minReplicas | int }}
+{{- end }}
+{{- if $explicit }}
+{{- toYaml $explicit }}
+{{- else if eq $minimumReplicas 1 }}
+type: RollingUpdate
+rollingUpdate:
+  maxSurge: 0
+  maxUnavailable: 1
+{{- end }}
+{{- end }}
+
 {{- define "aigateway.dataPlane.adminAddr" -}}
 {{- if .Values.dataPlane }}
 {{- .Values.dataPlane.adminAddr | default "0.0.0.0:15000" }}

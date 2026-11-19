@@ -66,6 +66,10 @@ spec:
   {{- if not (and .Values.autoscaling .Values.autoscaling.enabled) }}
   replicas: {{ include "aigateway.dataPlane.replicaCount" . }}
   {{- end }}
+  {{- with (include "aigateway.dataPlane.strategy" . | fromYaml) }}
+  strategy:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
   selector:
     matchLabels:
       {{- include "aigateway.selectorLabels" . | nindent 6 }}
@@ -194,6 +198,13 @@ spec:
             - name: LEVOAI_SATELLITE_URL
               value: {{ .Values.config.levo.satelliteUrl | quote }}
             {{- end }}
+            # Node IP, reported as upstream_ip on the health heartbeat (same field the
+            # sensors and satellite send). Deliberately the node, not the pod: the
+            # gateway cannot tell them apart from inside the container.
+            - name: LEVOAI_HOST_IP
+              valueFrom:
+                fieldRef:
+                  fieldPath: status.hostIP
             {{- if .Values.config.guardrailFailureMode }}
             # Deployment-wide guardrail failure posture (independent of SaaS).
             - name: LEVOAI_GUARDRAIL_FAILURE_MODE

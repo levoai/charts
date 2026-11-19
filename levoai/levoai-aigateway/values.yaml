@@ -275,6 +275,18 @@ dataPlane:
   # -- Set the number of data plane pod replicas (used in standalone mode).
   replicaCount: 1
 
+  # -- Rollout strategy for the data plane Deployment. Left empty, the chart
+  # picks one: a single replica (autoscaling off) gets
+  # `maxSurge: 0, maxUnavailable: 1`, i.e. the old pod stops before the new
+  # one starts; anything else gets the Kubernetes default. Kubernetes' 25%
+  # default rounds to "surge 1, unavailable 0" at one replica, so the new pod
+  # needs a second full memory request (7Gi with models) free on some node
+  # while the old pod still holds its own. On spec-building-e2e no node had
+  # that, and the new pod sat Pending until the old one was deleted by hand.
+  # The cost is a gap of roughly the model warmup (~2-3 min) per rollout; run
+  # more than one replica to roll without one.
+  strategy: {}
+
   # -- Forward proxy configuration.
   forwardProxy:
     # -- Enable forward proxy mode. When true, the gateway transparently forwards
