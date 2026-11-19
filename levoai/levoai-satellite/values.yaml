@@ -271,6 +271,12 @@ kafka:
     type: ClusterIP
     ports:
       client: 9092
+  # Retention must fit persistence.size at the 50 MiB/s design ingress (ingress is not capped);
+  # test_kafka_retention_fits_volume.py checks that bound.
+  logRetentionHours: 24
+  logRetentionBytes: _268435456 # 256 MiB per partition
+  logSegmentBytes: _67108864 # 64 MiB
+  logRetentionCheckIntervalMs: 30000
   persistence:
     enabled: true
     size: 32Gi
