@@ -23,6 +23,36 @@
 #          }
 #        }
 
+# ShadowNet-specific custom CA / mTLS example (same secretMounts + env
+# mechanism as above): trust an internal/private CA across every outbound
+# connection (browser, requests, Temporal) with LEVOAI_CA_CERT, optionally
+# override just the Temporal connection's trust anchor, and/or present a
+# client certificate to a target application requiring mutual TLS. See
+# ONPREM-DAST-RUNNER-CONFIGURATION.md for the full variable reference and
+# which connection each one governs.
+#global:
+#  levo:
+#    secretMounts:
+#      - name: shadownet-ca
+#        secretName: shadownet-custom-ca   # kubectl create secret generic shadownet-custom-ca --from-file=ca.pem=./internal-ca.pem
+#        mountPath: /etc/shadownet/ca
+#        items:
+#          - key: ca.pem
+#            path: ca.pem
+#      - name: shadownet-target-mtls
+#        secretName: shadownet-target-mtls # kubectl create secret generic shadownet-target-mtls --from-file=client-cert.pem=... --from-file=client-key.pem=...
+#        mountPath: /etc/shadownet/target-mtls
+#        items:
+#          - key: client-cert.pem
+#            path: client-cert.pem
+#          - key: client-key.pem
+#            path: client-key.pem
+#    env:
+#      LEVOAI_CA_CERT: /etc/shadownet/ca/ca.pem
+#      LEVOAI_TEMPORAL_CA_CERT: /etc/shadownet/ca/ca.pem
+#      CLIENT_CERT_PATH: /etc/shadownet/target-mtls/client-cert.pem
+#      CLIENT_KEY_PATH: /etc/shadownet/target-mtls/client-key.pem
+
 global:
   levo:
     secretMounts: []
@@ -39,6 +69,21 @@ image:
   tagOverride: ""
 
 imagePullSecrets: []
+
+# Kubernetes ignores the image's Docker HEALTHCHECK, so mirror it here: the worker
+# touches the file only while its Temporal poller runs. The staleness budget is far
+# looser than the HEALTHCHECK's 60s because a scan shares the event loop that touches
+# the file, and here a failure kills the pod. Set to null to disable.
+livenessProbe:
+  exec:
+    command:
+      - python
+      - -c
+      - "import os, sys, time; p = os.environ.get('SHADOWNET_LIVENESS_FILE', '/tmp/shadownet-worker.alive'); sys.exit(0 if os.path.exists(p) and time.time() - os.path.getmtime(p) < 300 else 1)"
+  initialDelaySeconds: 60
+  periodSeconds: 60
+  timeoutSeconds: 10
+  failureThreshold: 3
 
   # We usually recommend not to specify default resources and to leave this as a conscious
   # choice for the user. This also increases chances charts run on environments with little

@@ -117,6 +117,11 @@ spec:
           env:
           - name: LEVOAI_BASE_URL
             value: "{{ .Values.levoBaseUrl }}"
+          # The pod only sees its own IP; the node's comes from the Downward API.
+          - name: LEVOAI_HOST_IP
+            valueFrom:
+              fieldRef:
+                fieldPath: status.hostIP
           - name: ANTHROPIC_API_KEY
             valueFrom:
               secretKeyRef:
@@ -167,6 +172,10 @@ spec:
             {{- end }}
             readOnly: true
           {{- end }}
+          {{- end }}
+          {{- with .Values.livenessProbe }}
+          livenessProbe:
+            {{- toYaml . | nindent 12 }}
           {{- end }}
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
